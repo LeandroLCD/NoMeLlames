@@ -63,7 +63,7 @@ class PrefixRepository(context: Context) {
         private const val KEY_PREFIXES = "blocked_prefixes"
         private const val KEY_SKIP_CALL_LOG = "skip_call_log"
         private const val KEY_SKIP_NOTIFICATION = "skip_notification"
-        private val DEFAULT_PREFIXES = setOf("315", "316", "317", "318")
+        private val DEFAULT_PREFIXES = emptySet<String>()
 
         @Volatile
         private var INSTANCE: PrefixRepository? = null

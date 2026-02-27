@@ -212,11 +212,26 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Bloquea llamadas de ${prefixes.size} prefijos configurados",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
-        )
+        if (prefixes.isEmpty()) {
+            Text(
+                text = "No hay prefijos configurados",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Ve a la pestaña \"Prefijos\" para agregar los prefijos o números que deseas bloquear.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Text(
+                text = "Bloquea llamadas de ${prefixes.size} prefijos configurados",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
