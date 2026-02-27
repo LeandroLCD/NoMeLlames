@@ -2,7 +2,9 @@ package dev.andresfelipecaicedo.nomellames
 
 import android.Manifest
 import android.app.role.RoleManager
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -91,7 +94,10 @@ class MainActivity : ComponentActivity() {
                     prefixRepository = prefixRepository,
                     blockedCallDao = blockedCallDao,
                     onRequestPermissions = { requestPermissions() },
-                    onRequestRole = { requestCallScreeningRole() }
+                    onRequestRole = { requestCallScreeningRole() },
+                    onDisableRole = {
+                        startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+                    }
                 )
             }
         }
@@ -143,7 +149,8 @@ fun MainApp(
     prefixRepository: PrefixRepository,
     blockedCallDao: BlockedCallDao,
     onRequestPermissions: () -> Unit,
-    onRequestRole: () -> Unit
+    onRequestRole: () -> Unit,
+    onDisableRole: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Inicio", "Prefijos", "Historial", "Ajustes")
@@ -169,6 +176,7 @@ fun MainApp(
                 prefixRepository = prefixRepository,
                 onRequestPermissions = onRequestPermissions,
                 onRequestRole = onRequestRole,
+                onDisableRole = onDisableRole,
                 modifier = Modifier.padding(innerPadding)
             )
             1 -> PrefixScreen(
@@ -194,6 +202,7 @@ fun HomeScreen(
     prefixRepository: PrefixRepository,
     onRequestPermissions: () -> Unit,
     onRequestRole: () -> Unit,
+    onDisableRole: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val prefixes by prefixRepository.prefixes.collectAsState()
@@ -266,6 +275,10 @@ fun HomeScreen(
                 text = "El bloqueo de llamadas spam esta funcionando",
                 style = MaterialTheme.typography.bodyMedium
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedButton(onClick = onDisableRole) {
+                Text("Desactivar")
+            }
         }
     }
 }
