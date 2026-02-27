@@ -220,7 +220,7 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Ve a la pestaña \"Prefijos\" para agregar los prefijos o números que deseas bloquear.",
+                text = "Ve a la pestaña \"Prefijos\" para agregar los prefijos o números que deseas bloquear.\n\nNo incluyas el código de país.\nEjemplo: escribe 320, no +57320.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -291,7 +291,7 @@ fun PrefixScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Las llamadas de numeros que empiecen con estos prefijos seran bloqueadas.",
+            text = "Las llamadas de números que empiecen con estos prefijos serán bloqueadas. No incluyas el código de país (ej: escribe 320, no +57320).",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
