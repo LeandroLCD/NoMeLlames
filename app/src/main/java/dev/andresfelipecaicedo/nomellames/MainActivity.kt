@@ -3,6 +3,7 @@ package dev.andresfelipecaicedo.nomellames
 import android.Manifest
 import android.app.role.RoleManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -53,11 +54,20 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.content.edit
 
 class MainActivity : ComponentActivity() {
 
     private var isCallScreeningEnabled by mutableStateOf(false)
     private var permissionsGranted by mutableStateOf(false)
+    private var legacyScreeningConfigured by mutableStateOf(false)
+
+    private val supportsCallScreeningRole: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+
+    private val settingsPrefs by lazy {
+        getSharedPreferences("spam_blocker_prefs", MODE_PRIVATE)
+    }
 
     private lateinit var prefixRepository: PrefixRepository
     private lateinit var blockedCallDao: BlockedCallDao
@@ -81,6 +91,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        legacyScreeningConfigured = settingsPrefs.getBoolean(KEY_LEGACY_SCREENING_CONFIGURED, false)
+
         prefixRepository = PrefixRepository.getInstance(applicationContext)
         blockedCallDao = AppDatabase.getDatabase(applicationContext).blockedCallDao()
 
@@ -91,12 +103,17 @@ class MainActivity : ComponentActivity() {
                 MainApp(
                     isEnabled = isCallScreeningEnabled,
                     permissionsGranted = permissionsGranted,
+                    supportsRoleRequest = supportsCallScreeningRole,
                     prefixRepository = prefixRepository,
                     blockedCallDao = blockedCallDao,
                     onRequestPermissions = { requestPermissions() },
                     onRequestRole = { requestCallScreeningRole() },
                     onDisableRole = {
-                        startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+                        if (!supportsCallScreeningRole) {
+                            persistLegacyScreeningConfigured(false)
+                            checkCallScreeningRole()
+                        }
+                        openDefaultAppsSettings()
                     }
                 )
             }
@@ -118,8 +135,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkCallScreeningRole() {
-        val roleManager = getSystemService(RoleManager::class.java)
-        isCallScreeningEnabled = roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
+        if (supportsCallScreeningRole) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            isCallScreeningEnabled = roleManager?.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) == true
+        } else {
+            // Android 7-9: no hay API publica para confirmar este rol de forma fiable.
+            isCallScreeningEnabled = permissionsGranted && legacyScreeningConfigured
+        }
     }
 
     private fun requestPermissions() {
@@ -132,13 +154,33 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun requestCallScreeningRole() {
-        val roleManager = getSystemService(RoleManager::class.java)
-        if (roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) &&
-            !roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
-        ) {
-            val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
-            roleRequestLauncher.launch(intent)
+        if (supportsCallScreeningRole) {
+            val roleManager = getSystemService(RoleManager::class.java) ?: return
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) &&
+                !roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
+            ) {
+                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
+                roleRequestLauncher.launch(intent)
+            }
+            return
         }
+
+        persistLegacyScreeningConfigured(true)
+        openDefaultAppsSettings()
+        checkCallScreeningRole()
+    }
+
+    private fun persistLegacyScreeningConfigured(value: Boolean) {
+        legacyScreeningConfigured = value
+        settingsPrefs.edit { putBoolean(KEY_LEGACY_SCREENING_CONFIGURED, value) }
+    }
+
+    private fun openDefaultAppsSettings() {
+        startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+    }
+
+    companion object {
+        private const val KEY_LEGACY_SCREENING_CONFIGURED = "legacy_screening_configured"
     }
 }
 
@@ -146,6 +188,7 @@ class MainActivity : ComponentActivity() {
 fun MainApp(
     isEnabled: Boolean,
     permissionsGranted: Boolean,
+    supportsRoleRequest: Boolean,
     prefixRepository: PrefixRepository,
     blockedCallDao: BlockedCallDao,
     onRequestPermissions: () -> Unit,
@@ -173,6 +216,7 @@ fun MainApp(
             0 -> HomeScreen(
                 isEnabled = isEnabled,
                 permissionsGranted = permissionsGranted,
+                supportsRoleRequest = supportsRoleRequest,
                 prefixRepository = prefixRepository,
                 onRequestPermissions = onRequestPermissions,
                 onRequestRole = onRequestRole,
@@ -199,6 +243,7 @@ fun MainApp(
 fun HomeScreen(
     isEnabled: Boolean,
     permissionsGranted: Boolean,
+    supportsRoleRequest: Boolean,
     prefixRepository: PrefixRepository,
     onRequestPermissions: () -> Unit,
     onRequestRole: () -> Unit,
@@ -256,13 +301,18 @@ fun HomeScreen(
             }
         } else if (!isEnabled) {
             Text(
-                text = "Configura esta app como filtro de llamadas",
+                text = if (supportsRoleRequest) {
+                    "Configura esta app como filtro de llamadas"
+                } else {
+                    "En Android 7-9 debes activarla manualmente en Ajustes > Apps predeterminadas"
+                },
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Button(onClick = onRequestRole) {
-                Text("Configurar como Filtro")
+                Text(if (supportsRoleRequest) "Configurar como Filtro" else "Abrir Ajustes")
             }
         } else {
             Text(
@@ -272,8 +322,13 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "El bloqueo de llamadas spam esta funcionando",
-                style = MaterialTheme.typography.bodyMedium
+                text = if (supportsRoleRequest) {
+                    "El bloqueo de llamadas spam esta funcionando"
+                } else {
+                    "Configuracion manual aplicada. Verifica que NoMeLlames siga como app de filtrado."
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedButton(onClick = onDisableRole) {
