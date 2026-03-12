@@ -1,6 +1,5 @@
 package dev.andresfelipecaicedo.nomellames
 
-import android.content.Context
 import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.telephony.TelephonyManager
