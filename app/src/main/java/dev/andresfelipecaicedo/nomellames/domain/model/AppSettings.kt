@@ -1,5 +1,7 @@
 package dev.andresfelipecaicedo.nomellames.domain.model
 
+import java.util.Date
+
 data class AppSettings(
     val lastPrefixUpdateTimestamp: Long,
     val totalPrefixCount: Int,
@@ -27,6 +29,20 @@ data class AppSettings(
             daysSinceUpdate <= 1 -> 100
             daysSinceUpdate >= 30 -> 0
             else -> ((30 - daysSinceUpdate) * 100 / 30).toInt()
+        }
+    }
+    fun getLastUpdate(): String? {
+        if (lastPrefixUpdateTimestamp == 0L) return null
+
+        val now = System.currentTimeMillis()
+        val diffMillis = now - lastPrefixUpdateTimestamp
+        val diffMinutes = diffMillis / (1000 * 60)
+        val diffHours = diffMinutes / 60
+        val remainingMinutes = diffMinutes % 60
+
+        return when {
+            diffMinutes < 60 -> "$diffMinutes MIN"
+            else -> "$diffHours:${remainingMinutes.toString().padStart(2, '0')} HRS"
         }
     }
 }

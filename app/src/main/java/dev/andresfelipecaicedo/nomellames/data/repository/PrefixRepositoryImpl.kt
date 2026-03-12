@@ -25,7 +25,7 @@ import javax.inject.Singleton
 class PrefixRepositoryImpl @Inject constructor(
     private val appSettingsRepository: Lazy<AppSettingsRepository>,
     private val prefixRuleDao: PrefixRuleDao,
-    private val dispatcher: CoroutineDispatcher
+    dispatcher: CoroutineDispatcher
 ) : BaseRepository(dispatcher), PrefixRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -136,7 +136,7 @@ class PrefixRepositoryImpl @Inject constructor(
             val rules = prefixRuleDao.getAllPrefixRules().first()
             appSettingsRepository.get().updatePrefixSync(rules.size)
         } catch (e: Exception) {
-            // Ignore sync errors
+            e.printStackTrace()
         }
     }
 }

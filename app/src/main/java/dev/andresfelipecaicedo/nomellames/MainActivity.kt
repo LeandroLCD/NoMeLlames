@@ -84,7 +84,6 @@ class MainActivity : ComponentActivity() {
                         permissionsGranted = permissionsGranted,
                         supportsRoleRequest = supportsCallScreeningRole,
                         onRequestPermissions = { requestPermissions() },
-                        onRequestRole = { requestCallScreeningRole() },
                         onDisableRole = {
                             if (!supportsCallScreeningRole) {
                                 persistLegacyScreeningConfigured(false)
