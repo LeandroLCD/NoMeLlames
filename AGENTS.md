@@ -28,6 +28,7 @@ di/          → Hilt modules (DataModule, RepositoryModule, UseCaseModule)
 
 ### UseCase Pattern
 Every use case has interface + implementation pair:
+
 ```kotlin
 // Interface: IAddPrefixRuleUseCase.kt
 interface IAddPrefixRuleUseCase {
@@ -37,7 +38,10 @@ interface IAddPrefixRuleUseCase {
 // Implementation: AddPrefixRuleUseCase.kt
 class AddPrefixRuleUseCase @Inject constructor(
     private val prefixRepository: PrefixRepository
-) : IAddPrefixRuleUseCase { ... }
+) : IAddPrefixRuleUseCase {
+    override suspend operator fun invoke(prefix: String, ruleType: PrefixRule.RuleType): Result<Unit> {
+        
+    }}
 ```
 
 ### Repository Pattern
@@ -76,11 +80,11 @@ class AddPrefixRuleUseCase @Inject constructor(
 - `:specialbottombar` - Reusable custom bottom navigation component
 
 ## Key Files Reference
-| Purpose | Location |
-|---------|----------|
-| Call screening logic | `SpamCallScreeningService.kt` |
-| DI setup | `di/DataModule.kt`, `di/RepositoryModule.kt` |
-| Database schema | `data/local/database/AppDatabase.kt` |
-| Theme/colors | `ui/theme/Color.kt`, `ui/theme/Theme.kt` |
-| String resources | `res/values/strings.xml` (Spanish) |
+| Purpose              | Location                                     |
+|----------------------|----------------------------------------------|
+| Call screening logic | `SpamCallScreeningService.kt`                |
+| DI setup             | `di/DataModule.kt`, `di/RepositoryModule.kt` |
+| Database schema      | `data/local/database/AppDatabase.kt`         |
+| Theme/colors         | `ui/theme/Color.kt`, `ui/theme/Theme.kt`     |
+| String resources     | `res/values/strings.xml` (Spanish)           |
 
