@@ -162,7 +162,7 @@ class SpamCallScreeningService : CallScreeningService() {
     }
 
     private fun detectCountryDialingCode(): String? {
-        val tm = getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+        val tm = getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
         val countryIso = (tm?.simCountryIso ?: tm?.networkCountryIso)?.uppercase()
         return CountryDialingCodeProvider.getDialingCode(applicationContext, countryIso)
     }
