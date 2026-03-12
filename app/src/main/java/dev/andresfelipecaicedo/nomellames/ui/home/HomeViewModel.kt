@@ -8,79 +8,63 @@ import dev.andresfelipecaicedo.nomellames.domain.useCase.blockedcall.IGetBlocked
 import dev.andresfelipecaicedo.nomellames.domain.useCase.blockedcall.IGetRecentBlockedCallsUseCase
 import dev.andresfelipecaicedo.nomellames.domain.useCase.prefix.IGetPrefixesUseCase
 import dev.andresfelipecaicedo.nomellames.domain.useCase.settings.IGetAppSettingsUseCase
+import dev.andresfelipecaicedo.nomellames.ui.home.model.Permission
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getPrefixesUseCase: IGetPrefixesUseCase,
-    private val getBlockedCallsCountUseCase: IGetBlockedCallsCountUseCase,
-    private val getRecentBlockedCallsUseCase: IGetRecentBlockedCallsUseCase,
-    private val getAllowedCallsCountUseCase: IGetAllowedCallsCountUseCase,
-    private val getAppSettingsUseCase: IGetAppSettingsUseCase
+    getPrefixesUseCase: IGetPrefixesUseCase,
+    getBlockedCallsCountUseCase: IGetBlockedCallsCountUseCase,
+    getRecentBlockedCallsUseCase: IGetRecentBlockedCallsUseCase,
+    getAllowedCallsCountUseCase: IGetAllowedCallsCountUseCase,
+    getAppSettingsUseCase: IGetAppSettingsUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private val _permission = MutableStateFlow(Permission())
+    val permission: StateFlow<Permission> = _permission.asStateFlow()
 
-    private var isEnabled: Boolean = false
-    private var permissionsGranted: Boolean = false
-    private var supportsRoleRequest: Boolean = true
+    val uiState = combine(
+        getPrefixesUseCase(),
+        getBlockedCallsCountUseCase(),
+        getRecentBlockedCallsUseCase(RECENT_THREATS_LIMIT),
+        getAllowedCallsCountUseCase(),
+        getAppSettingsUseCase(),
+    ) { prefixes, blockedCount, recentCalls, allowedCount, appSettings ->
+        HomeUiState.Content(
+            prefixCount = prefixes.size,
+            blockedCount = blockedCount,
+            allowedCount = allowedCount,
+            lastUpdateProgress = appSettings.calculateUpdateProgress(),
+            recentThreats = recentCalls,
+            lastUpdate = appSettings.getLastUpdate()
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState.Loading)
 
-    init {
-        observeData()
-    }
 
-    private fun observeData() {
-        combine(
-            getPrefixesUseCase(),
-            getBlockedCallsCountUseCase(),
-            getRecentBlockedCallsUseCase(RECENT_THREATS_LIMIT),
-            getAllowedCallsCountUseCase(),
-            getAppSettingsUseCase()
-        ) { prefixes, blockedCount, recentCalls, allowedCount, appSettings ->
-            HomeUiState.Content(
-                prefixCount = prefixes.size,
-                isEnabled = isEnabled,
-                permissionsGranted = permissionsGranted,
-                supportsRoleRequest = supportsRoleRequest,
-                blockedCount = blockedCount,
-                allowedCount = allowedCount,
-                lastUpdateProgress = appSettings.calculateUpdateProgress(),
-                recentThreats = recentCalls
-            )
-        }
-        .onEach { content ->
-            _uiState.value = content
-        }
-        .launchIn(viewModelScope)
-    }
+
 
     fun updateSystemState(
         isEnabled: Boolean,
         permissionsGranted: Boolean,
         supportsRoleRequest: Boolean
     ) {
-        this.isEnabled = isEnabled
-        this.permissionsGranted = permissionsGranted
-        this.supportsRoleRequest = supportsRoleRequest
-        
-        val currentState = _uiState.value
-        if (currentState is HomeUiState.Content) {
-            _uiState.update {
-                currentState.copy(
-                    isEnabled = isEnabled,
-                    permissionsGranted = permissionsGranted,
-                    supportsRoleRequest = supportsRoleRequest
-                )
-            }
+        _permission.update {
+            it.copy(
+                isEnabled = isEnabled,
+                permissionsGranted = permissionsGranted,
+                supportsRoleRequest = supportsRoleRequest
+            )
         }
+
     }
 
     companion object {

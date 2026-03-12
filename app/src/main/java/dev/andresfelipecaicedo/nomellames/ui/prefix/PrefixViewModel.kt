@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PrefixViewModel @Inject constructor(
-    private val getAllPrefixRulesUseCase: IGetAllPrefixRulesUseCase,
+    getAllPrefixRulesUseCase: IGetAllPrefixRulesUseCase,
     private val addPrefixRuleUseCase: IAddPrefixRuleUseCase,
     private val removePrefixRuleUseCase: IRemovePrefixRuleUseCase
 ) : ViewModel() {
@@ -43,10 +43,6 @@ class PrefixViewModel @Inject constructor(
     private val _isAllowedRule = MutableStateFlow(false)
     val isAllowedRule = _isAllowedRule.asStateFlow()
 
-
-
-
-    
     
     fun onPrefixInputChanged(input: String) {
         _prefixInput.tryEmit(input.filter { it.isDigit() || it == ' ' })

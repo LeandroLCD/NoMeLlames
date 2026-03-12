@@ -24,14 +24,16 @@
     <string name="home_disable">Desactivar</string>
 
     <!-- New Dashboard Strings -->
-    <string name="home_status_online">EN LÍNEA</string>
+    <string name="home_status_online" translatable="false">ONLINE</string>
+    <string name="home_status_offline" translatable="false">OFFLINE</string>
     <string name="home_system_active">SISTEMA ACTIVO</string>
-    <string name="home_interception_on">INTERCEPTACIÓN DETERMINÍSTICA: ON</string>
+    <string name="home_system_inactive">SISTEMA DESACTIVADO</string>
+    <string name="home_interception">INTERCEPTACIÓN DETERMINÍSTICA</string>
     <string name="home_firewall_master">CORTAFUEGOS MAESTRO</string>
     <string name="home_blocked_label">BLOQUEADAS</string>
     <string name="home_allowed_label">PERMITIDAS</string>
     <string name="home_last_update_label">ÚLTIMA ACTUALIZACIÓN DE REGLAS</string>
-    <string name="home_last_update_time">HACE 2 MIN</string>
+    <string name="home_last_update_time">HACE %1$s</string>
     <string name="home_recent_threats_title">AMENAZAS RECIENTES</string>
     <string name="home_view_all">VER TODO</string>
 

@@ -11,6 +11,9 @@ interface PrefixRuleDao {
     
     @Query("SELECT * FROM prefix_rules ORDER BY createdAt DESC")
     fun getAllPrefixRules(): Flow<List<PrefixRuleEntity>>
+
+    @Query("SELECT * FROM prefix_rules ORDER BY createdAt DESC")
+    fun getAllPrefixRulesList(): List<PrefixRuleEntity>
     
     @Query("SELECT * FROM prefix_rules WHERE ruleType = 'BLOCK' ORDER BY createdAt DESC")
     fun getBlockedPrefixes(): Flow<List<PrefixRuleEntity>>
