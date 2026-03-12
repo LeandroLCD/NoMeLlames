@@ -1,8 +1,6 @@
 package dev.andresfelipecaicedo.nomellames.domain.useCase.history
 
-import android.content.Context
 import android.os.Environment
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.andresfelipecaicedo.nomellames.domain.model.HistoryItem
 import java.io.File
 import java.text.SimpleDateFormat
