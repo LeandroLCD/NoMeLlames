@@ -19,8 +19,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "SpamCallBlocker"
 include(":app")
+include(":specialbottombar")
+include(":specialbottombar")
