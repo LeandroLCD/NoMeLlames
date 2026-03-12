@@ -14,6 +14,7 @@ import dev.andresfelipecaicedo.nomellames.domain.repositories.BlockedCallReposit
 import dev.andresfelipecaicedo.nomellames.domain.repositories.PrefixRepository
 import javax.inject.Singleton
 
+@Suppress("unused")
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {

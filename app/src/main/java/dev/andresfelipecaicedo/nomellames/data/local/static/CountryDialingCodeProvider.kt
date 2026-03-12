@@ -1,7 +1,6 @@
 package dev.andresfelipecaicedo.nomellames.data.local.static
 
 import android.content.Context
-import android.util.Log
 import dev.andresfelipecaicedo.nomellames.utils.AppConstants
 import org.json.JSONObject
 
