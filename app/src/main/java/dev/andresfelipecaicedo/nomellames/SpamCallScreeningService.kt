@@ -5,107 +5,100 @@ import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.telephony.TelephonyManager
 import android.util.Log
-import dev.andresfelipecaicedo.nomellames.data.AppDatabase
-import dev.andresfelipecaicedo.nomellames.data.BlockedCall
+import dagger.hilt.android.AndroidEntryPoint
+import dev.andresfelipecaicedo.nomellames.data.local.static.CountryDialingCodeProvider
+import dev.andresfelipecaicedo.nomellames.domain.model.PrefixRule
+import dev.andresfelipecaicedo.nomellames.domain.repositories.AllowedCallRepository
+import dev.andresfelipecaicedo.nomellames.domain.repositories.BlockedCallRepository
+import dev.andresfelipecaicedo.nomellames.domain.repositories.PrefixRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SpamCallScreeningService : CallScreeningService() {
 
+    @Inject
+    lateinit var blockedCallRepository: BlockedCallRepository
+
+    @Inject
+    lateinit var allowedCallRepository: AllowedCallRepository
+
+    @Inject
+    lateinit var prefixRepository: PrefixRepository
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var cachedPrefixes: Set<String> = emptySet()
+    
+    private var cachedPrefixRules: List<PrefixRule> = emptyList()
     private var skipCallLog: Boolean = true
     private var skipNotification: Boolean = true
-
     private var countryDialingCode: String? = null
 
     companion object {
         private const val TAG = "NoMeLlames"
-
-        private val COUNTRY_DIALING_CODES = mapOf(
-            "AF" to "93", "AL" to "355", "DZ" to "213", "AD" to "376", "AO" to "244",
-            "AG" to "1", "AR" to "54", "AM" to "374", "AU" to "61", "AT" to "43",
-            "AZ" to "994", "BS" to "1", "BH" to "973", "BD" to "880", "BB" to "1",
-            "BY" to "375", "BE" to "32", "BZ" to "501", "BJ" to "229", "BT" to "975",
-            "BO" to "591", "BA" to "387", "BW" to "267", "BR" to "55", "BN" to "673",
-            "BG" to "359", "BF" to "226", "BI" to "257", "KH" to "855", "CM" to "237",
-            "CA" to "1", "CV" to "238", "CF" to "236", "TD" to "235", "CL" to "56",
-            "CN" to "86", "CO" to "57", "KM" to "269", "CG" to "242", "CD" to "243",
-            "CR" to "506", "CI" to "225", "HR" to "385", "CU" to "53", "CY" to "357",
-            "CZ" to "420", "DK" to "45", "DJ" to "253", "DM" to "1", "DO" to "1",
-            "EC" to "593", "EG" to "20", "SV" to "503", "GQ" to "240", "ER" to "291",
-            "EE" to "372", "ET" to "251", "FJ" to "679", "FI" to "358", "FR" to "33",
-            "GA" to "241", "GM" to "220", "GE" to "995", "DE" to "49", "GH" to "233",
-            "GR" to "30", "GD" to "1", "GT" to "502", "GN" to "224", "GW" to "245",
-            "GY" to "592", "HT" to "509", "HN" to "504", "HU" to "36", "IS" to "354",
-            "IN" to "91", "ID" to "62", "IR" to "98", "IQ" to "964", "IE" to "353",
-            "IL" to "972", "IT" to "39", "JM" to "1", "JP" to "81", "JO" to "962",
-            "KZ" to "7", "KE" to "254", "KI" to "686", "KP" to "850", "KR" to "82",
-            "KW" to "965", "KG" to "996", "LA" to "856", "LV" to "371", "LB" to "961",
-            "LS" to "266", "LR" to "231", "LY" to "218", "LI" to "423", "LT" to "370",
-            "LU" to "352", "MG" to "261", "MW" to "265", "MY" to "60", "MV" to "960",
-            "ML" to "223", "MT" to "356", "MH" to "692", "MR" to "222", "MU" to "230",
-            "MX" to "52", "FM" to "691", "MD" to "373", "MC" to "377", "MN" to "976",
-            "ME" to "382", "MA" to "212", "MZ" to "258", "MM" to "95", "NA" to "264",
-            "NR" to "674", "NP" to "977", "NL" to "31", "NZ" to "64", "NI" to "505",
-            "NE" to "227", "NG" to "234", "NO" to "47", "OM" to "968", "PK" to "92",
-            "PW" to "680", "PA" to "507", "PG" to "675", "PY" to "595", "PE" to "51",
-            "PH" to "63", "PL" to "48", "PT" to "351", "PR" to "1", "QA" to "974",
-            "RO" to "40", "RU" to "7", "RW" to "250", "KN" to "1", "LC" to "1",
-            "VC" to "1", "WS" to "685", "SM" to "378", "ST" to "239", "SA" to "966",
-            "SN" to "221", "RS" to "381", "SC" to "248", "SL" to "232", "SG" to "65",
-            "SK" to "421", "SI" to "386", "SB" to "677", "SO" to "252", "ZA" to "27",
-            "SS" to "211", "ES" to "34", "LK" to "94", "SD" to "249", "SR" to "597",
-            "SZ" to "268", "SE" to "46", "CH" to "41", "SY" to "963", "TW" to "886",
-            "TJ" to "992", "TZ" to "255", "TH" to "66", "TL" to "670", "TG" to "228",
-            "TO" to "676", "TT" to "1", "TN" to "216", "TR" to "90", "TM" to "993",
-            "TV" to "688", "UG" to "256", "UA" to "380", "AE" to "971", "GB" to "44",
-            "US" to "1", "UY" to "598", "UZ" to "998", "VU" to "678", "VE" to "58",
-            "VN" to "84", "YE" to "967", "ZM" to "260", "ZW" to "263"
-        )
     }
 
     override fun onCreate() {
         super.onCreate()
-        val prefs = applicationContext.getSharedPreferences("spam_blocker_prefs", MODE_PRIVATE)
-        cachedPrefixes = prefs.getStringSet("blocked_prefixes", emptySet())
-            ?: emptySet()
-        skipCallLog = prefs.getBoolean("skip_call_log", true)
-        skipNotification = prefs.getBoolean("skip_notification", true)
+        loadPrefixRules()
         countryDialingCode = detectCountryDialingCode()
+        
         Log.i(TAG, "Detected country dialing code: ${countryDialingCode ?: "unknown"}")
+        Log.i(TAG, "Loaded ${cachedPrefixRules.size} prefix rules from database")
+    }
+
+    private fun loadPrefixRules() {
+        try {
+            cachedPrefixRules = runBlocking {
+                prefixRepository.getAllPrefixRules().first()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading prefix rules", e)
+            cachedPrefixRules = emptyList()
+        }
     }
 
     override fun onScreenCall(callDetails: Call.Details) {
         val phoneNumber = callDetails.handle?.schemeSpecificPart ?: ""
         val normalizedNumber = normalizePhoneNumber(phoneNumber)
-
-        var matchedPrefix: String? = null
-        val shouldBlock = cachedPrefixes.any { prefix ->
-            if (normalizedNumber.startsWith(prefix)) {
-                matchedPrefix = prefix
-                true
-            } else {
-                false
-            }
-        }
+        val matchResult = findBestMatchingRule(normalizedNumber)
 
         val response = CallResponse.Builder()
             .apply {
-                if (shouldBlock) {
-                    setDisallowCall(true)
-                    setRejectCall(true)
-                    setSkipCallLog(skipCallLog)
-                    setSkipNotification(skipNotification)
+                when (matchResult) {
+                    is MatchResult.Blocked -> {
+                        Log.i(TAG, "Blocking call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
+                        setDisallowCall(true)
+                        setRejectCall(true)
+                        setSkipCallLog(skipCallLog)
+                        setSkipNotification(skipNotification)
 
-                    serviceScope.launch {
-                        saveBlockedCall(phoneNumber, matchedPrefix!!)
+                        serviceScope.launch {
+                            saveBlockedCall(phoneNumber, matchResult.prefix)
+                        }
                     }
-                } else {
-                    setDisallowCall(false)
-                    setRejectCall(false)
+                    is MatchResult.Allowed -> {
+                        Log.i(TAG, "Allowing call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
+                        setDisallowCall(false)
+                        setRejectCall(false)
+
+                        serviceScope.launch {
+                            saveAllowedCall(phoneNumber)
+                        }
+                    }
+                    is MatchResult.NoMatch -> {
+                        Log.i(TAG, "No rule matched for $phoneNumber - allowing call")
+                        setDisallowCall(false)
+                        setRejectCall(false)
+
+                        serviceScope.launch {
+                            saveAllowedCall(phoneNumber)
+                        }
+                    }
                 }
             }
             .build()
@@ -113,17 +106,48 @@ class SpamCallScreeningService : CallScreeningService() {
         respondToCall(callDetails, response)
     }
 
+    /**
+     * Find the best matching rule for a phone number.
+     * The rule with the longest matching prefix wins.
+     * 
+     * Example:
+     * - Phone: 123456789
+     * - ALLOW rule: 1234 (4 chars) ← This wins
+     * - BLOCK rule: 123 (3 chars)
+     * - Result: ALLOWED because 1234 > 123
+     */
+    private fun findBestMatchingRule(normalizedNumber: String): MatchResult {
+        var bestMatch: PrefixRule? = null
+        var bestMatchLength = 0
+
+        for (rule in cachedPrefixRules) {
+            val cleanPrefix = rule.prefix.filter { it.isDigit() }
+            if (normalizedNumber.startsWith(cleanPrefix) && cleanPrefix.length > bestMatchLength) {
+                bestMatch = rule
+                bestMatchLength = cleanPrefix.length
+            }
+        }
+
+        return when {
+            bestMatch == null -> MatchResult.NoMatch
+            bestMatch.isBlocked -> MatchResult.Blocked(bestMatch.prefix)
+            else -> MatchResult.Allowed(bestMatch.prefix)
+        }
+    }
+
     private suspend fun saveBlockedCall(phoneNumber: String, matchedPrefix: String) {
         try {
-            val database = AppDatabase.getDatabase(applicationContext)
-            database.blockedCallDao().insertBlockedCall(
-                BlockedCall(
-                    phoneNumber = phoneNumber,
-                    matchedPrefix = matchedPrefix
-                )
-            )
+            blockedCallRepository.insertBlockedCall(phoneNumber, matchedPrefix)
         } catch (e: Exception) {
             Log.e(TAG, "Error saving blocked call", e)
+        }
+    }
+
+    private suspend fun saveAllowedCall(phoneNumber: String) {
+        try {
+            allowedCallRepository.insertAllowedCall(phoneNumber)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving allowed call", e)
         }
     }
 
@@ -140,6 +164,12 @@ class SpamCallScreeningService : CallScreeningService() {
     private fun detectCountryDialingCode(): String? {
         val tm = getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
         val countryIso = (tm?.simCountryIso ?: tm?.networkCountryIso)?.uppercase()
-        return countryIso?.let { COUNTRY_DIALING_CODES[it] }
+        return CountryDialingCodeProvider.getDialingCode(applicationContext, countryIso)
+    }
+
+    private sealed class MatchResult {
+        data class Blocked(val prefix: String) : MatchResult()
+        data class Allowed(val prefix: String) : MatchResult()
+        data object NoMatch : MatchResult()
     }
 }
