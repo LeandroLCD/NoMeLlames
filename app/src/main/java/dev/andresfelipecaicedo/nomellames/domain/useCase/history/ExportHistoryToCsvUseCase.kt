@@ -10,9 +10,7 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
-class ExportHistoryToCsvUseCase @Inject constructor(
-    @ApplicationContext private val context: Context
-) : IExportHistoryToCsvUseCase {
+class ExportHistoryToCsvUseCase @Inject constructor() : IExportHistoryToCsvUseCase {
     
     private val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
     private val fileNameFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
