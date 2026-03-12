@@ -15,7 +15,7 @@
     <string name="home_permissions_needed">Se necesitan permisos para funcionar</string>
     <string name="home_grant_permissions">Otorgar Permisos</string>
     <string name="home_configure_filter_modern">Configura esta app como filtro de llamadas</string>
-    <string name="home_configure_filter_legacy">En Android 7-9 debes activarla manualmente en Ajustes > Apps predeterminadas</string>
+    <string name="home_configure_filter_legacy">En Android 7–9 debes activarla manualmente en Ajustes > Apps predeterminadas</string>
     <string name="home_configure_as_filter">Configurar como Filtro</string>
     <string name="home_open_settings">Abrir Ajustes</string>
     <string name="home_active">Activo</string>
@@ -39,7 +39,7 @@
     <string name="prefix_title">PREFIJOS</string>
     <string name="prefix_description">No incluyas el código de país.\nEjemplo: escribe 907, no +56907.</string>
     <string name="prefix_new_label">Nuevo prefijo</string>
-    <string name="prefix_new_placeholder">INGRESAR PREFIJO...</string>
+    <string name="prefix_new_placeholder">INGRESAR PREF</string>
     <string name="prefix_add">AÑADIR</string>
     <string name="prefix_delete">Eliminar</string>
     <string name="prefix_empty">No hay prefijos configurados</string>
