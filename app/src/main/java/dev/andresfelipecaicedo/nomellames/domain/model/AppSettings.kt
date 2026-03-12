@@ -1,7 +1,5 @@
 package dev.andresfelipecaicedo.nomellames.domain.model
 
-import java.util.Date
-
 data class AppSettings(
     val lastPrefixUpdateTimestamp: Long,
     val totalPrefixCount: Int,
