@@ -13,7 +13,6 @@ sealed interface HistoryUiState {
         val exportMessage: String? = null
     ) : HistoryUiState {
         val isEmpty: Boolean get() = historyItems.isEmpty()
-        val canClear: Boolean get() = historyItems.isNotEmpty()
         val canExport: Boolean get() = historyItems.isNotEmpty() && !isExporting
         
         // Group items by date for sticky headers
