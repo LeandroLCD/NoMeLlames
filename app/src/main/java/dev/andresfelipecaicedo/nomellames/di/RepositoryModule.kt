@@ -8,12 +8,10 @@ import dev.andresfelipecaicedo.nomellames.data.repository.AllowedCallRepositoryI
 import dev.andresfelipecaicedo.nomellames.data.repository.AppSettingsRepositoryImpl
 import dev.andresfelipecaicedo.nomellames.data.repository.BlockedCallRepositoryImpl
 import dev.andresfelipecaicedo.nomellames.data.repository.PrefixRepositoryImpl
-import dev.andresfelipecaicedo.nomellames.data.repository.SystemBlockedNumbersRepositoryImpl
 import dev.andresfelipecaicedo.nomellames.domain.repositories.AllowedCallRepository
 import dev.andresfelipecaicedo.nomellames.domain.repositories.AppSettingsRepository
 import dev.andresfelipecaicedo.nomellames.domain.repositories.BlockedCallRepository
 import dev.andresfelipecaicedo.nomellames.domain.repositories.PrefixRepository
-import dev.andresfelipecaicedo.nomellames.domain.repositories.SystemBlockedNumbersRepository
 import javax.inject.Singleton
 
 @Suppress("unused")
@@ -37,7 +35,4 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindAppSettingsRepository(repository: AppSettingsRepositoryImpl): AppSettingsRepository
 
-    @Binds
-    @Singleton
-    abstract fun bindSystemBlockedNumbersRepository(repository: SystemBlockedNumbersRepositoryImpl): SystemBlockedNumbersRepository
 }

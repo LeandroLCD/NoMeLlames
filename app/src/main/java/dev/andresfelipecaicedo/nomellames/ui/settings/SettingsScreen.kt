@@ -47,7 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.andresfelipecaicedo.nomellames.R
 import dev.andresfelipecaicedo.nomellames.ui.security.DisableBiometricDialog
@@ -62,7 +62,6 @@ import dev.andresfelipecaicedo.nomellames.ui.theme.DividerColor
 import dev.andresfelipecaicedo.nomellames.ui.theme.NoMeLlamesTheme
 import dev.andresfelipecaicedo.nomellames.ui.theme.TextGray
 import dev.andresfelipecaicedo.nomellames.utils.biometric.BiometricHelper
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SettingsScreen(
