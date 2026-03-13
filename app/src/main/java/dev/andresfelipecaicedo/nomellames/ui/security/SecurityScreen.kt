@@ -127,7 +127,7 @@ fun SecurityScreen(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SecurityHeader(id = "NMLL-8829")
+            SecurityHeader()
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -225,7 +225,7 @@ fun SecurityScreen(
 }
 
 @Composable
-private fun SecurityHeader(id: String, modifier: Modifier = Modifier) {
+private fun SecurityHeader(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
