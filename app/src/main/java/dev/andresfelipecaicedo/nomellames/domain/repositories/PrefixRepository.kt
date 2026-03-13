@@ -22,5 +22,6 @@ interface PrefixRepository {
     fun getAllowedPrefixes(): Flow<List<PrefixRule>>
     suspend fun addPrefixRule(prefix: String, ruleType: PrefixRule.RuleType): Result<Unit>
     suspend fun removePrefixRule(id: Long): Result<Unit>
+    suspend fun deleteAllPrefixRules(): Result<Unit>
     suspend fun removePrefixByValue(prefix: String): Result<Unit>
 }

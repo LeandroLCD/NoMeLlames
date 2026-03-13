@@ -1,16 +1,16 @@
-package dev.andresfelipecaicedo.nomellames.ui.prefix.components
+package dev.andresfelipecaicedo.nomellames.ui.history.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -22,19 +22,17 @@ import dev.andresfelipecaicedo.nomellames.ui.theme.DarkBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrefixTopBar(
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-) {
+fun HistoryTopBar(modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
-        scrollBehavior = scrollBehavior,
+        modifier = modifier,
         title = {
             Text(
-                text = stringResource(R.string.prefix_title),
+                text = stringResource(R.string.history_title),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
-                ),
-                color = Color.White
+                    letterSpacing = 0.5.sp,
+                    color = CyanAccent
+                )
             )
         },
         navigationIcon = {
@@ -42,13 +40,13 @@ fun PrefixTopBar(
                 painter = painterResource(id = R.drawable.ic_block_filled),
                 contentDescription = null,
                 tint = CyanAccent,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(24.dp)
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DarkBg,
-            titleContentColor = Color.White
+            containerColor = DarkBg
         )
     )
 }
-
