@@ -31,10 +31,10 @@ fun RuleTypeToggle(
             .padding(2.dp)
     ) {
         Box(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxHeight()
                 .width(24.dp)
-                .align(if (isAllowed) Alignment.Companion.CenterEnd else Alignment.Companion.CenterStart)
+                .align(if (isAllowed) Alignment.CenterEnd else Alignment.CenterStart)
                 .background(if (isAllowed) AllowedCyan else BlockedRed)
         )
     }
