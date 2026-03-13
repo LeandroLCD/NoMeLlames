@@ -1,20 +1,16 @@
-package dev.andresfelipecaicedo.nomellames.ui.prefix.components
+package dev.andresfelipecaicedo.nomellames.ui.settings.components
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.andresfelipecaicedo.nomellames.R
 import dev.andresfelipecaicedo.nomellames.ui.theme.CyanAccent
@@ -22,33 +18,31 @@ import dev.andresfelipecaicedo.nomellames.ui.theme.DarkBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrefixTopBar(
-    scrollBehavior: TopAppBarScrollBehavior? = null,
+fun SettingsTopBar(
+    onBackClick: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
-        scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = stringResource(R.string.prefix_title),
-                style = MaterialTheme.typography.headlineSmall.copy(
+                text = stringResource(R.string.settings_title),
+                style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 ),
-                color = Color.White
+                color = CyanAccent
             )
         },
         navigationIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_block_filled),
-                contentDescription = null,
-                tint = CyanAccent,
-                modifier = Modifier.size(32.dp)
-            )
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back_arrow),
+                    contentDescription = stringResource(R.string.back),
+                    tint = CyanAccent
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DarkBg,
-            titleContentColor = Color.White
+            containerColor = DarkBg
         )
     )
 }
-

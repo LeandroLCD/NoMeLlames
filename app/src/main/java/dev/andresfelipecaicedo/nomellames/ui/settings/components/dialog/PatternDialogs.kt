@@ -1,12 +1,9 @@
-package dev.andresfelipecaicedo.nomellames.ui.security
+package dev.andresfelipecaicedo.nomellames.ui.settings.components.dialog
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,10 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,43 +41,6 @@ import dev.andresfelipecaicedo.nomellames.ui.theme.CyanAccent
 import dev.andresfelipecaicedo.nomellames.ui.theme.DarkBg
 import dev.andresfelipecaicedo.nomellames.ui.theme.NoMeLlamesTheme
 import dev.andresfelipecaicedo.nomellames.ui.theme.TextGray
-
-/**
- * Dialog to enable biometric authentication
- */
-@Composable
-fun EnableBiometricDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    SecurityBaseDialog(
-        icon = R.drawable.ic_fingerprint,
-        title = stringResource(R.string.security_dialog_enable_biometric_title),
-        description = stringResource(R.string.security_dialog_enable_biometric_description),
-        confirmText = stringResource(R.string.security_dialog_enable),
-        onConfirm = onConfirm,
-        onDismiss = onDismiss
-    )
-}
-
-/**
- * Dialog to disable biometric authentication
- */
-@Composable
-fun DisableBiometricDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    SecurityBaseDialog(
-        icon = R.drawable.ic_fingerprint,
-        title = stringResource(R.string.security_dialog_disable_biometric_title),
-        description = stringResource(R.string.security_dialog_disable_biometric_description),
-        confirmText = stringResource(R.string.security_dialog_disable),
-        confirmColor = BlockedRed,
-        onConfirm = onConfirm,
-        onDismiss = onDismiss
-    )
-}
 
 /**
  * Dialog to enable pattern lock with pattern input
@@ -264,12 +220,11 @@ fun DisablePatternDialog(
                     accentColor = BlockedRed
                 )
 
-                    Text(
-                        text = error.orEmpty(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = BlockedRed
-                    )
-
+                Text(
+                    text = error.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = BlockedRed
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -406,130 +361,6 @@ private fun getNodeCenter(node: Int, spacing: Float): Offset {
     return Offset(spacing + i * spacing, spacing + j * spacing)
 }
 
-/**
- * Base dialog component for security dialogs
- */
-@Composable
-private fun SecurityBaseDialog(
-    icon: Int,
-    title: String,
-    description: String,
-    confirmText: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-    confirmColor: Color = CyanAccent
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            shape = RoundedCornerShape(4.dp),
-            color = DarkBg,
-            border = BorderStroke(1.dp, confirmColor.copy(alpha = 0.3f))
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    ),
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextGray,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(
-                            color = confirmColor.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = confirmColor.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(4.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = icon),
-                        contentDescription = null,
-                        tint = confirmColor,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Actions
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(
-                            text = stringResource(R.string.security_cancel),
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CyanAccent
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = onConfirm,
-                        shape = RoundedCornerShape(4.dp),
-                        border = BorderStroke(1.dp, confirmColor),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = confirmColor
-                        )
-                    ) {
-                        Text(
-                            text = confirmText,
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun EnableBiometricDialogPreview() {
-    NoMeLlamesTheme {
-        EnableBiometricDialog(onConfirm = {}, onDismiss = {})
-    }
-}
-
-@Preview
-@Composable
-private fun DisableBiometricDialogPreview() {
-    NoMeLlamesTheme {
-        DisableBiometricDialog(onConfirm = {}, onDismiss = {})
-    }
-}
-
 @Preview
 @Composable
 private fun EnablePatternDialogPreview() {
@@ -546,3 +377,101 @@ private fun DisablePatternDialogPreview() {
     }
 }
 
+/**
+ * Dialog to verify pattern before sensitive operations (e.g., purge database)
+ */
+@Composable
+fun VerifyPatternDialog(
+    currentPattern: List<Int>,
+    onPatternCorrect: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var enteredPattern by remember { mutableStateOf<List<Int>>(emptyList()) }
+    var error by remember { mutableStateOf<String?>(null) }
+    
+    val errorWrongPattern = stringResource(R.string.security_dialog_wrong_pattern)
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            shape = RoundedCornerShape(4.dp),
+            color = DarkBg,
+            border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.3f))
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Text(
+                    text = stringResource(R.string.security_dialog_verify_pattern_title),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    ),
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.security_dialog_enter_pattern_to_continue),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextGray,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                PatternInputGrid(
+                    selectedNodes = enteredPattern,
+                    onPatternComplete = { pattern ->
+                        enteredPattern = pattern
+                        if (pattern == currentPattern) {
+                            onPatternCorrect()
+                        } else {
+                            error = errorWrongPattern
+                            enteredPattern = emptyList()
+                        }
+                    },
+                    errorColor = if (error != null) BlockedRed else null
+                )
+
+                Text(
+                    text = error.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = BlockedRed
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Actions
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(
+                            text = stringResource(R.string.security_cancel),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = CyanAccent
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun VerifyPatternDialogPreview() {
+    NoMeLlamesTheme {
+        VerifyPatternDialog(listOf(0, 1, 2), onPatternCorrect = {}, onDismiss = {})
+    }
+}

@@ -27,11 +27,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -96,91 +93,56 @@ fun HistoryScreen(
 @Composable
 private fun HistoryContentContainer(
     uiState: HistoryUiState,
+    modifier: Modifier = Modifier,
     onFilterSelected: (IGetCallHistoryUseCase.HistoryFilter) -> Unit,
-    onExportClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onExportClick: () -> Unit
 ) {
-    Scaffold(
-        modifier = modifier,
-        containerColor = DarkBg,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.history_title),
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp,
-                            color = CyanAccent
-                        )
-                    )
-                },
-                actions = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_block_filled),
-                        contentDescription = null,
-                        tint = CyanAccent,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .size(24.dp)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkBg
-                )
-            )
-        },
-        floatingActionButton = {
-            val canExport = (uiState as? HistoryUiState.Content)?.canExport == true
-            val isExporting = (uiState as? HistoryUiState.Content)?.isExporting == true
-            
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = RoundedCornerShape(4.dp),
-                color = DarkBg,
-                border = BorderStroke(1.dp, if (canExport) CyanAccent else DarkGray)
-            ) {
-                IconButton(
-                    onClick = onExportClick,
-                    enabled = canExport
+    val canExport = (uiState as? HistoryUiState.Content)?.canExport == true
+    val isExporting = (uiState as? HistoryUiState.Content)?.isExporting == true
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        when (uiState) {
+            is HistoryUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    if (isExporting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = CyanAccent,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_download),
-                            contentDescription = null,
-                            tint = if (canExport) CyanAccent else TextGray
-                        )
-                    }
+                    CircularProgressIndicator(color = CyanAccent)
                 }
             }
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (uiState) {
-                is HistoryUiState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = CyanAccent)
-                    }
-                }
 
-                is HistoryUiState.Content -> {
-                    HistoryContent(
-                        state = uiState,
-                        onFilterSelected = onFilterSelected,
-                        modifier = Modifier.fillMaxSize()
+            is HistoryUiState.Content -> {
+                HistoryContent(
+                    state = uiState,
+                    onFilterSelected = onFilterSelected,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        Surface(
+            modifier = Modifier.size(56.dp).align(Alignment.BottomEnd).padding(16.dp),
+            shape = RoundedCornerShape(4.dp),
+            color = DarkBg,
+            border = BorderStroke(1.dp, if (canExport) CyanAccent else DarkGray)
+        ) {
+            IconButton(
+                onClick = onExportClick,
+                enabled = canExport
+            ) {
+                if (isExporting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = CyanAccent,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_download),
+                        contentDescription = null,
+                        tint = if (canExport) CyanAccent else TextGray
                     )
                 }
             }

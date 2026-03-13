@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -31,12 +32,15 @@ import dev.andresfelipecaicedo.nomellames.domain.exception.PrefixAlreadyExistsEx
 import dev.andresfelipecaicedo.nomellames.specialbottombar.components.SpecialBottomBar
 import dev.andresfelipecaicedo.nomellames.specialbottombar.data.SpecialBottom
 import dev.andresfelipecaicedo.nomellames.ui.history.HistoryScreen
+import dev.andresfelipecaicedo.nomellames.ui.history.components.HistoryTopBar
 import dev.andresfelipecaicedo.nomellames.ui.home.HomeScreen
 import dev.andresfelipecaicedo.nomellames.ui.home.components.HomeTopBar
 import dev.andresfelipecaicedo.nomellames.ui.prefix.PrefixScreen
 import dev.andresfelipecaicedo.nomellames.ui.prefix.components.PrefixTopBar
 import dev.andresfelipecaicedo.nomellames.ui.settings.SettingsScreen
+import dev.andresfelipecaicedo.nomellames.ui.settings.components.SettingsTopBar
 import dev.andresfelipecaicedo.nomellames.ui.theme.BlockedRed
+import kotlinx.coroutines.launch
 
 object TabIds {
     val HOME = SpecialBottom.Id("home")
@@ -104,7 +108,7 @@ fun MainScreen(
         selectedColor = MaterialTheme.colorScheme.primary,
         unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
-
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -116,14 +120,16 @@ fun MainScreen(
             .navigationBarsPadding()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            AnimatedContent (tabIdCurrent) { current->
+            AnimatedContent (tabIdCurrent, Modifier) { current->
                 when (current) {
                     TabIds.HOME -> HomeTopBar(permissionsGranted, scrollBehavior)
                     TabIds.PREFIXES ->  PrefixTopBar(
                         scrollBehavior = scrollBehavior
                     )
-                    TabIds.HISTORY -> HistoryScreen()
-                    TabIds.SETTINGS -> SettingsScreen()
+                    TabIds.HISTORY -> HistoryTopBar()
+                    TabIds.SETTINGS -> SettingsTopBar{
+                        viewModel.setTabIdCurrent(TabIds.HOME)
+                    }
                 }
             }
         },
@@ -156,7 +162,7 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            AnimatedContent (tabIdCurrent) { current->
+            AnimatedContent (tabIdCurrent, Modifier) { current->
                 when (current) {
                     TabIds.HOME -> HomeScreen(
                         isEnabled = isEnabled,
@@ -167,21 +173,26 @@ fun MainScreen(
                         onDisableRole = onDisableRole
                     )
                     TabIds.PREFIXES -> PrefixScreen{
-                        val message = when (val error = it) {
+                        val message = when (it) {
                             is PrefixAlreadyExistsException -> {
-                                val ruleType = if (error.existingRuleType == "BLOCK") {
+                                val ruleType = if (it.existingRuleType == "BLOCK") {
                                     context.getString(R.string.prefix_rule_type_block)
                                 } else {
                                     context.getString(R.string.prefix_rule_type_allow)
                                 }
-                                context.getString(R.string.prefix_error_already_exists, error.existingPrefix, ruleType)
+                                context.getString(R.string.prefix_error_already_exists,
+                                    it.existingPrefix, ruleType)
                             }
                             else -> context.getString(R.string.prefix_error_generic)
                         }
                         snackbarHostState.showSnackbar(message)
                     }
                     TabIds.HISTORY -> HistoryScreen()
-                    TabIds.SETTINGS -> SettingsScreen()
+                    TabIds.SETTINGS -> SettingsScreen {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(it)
+                        }
+                    }
                 }
             }
         }

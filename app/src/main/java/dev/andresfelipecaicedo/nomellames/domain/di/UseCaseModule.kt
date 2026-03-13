@@ -170,4 +170,10 @@ abstract class UseCaseModule {
     abstract fun bindRemovePrefixRuleUseCase(
         useCase: RemovePrefixRuleUseCase
     ): IRemovePrefixRuleUseCase
+
+    @Binds
+    @Singleton
+    abstract fun bindDeleteAllPrefixRulesUseCase(
+        useCase: DeleteAllPrefixRulesUseCase
+    ): IDeleteAllPrefixRulesUseCase
 }

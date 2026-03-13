@@ -8,19 +8,25 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.andresfelipecaicedo.nomellames.domain.useCase.history.IClearAllHistoryUseCase
+import dev.andresfelipecaicedo.nomellames.domain.useCase.prefix.IDeleteAllPrefixRulesUseCase
 import dev.andresfelipecaicedo.nomellames.domain.useCase.prefix.IGetSkipCallLogUseCase
 import dev.andresfelipecaicedo.nomellames.domain.useCase.prefix.IGetSkipNotificationUseCase
 import dev.andresfelipecaicedo.nomellames.domain.useCase.prefix.ISetSkipCallLogUseCase
 import dev.andresfelipecaicedo.nomellames.domain.useCase.prefix.ISetSkipNotificationUseCase
+import dev.andresfelipecaicedo.nomellames.ui.settings.state.SecurityState
+import dev.andresfelipecaicedo.nomellames.ui.settings.state.SettingDialog
 import dev.andresfelipecaicedo.nomellames.utils.AppConstants
 import dev.andresfelipecaicedo.nomellames.utils.biometric.BiometricHelper
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -33,50 +39,42 @@ class SettingsViewModel @Inject constructor(
     private val setSkipCallLogUseCase: ISetSkipCallLogUseCase,
     private val setSkipNotificationUseCase: ISetSkipNotificationUseCase,
     private val clearAllHistoryUseCase: IClearAllHistoryUseCase,
+    private val deleteAllPrefixesUseCase: IDeleteAllPrefixRulesUseCase,
     @Named(AppConstants.Prefs.NAME) private val prefs: SharedPreferences
 ) : ViewModel() {
 
-    private val _biometricLock = MutableStateFlow(prefs.getBoolean(KEY_BIOMETRIC_LOCK, false))
-    private val _patternLock = MutableStateFlow(prefs.getBoolean(KEY_PATTERN_LOCK, false))
-    private val _showPurgeDialog = MutableStateFlow(false)
-    private val _isPurging = MutableStateFlow(false)
-    
-    // Dialog states
-    private val _showEnableBiometricDialog = MutableStateFlow(false)
-    private val _showDisableBiometricDialog = MutableStateFlow(false)
-    private val _showEnablePatternDialog = MutableStateFlow(false)
-    private val _showDisablePatternDialog = MutableStateFlow(false)
+    // Security state
+    private val _securityState = MutableStateFlow(
+        SecurityState(
+            biometricLock = prefs.getBoolean(KEY_BIOMETRIC_LOCK, false),
+            patternLock = prefs.getBoolean(KEY_PATTERN_LOCK, false),
+            hasBiometricHardware = BiometricHelper.canAuthenticateWithBiometrics(context),
+            hasDeviceCredential = BiometricHelper.canAuthenticateWithDeviceCredential(context),
+            currentPattern = getStoredPattern()
+        )
+    )
+    val securityState: StateFlow<SecurityState> = _securityState.asStateFlow()
 
+    // Dialog state
+    private val _dialogState = MutableStateFlow<SettingDialog>(SettingDialog.Idle)
+    val dialogState: StateFlow<SettingDialog> = _dialogState.asStateFlow()
+
+    // Events
     private val _eventFlow = MutableSharedFlow<SettingsEvent>()
     val eventFlow: SharedFlow<SettingsEvent> = _eventFlow.asSharedFlow()
 
-    val uiState = combine(
+    // UI State (settings preferences only)
+    val uiState: StateFlow<SettingsUiState> = combine(
         getSkipCallLogUseCase(),
-        getSkipNotificationUseCase(),
-        combine(_biometricLock, _patternLock, _showPurgeDialog, _isPurging) { b, p, d, purging ->
-            SecurityState(b, p, d, purging)
-        },
-        combine(_showEnableBiometricDialog, _showDisableBiometricDialog, _showEnablePatternDialog, _showDisablePatternDialog) { eb, db, ep, dp ->
-            DialogState(eb, db, ep, dp)
-        }
-    ) { skipLog, skipNotif, security, dialogs ->
+        getSkipNotificationUseCase()
+    ) { skipLog, skipNotif ->
         SettingsUiState.Content(
             skipCallLog = skipLog,
-            skipNotification = skipNotif,
-            biometricLock = security.biometricLock,
-            patternLock = security.patternLock,
-            hasBiometricHardware = BiometricHelper.canAuthenticateWithBiometrics(context),
-            hasDeviceCredential = BiometricHelper.canAuthenticateWithDeviceCredential(context),
-            showPurgeDialog = security.showPurgeDialog,
-            isPurging = security.isPurging,
-            showEnableBiometricDialog = dialogs.showEnableBiometric,
-            showDisableBiometricDialog = dialogs.showDisableBiometric,
-            showEnablePatternDialog = dialogs.showEnablePattern,
-            showDisablePatternDialog = dialogs.showDisablePattern,
-            currentPattern = getStoredPattern()
+            skipNotification = skipNotif
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(1_000L), SettingsUiState.Loading)
 
+    // Settings actions
     fun setSkipCallLog(value: Boolean) {
         setSkipCallLogUseCase(value)
     }
@@ -85,80 +83,143 @@ class SettingsViewModel @Inject constructor(
         setSkipNotificationUseCase(value)
     }
 
+    // Biometric actions
     fun setBiometricLock(value: Boolean) {
-        if (value) {
-            // Show enable biometric dialog
-            _showEnableBiometricDialog.value = true
-        } else {
-            // Show disable biometric dialog
-            _showDisableBiometricDialog.value = true
+        _dialogState.update {
+            if (value) {
+                SettingDialog.EnableBiometric(
+                    onConfirm = ::onConfirmEnableBiometric,
+                    onDismiss = ::dismissDialog
+                )
+            } else {
+                SettingDialog.DisableBiometric(
+                    onConfirm = ::onConfirmDisableBiometric,
+                    onDismiss = ::dismissDialog
+                )
+            }
         }
     }
 
     fun onConfirmEnableBiometric() {
         viewModelScope.launch {
-            _showEnableBiometricDialog.value = false
+            _dialogState.value = SettingDialog.Idle
             _eventFlow.emit(SettingsEvent.RequestAuth(
                 onSuccess = {
-                    _biometricLock.value = true
+                    _securityState.update { it.copy(biometricLock = true) }
                     prefs.edit { putBoolean(KEY_BIOMETRIC_LOCK, true) }
                 }
             ))
         }
     }
 
-    fun onDismissEnableBiometricDialog() {
-        _showEnableBiometricDialog.value = false
-    }
-
     fun onConfirmDisableBiometric() {
         viewModelScope.launch {
-            _showDisableBiometricDialog.value = false
+            _dialogState.value = SettingDialog.Idle
             _eventFlow.emit(SettingsEvent.RequestAuth(
                 onSuccess = {
-                    _biometricLock.value = false
+                    _securityState.update { it.copy(biometricLock = false) }
                     prefs.edit { putBoolean(KEY_BIOMETRIC_LOCK, false) }
                 }
             ))
         }
     }
 
-    fun onDismissDisableBiometricDialog() {
-        _showDisableBiometricDialog.value = false
-    }
-
+    // Pattern actions
     fun setPatternLock(value: Boolean) {
-        if (value) {
-            // Show enable pattern dialog
-            _showEnablePatternDialog.value = true
-        } else {
-            // Show disable pattern dialog
-            _showDisablePatternDialog.value = true
+        _dialogState.update {
+            if (value) {
+                SettingDialog.EnablePattern(
+                    onConfirm = ::onPatternSet,
+                    onDismiss = ::dismissDialog
+                )
+            } else {
+                SettingDialog.DisablePattern(
+                    onConfirm = ::onPatternCorrectForDisable,
+                    onDismiss = ::dismissDialog,
+                    currentPattern = _securityState.value.currentPattern
+                )
+            }
         }
     }
 
     fun onPatternSet(pattern: List<Int>) {
-        _showEnablePatternDialog.value = false
+        _dialogState.value = SettingDialog.Idle
         savePattern(pattern)
-        _patternLock.value = true
+        _securityState.update { it.copy(patternLock = true, currentPattern = pattern) }
         prefs.edit { putBoolean(KEY_PATTERN_LOCK, true) }
     }
 
-    fun onDismissEnablePatternDialog() {
-        _showEnablePatternDialog.value = false
-    }
-
     fun onPatternCorrectForDisable() {
-        _showDisablePatternDialog.value = false
+        _dialogState.value = SettingDialog.Idle
         clearPattern()
-        _patternLock.value = false
+        _securityState.update { it.copy(patternLock = false, currentPattern = emptyList()) }
         prefs.edit { putBoolean(KEY_PATTERN_LOCK, false) }
     }
 
-    fun onDismissDisablePatternDialog() {
-        _showDisablePatternDialog.value = false
+    // Purge actions
+    fun onPurgeClicked() {
+        val securityState = _securityState.value
+        when {
+            // If biometric is enabled, use biometric authentication
+            securityState.biometricLock -> {
+                viewModelScope.launch {
+                    _eventFlow.emit(SettingsEvent.RequestAuth(
+                        onSuccess = { showPurgeConfirmationDialog() }
+                    ))
+                }
+            }
+            // If only pattern is enabled, verify pattern first
+            securityState.patternLock -> {
+                _dialogState.update {
+                    SettingDialog.VerifyPatternForPurge(
+                        onPatternCorrect = ::showPurgeConfirmationDialog,
+                        onDismiss = ::dismissDialog,
+                        currentPattern = securityState.currentPattern
+                    )
+                }
+            }
+            // No security configured
+            else -> {
+                viewModelScope.launch {
+                    _eventFlow.emit(SettingsEvent.RequireSecuritySetup)
+                }
+            }
+        }
     }
 
+    private fun showPurgeConfirmationDialog() {
+        _dialogState.update {
+            SettingDialog.PurgeConfirmation(
+                onConfirm = ::confirmPurge,
+                onDismiss = ::dismissDialog,
+                isPurging = false
+            )
+        }
+    }
+
+    fun confirmPurge() {
+        viewModelScope.launch {
+            _dialogState.tryEmit(
+                SettingDialog.PurgeConfirmation(
+                    onConfirm = {},
+                    onDismiss = ::dismissDialog,
+                    isPurging = true)
+            )
+            clearAllHistoryUseCase().onSuccess {
+                deleteAllPrefixesUseCase.invoke().onSuccess {
+                    _dialogState.tryEmit(SettingDialog.Idle)
+                    _eventFlow.emit(SettingsEvent.PurgeCompleted)
+                }
+            }
+        }
+    }
+
+    // Dialog dismiss
+    fun dismissDialog() {
+        _dialogState.tryEmit(SettingDialog.Idle)
+    }
+
+    // Pattern storage
     private fun savePattern(pattern: List<Int>) {
         val patternString = pattern.joinToString(",")
         prefs.edit { putString(KEY_PATTERN_VALUE, patternString) }
@@ -168,40 +229,9 @@ class SettingsViewModel @Inject constructor(
         prefs.edit { remove(KEY_PATTERN_VALUE) }
     }
 
-    fun getStoredPattern(): List<Int> {
+    private fun getStoredPattern(): List<Int> {
         val patternString = prefs.getString(KEY_PATTERN_VALUE, null) ?: return emptyList()
         return patternString.split(",").mapNotNull { it.toIntOrNull() }
-    }
-
-    fun onPurgeClicked() {
-        val hasSecurity = _biometricLock.value || _patternLock.value
-        if (hasSecurity) {
-            // Security is configured: authenticate first, then show dialog
-            viewModelScope.launch {
-                _eventFlow.emit(SettingsEvent.RequestAuth(
-                    onSuccess = { _showPurgeDialog.tryEmit(true) }
-                ))
-            }
-        } else {
-            // No security configured: require the user to enable one
-            viewModelScope.launch {
-                _eventFlow.emit(SettingsEvent.RequireSecuritySetup)
-            }
-        }
-    }
-
-    fun confirmPurge() {
-        viewModelScope.launch {
-            _showPurgeDialog.value = false
-            _isPurging.value = true
-            clearAllHistoryUseCase()
-            _isPurging.value = false
-            _eventFlow.emit(SettingsEvent.PurgeCompleted)
-        }
-    }
-
-    fun dismissPurgeDialog() {
-        _showPurgeDialog.value = false
     }
 
     companion object {
@@ -210,20 +240,6 @@ class SettingsViewModel @Inject constructor(
         const val KEY_PATTERN_VALUE = "pattern_value"
     }
 }
-
-private data class SecurityState(
-    val biometricLock: Boolean,
-    val patternLock: Boolean,
-    val showPurgeDialog: Boolean,
-    val isPurging: Boolean
-)
-
-private data class DialogState(
-    val showEnableBiometric: Boolean,
-    val showDisableBiometric: Boolean,
-    val showEnablePattern: Boolean,
-    val showDisablePattern: Boolean
-)
 
 sealed interface SettingsEvent {
     data class RequestAuth(val onSuccess: () -> Unit) : SettingsEvent

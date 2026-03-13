@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">NoMeLlames</string>
 
+    <!-- Content Descriptions -->
+    <string name="back">Volver</string>
+
     <!-- Navigation Tabs -->
     <string name="tab_home">INICIO</string>
     <string name="tab_prefixes">PREFIJOS</string>
@@ -38,7 +41,7 @@
     <string name="home_view_all">VER TODO</string>
 
     <!-- Prefix Screen -->
-    <string name="prefix_title">PREFIJOS</string>
+    <string name="prefix_title">[ PREFIJOS ]</string>
     <string name="prefix_description">No incluyas el código de país.\nEjemplo: escribe 907, no +56907.</string>
     <string name="prefix_new_label">Nuevo prefijo</string>
     <string name="prefix_new_placeholder">INGRESAR PREF</string>
@@ -54,7 +57,7 @@
     <string name="prefix_rule_type_allow">PERMITIDA</string>
 
     <!-- History Screen -->
-    <string name="history_title">HISTORIAL</string>
+    <string name="history_title">[ HISTORIAL ]</string>
     <string name="history_filter_all">TODO</string>
     <string name="history_filter_blocked">BLOQUEADO</string>
     <string name="history_filter_allowed">PERMITIDO</string>
@@ -130,6 +133,8 @@
     <string name="security_dialog_pattern_mismatch">Los patrones no coinciden. Intenta de nuevo.</string>
     <string name="security_dialog_pattern_too_short">El patrón debe tener al menos 4 puntos</string>
     <string name="security_dialog_wrong_pattern">Patrón incorrecto. Intenta de nuevo.</string>
+    <string name="security_dialog_verify_pattern_title">VERIFICAR PATRÓN</string>
+    <string name="security_dialog_enter_pattern_to_continue">Ingresa tu patrón para continuar</string>
     <string name="security_dialog_enable">ACTIVAR</string>
     <string name="security_dialog_disable">DESACTIVAR</string>
 </resources>

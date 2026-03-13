@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import dev.andresfelipecaicedo.nomellames.R
+import dev.andresfelipecaicedo.nomellames.ui.settings.components.dialog.PatternInputGrid
 import dev.andresfelipecaicedo.nomellames.ui.theme.BlockedRed
 import dev.andresfelipecaicedo.nomellames.ui.theme.CyanAccent
 import dev.andresfelipecaicedo.nomellames.ui.theme.DarkBg

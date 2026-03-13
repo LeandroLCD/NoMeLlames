@@ -124,6 +124,13 @@ class PrefixRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteAllPrefixRules(): Result<Unit> {
+        return makeSuspendCall {
+            prefixRuleDao.deleteAllPrefixRules()
+            updateSyncStatus()
+        }
+    }
+
     override suspend fun removePrefixByValue(prefix: String): Result<Unit> {
         return makeSuspendCall {
             prefixRuleDao.deletePrefixByValue(prefix)
