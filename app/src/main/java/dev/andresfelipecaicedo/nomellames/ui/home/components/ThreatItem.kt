@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -65,7 +68,7 @@ fun ThreatItem(blockedCall: BlockedCall) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = if (isBlocked) R.drawable.ic_block_filled else R.drawable.ic_history_filled),
+                if (isBlocked) Icons.Filled.Block else Icons.Filled.History,
                 contentDescription = null,
                 tint = if (isBlocked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(16.dp)
