@@ -8,6 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PhoneLocked
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.PhoneLocked
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -70,20 +79,26 @@ fun MainScreen(
 
     val menuItems = listOf(
         SpecialBottom.Item(
-            icon = R.drawable.ic_home_outlined,
-            activatedIcon = R.drawable.ic_home_filled,
+            icon = SpecialBottom.Icon.Vector(
+                icon = Icons.Outlined.Home,
+                activatedIcon = Icons.Filled.Home
+            ),
             tag = homeTag,
             id = TabIds.HOME
         ),
         SpecialBottom.Item(
-            icon = R.drawable.ic_block_outlined,
-            activatedIcon = R.drawable.ic_block_filled,
+            icon = SpecialBottom.Icon.Vector(
+                icon = Icons.Outlined.PhoneLocked,
+                activatedIcon = Icons.Filled.PhoneLocked
+            ),
             tag = prefixesTag,
             id = TabIds.PREFIXES
         ),
         SpecialBottom.Item(
-            icon = R.drawable.ic_history_outlined,
-            activatedIcon = R.drawable.ic_history_filled,
+            icon = SpecialBottom.Icon.Vector(
+                icon = Icons.Outlined.History,
+                activatedIcon = Icons.Filled.History
+            ),
             tag = historyTag,
             id = TabIds.HISTORY,
             badge = if (unseenCount > 0) {
@@ -95,8 +110,10 @@ fun MainScreen(
             } else null
         ),
         SpecialBottom.Item(
-            icon = R.drawable.ic_settings_outlined,
-            activatedIcon = R.drawable.ic_settings_filled,
+            icon = SpecialBottom.Icon.Vector(
+                icon = Icons.Outlined.Settings,
+                activatedIcon = Icons.Filled.Settings
+            ),
             tag = settingsTag,
             id = TabIds.SETTINGS
         )
@@ -116,18 +133,20 @@ fun MainScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
             .navigationBarsPadding()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            AnimatedContent (tabIdCurrent, Modifier) { current->
+            AnimatedContent(tabIdCurrent, Modifier) { current ->
                 when (current) {
                     TabIds.HOME -> HomeTopBar(permissionsGranted, scrollBehavior)
-                    TabIds.PREFIXES ->  PrefixTopBar(
+                    TabIds.PREFIXES -> PrefixTopBar(
                         scrollBehavior = scrollBehavior
                     )
+
                     TabIds.HISTORY -> HistoryTopBar()
-                    TabIds.SETTINGS -> SettingsTopBar{
+                    TabIds.SETTINGS -> SettingsTopBar {
                         viewModel.setTabIdCurrent(TabIds.HOME)
                     }
                 }
@@ -162,7 +181,7 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            AnimatedContent (tabIdCurrent, Modifier) { current->
+            AnimatedContent(tabIdCurrent, Modifier) { current ->
                 when (current) {
                     TabIds.HOME -> HomeScreen(
                         isEnabled = isEnabled,
@@ -172,7 +191,8 @@ fun MainScreen(
                         onGoHistory = { viewModel.setTabIdCurrent(TabIds.HISTORY) },
                         onDisableRole = onDisableRole
                     )
-                    TabIds.PREFIXES -> PrefixScreen{
+
+                    TabIds.PREFIXES -> PrefixScreen {
                         val message = when (it) {
                             is PrefixAlreadyExistsException -> {
                                 val ruleType = if (it.existingRuleType == "BLOCK") {
@@ -180,13 +200,17 @@ fun MainScreen(
                                 } else {
                                     context.getString(R.string.prefix_rule_type_allow)
                                 }
-                                context.getString(R.string.prefix_error_already_exists,
-                                    it.existingPrefix, ruleType)
+                                context.getString(
+                                    R.string.prefix_error_already_exists,
+                                    it.existingPrefix, ruleType
+                                )
                             }
+
                             else -> context.getString(R.string.prefix_error_generic)
                         }
                         snackbarHostState.showSnackbar(message)
                     }
+
                     TabIds.HISTORY -> HistoryScreen()
                     TabIds.SETTINGS -> SettingsScreen {
                         scope.launch {

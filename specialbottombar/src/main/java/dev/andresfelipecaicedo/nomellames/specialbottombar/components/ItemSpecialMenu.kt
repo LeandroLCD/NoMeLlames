@@ -19,8 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,12 +35,12 @@ fun ItemSpecialMenu(
     color: Color = Color.Black,
     click: () -> Unit = {}
 ) {
-    val iconSelected = if (isSelected) item.activatedIcon else item.icon
+
     val iconSize = remember {
         Animatable(if (startAnimation) 0f else 29.dp.value)
     }
 
-    LaunchedEffect(key1 = iconSelected) {
+    LaunchedEffect(key1 = isSelected) {
         iconSize.animateTo(
             targetValue = 29.dp.value,
             animationSpec = tween(durationMillis = 1_000)
@@ -65,18 +64,38 @@ fun ItemSpecialMenu(
             val topGuideline = createGuidelineFromTop(7.dp)
             val verticalGuideline = createGuidelineFromStart(0.5f)
 
-            Icon(
-                tint = color,
-                modifier = Modifier
-                    .constrainAs(icon) {
-                        top.linkTo(topGuideline)
-                        start.linkTo(verticalGuideline)
-                        end.linkTo(verticalGuideline)
-                    }
-                    .width(iconSize.value.dp),
-                imageVector = ImageVector.vectorResource(id = iconSelected),
-                contentDescription = item.tag
-            )
+            when(item.icon){
+                is SpecialBottom.Icon.Drawable -> {
+                    Icon(
+                        painter = painterResource(if (isSelected) item.icon.activatedIcon else item.icon.icon),
+                        tint = color,
+                        modifier = Modifier
+                            .constrainAs(icon) {
+                                top.linkTo(topGuideline)
+                                start.linkTo(verticalGuideline)
+                                end.linkTo(verticalGuideline)
+                            }
+                            .width(iconSize.value.dp),
+                        contentDescription = item.tag
+                    )
+                }
+                is SpecialBottom.Icon.Vector -> {
+
+                    Icon(
+                        imageVector = if (isSelected) item.icon.activatedIcon else item.icon.icon, tint = color,
+                        modifier = Modifier
+                            .constrainAs(icon) {
+                                top.linkTo(topGuideline)
+                                start.linkTo(verticalGuideline)
+                                end.linkTo(verticalGuideline)
+                            }
+                            .width(iconSize.value.dp),
+                        contentDescription = item.tag
+                    )
+                }
+            }
+
+
 
             item.badge?.let {
                 SpecialBadge(
@@ -94,7 +113,7 @@ fun ItemSpecialMenu(
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             color = color,
-            fontSize = 12.sp,
+            fontSize = 10.sp,
             text = item.tag,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

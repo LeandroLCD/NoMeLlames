@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.core.splashscreen)
     implementation(project(":specialbottombar"))
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)

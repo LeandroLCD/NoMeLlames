@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NoMeLlames</string>
+    <string name="app_name">PreFixApp</string>
 
     <!-- Content Descriptions -->
     <string name="back">Volver</string>
@@ -11,7 +11,7 @@
     <string name="tab_settings">AJUSTES</string>
 
     <!-- Home Screen -->
-    <string name="home_title">NOMELLAMES</string>
+    <string name="home_title"><P>PREFIXAPP</P></string>
     <string name="home_no_prefixes_title">No hay prefijos configurados</string>
     <string name="home_no_prefixes_description">Ve a la pestaña "Prefijos" para agregar los prefijos o números que deseas bloquear.\n\nNo incluyas el código de país.\nEjemplo: escribe 320, no +57320.</string>
     <string name="home_blocking_prefixes">Bloquea llamadas de %1$d prefijos configurados</string>

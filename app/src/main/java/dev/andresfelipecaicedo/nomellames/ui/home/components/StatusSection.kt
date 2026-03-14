@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import dev.andresfelipecaicedo.nomellames.R
 import dev.andresfelipecaicedo.nomellames.ui.home.model.Permission
 import dev.andresfelipecaicedo.nomellames.ui.theme.BlockedRed
+import dev.andresfelipecaicedo.nomellames.ui.widget.icons.Logo
 
 @Composable
 fun StatusSection(permission: Permission) {
@@ -69,7 +71,7 @@ fun StatusSection(permission: Permission) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_block_filled),
+                    Icons.Logo,
                     contentDescription = null,
                     tint = primaryColor,
                     modifier = Modifier.size(36.dp)
