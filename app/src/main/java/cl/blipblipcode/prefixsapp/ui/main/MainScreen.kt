@@ -1,6 +1,8 @@
 package cl.blipblipcode.prefixsapp.ui.main
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,8 +29,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -38,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.exception.PrefixAlreadyExistsException
+import cl.blipblipcode.prefixsapp.domain.model.VersionStatus
 import cl.blipblipcode.prefixsapp.specialbottombar.components.SpecialBottomBar
 import cl.blipblipcode.prefixsapp.specialbottombar.data.SpecialBottom
 import cl.blipblipcode.prefixsapp.ui.history.HistoryScreen
@@ -49,7 +55,10 @@ import cl.blipblipcode.prefixsapp.ui.prefix.components.PrefixTopBar
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsScreen
 import cl.blipblipcode.prefixsapp.ui.settings.components.SettingsTopBar
 import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
+import cl.blipblipcode.prefixsapp.ui.widget.dialog.versionControl.UpdateAvailableDialog
+import cl.blipblipcode.prefixsapp.ui.widget.dialog.versionControl.UpdateRequiredDialog
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 object TabIds {
     val HOME = SpecialBottom.Id("home")
@@ -131,94 +140,122 @@ fun MainScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val versionStatus by viewModel.versionStatus.collectAsState()
+    var dialogDismiss by rememberSaveable {
+        mutableStateOf(false)
+    }
 
-    Scaffold(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .navigationBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            AnimatedContent(tabIdCurrent, Modifier) { current ->
-                when (current) {
-                    TabIds.HOME -> HomeTopBar(permissionsGranted, scrollBehavior)
-                    TabIds.PREFIXES -> PrefixTopBar(
-                        scrollBehavior = scrollBehavior
-                    )
+    Box(Modifier.fillMaxSize()){
+        Scaffold(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .navigationBarsPadding()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                AnimatedContent(tabIdCurrent, Modifier) { current ->
+                    when (current) {
+                        TabIds.HOME -> HomeTopBar(permissionsGranted, scrollBehavior)
+                        TabIds.PREFIXES -> PrefixTopBar(
+                            scrollBehavior = scrollBehavior
+                        )
 
-                    TabIds.HISTORY -> HistoryTopBar()
-                    TabIds.SETTINGS -> SettingsTopBar {
-                        viewModel.setTabIdCurrent(TabIds.HOME)
+                        TabIds.HISTORY -> HistoryTopBar()
+                        TabIds.SETTINGS -> SettingsTopBar {
+                            viewModel.setTabIdCurrent(TabIds.HOME)
+                        }
                     }
+                }
+            },
+            bottomBar = {
+                SpecialBottomBar(
+                    theme = bottomBarTheme,
+                    menuItems = menuItems,
+                    currentSelected = tabIdCurrent,
+                    onItemSelected = { id ->
+                        viewModel.setTabIdCurrent(id)
+                        if (id == TabIds.HISTORY) {
+                            viewModel.markAllAsSeen()
+                        }
+                    }
+                )
+            },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = BlockedRed,
+                        contentColor = Color.White,
+                        shape = RoundedCornerShape(4.dp)
+                    )
                 }
             }
-        },
-        bottomBar = {
-            SpecialBottomBar(
-                theme = bottomBarTheme,
-                menuItems = menuItems,
-                currentSelected = tabIdCurrent,
-                onItemSelected = { id ->
-                    viewModel.setTabIdCurrent(id)
-                    if (id == TabIds.HISTORY) {
-                        viewModel.markAllAsSeen()
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                AnimatedContent(tabIdCurrent, Modifier) { current ->
+                    when (current) {
+                        TabIds.HOME -> HomeScreen(
+                            isEnabled = isEnabled,
+                            permissionsGranted = permissionsGranted,
+                            supportsRoleRequest = supportsRoleRequest,
+                            onRequestPermissions = onRequestPermissions,
+                            onGoHistory = { viewModel.setTabIdCurrent(TabIds.HISTORY) },
+                            onDisableRole = onDisableRole
+                        )
+
+                        TabIds.PREFIXES -> PrefixScreen {
+                            val message = when (it) {
+                                is PrefixAlreadyExistsException -> {
+                                    val ruleType = if (it.existingRuleType == "BLOCK") {
+                                        context.getString(R.string.prefix_rule_type_block)
+                                    } else {
+                                        context.getString(R.string.prefix_rule_type_allow)
+                                    }
+                                    context.getString(
+                                        R.string.prefix_error_already_exists,
+                                        it.existingPrefix, ruleType
+                                    )
+                                }
+
+                                else -> context.getString(R.string.prefix_error_generic)
+                            }
+                            snackbarHostState.showSnackbar(message)
+                        }
+
+                        TabIds.HISTORY -> HistoryScreen()
+                        TabIds.SETTINGS -> SettingsScreen {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(it)
+                            }
+                        }
                     }
                 }
-            )
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = BlockedRed,
-                    contentColor = Color.White,
-                    shape = RoundedCornerShape(4.dp)
-                )
             }
         }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            AnimatedContent(tabIdCurrent, Modifier) { current ->
-                when (current) {
-                    TabIds.HOME -> HomeScreen(
-                        isEnabled = isEnabled,
-                        permissionsGranted = permissionsGranted,
-                        supportsRoleRequest = supportsRoleRequest,
-                        onRequestPermissions = onRequestPermissions,
-                        onGoHistory = { viewModel.setTabIdCurrent(TabIds.HISTORY) },
-                        onDisableRole = onDisableRole
-                    )
-
-                    TabIds.PREFIXES -> PrefixScreen {
-                        val message = when (it) {
-                            is PrefixAlreadyExistsException -> {
-                                val ruleType = if (it.existingRuleType == "BLOCK") {
-                                    context.getString(R.string.prefix_rule_type_block)
-                                } else {
-                                    context.getString(R.string.prefix_rule_type_allow)
-                                }
-                                context.getString(
-                                    R.string.prefix_error_already_exists,
-                                    it.existingPrefix, ruleType
-                                )
-                            }
-
-                            else -> context.getString(R.string.prefix_error_generic)
-                        }
-                        snackbarHostState.showSnackbar(message)
-                    }
-
-                    TabIds.HISTORY -> HistoryScreen()
-                    TabIds.SETTINGS -> SettingsScreen {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(it)
-                        }
-                    }
+        AnimatedContent(versionStatus, Modifier) { current ->
+            when (current) {
+                is VersionStatus.UpdateAvailable if !dialogDismiss -> {
+                    UpdateAvailableDialog(
+                        latestVersion = current.latestVersion,
+                        onDismiss = { dialogDismiss = true },
+                        onConfirm = {
+                            val intent = Intent(Intent.ACTION_VIEW, current.urlDownload.toUri())
+                            context.startActivity(intent)
+                        })
                 }
+                is VersionStatus.UpdateRequired -> {
+                    UpdateRequiredDialog(latestVersion = current.latestVersion){
+                        val intent = Intent(Intent.ACTION_VIEW, current.urlDownload.toUri())
+                        context.startActivity(intent)
+                    }
+
+                }
+                else -> {}
             }
+
         }
     }
 }

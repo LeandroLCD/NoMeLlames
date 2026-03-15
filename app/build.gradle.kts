@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -17,8 +18,8 @@ android {
         applicationId = "cl.blipblipcode.prefixsapp"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 1
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,6 +68,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.biometric.ktx)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.config)
+    implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)

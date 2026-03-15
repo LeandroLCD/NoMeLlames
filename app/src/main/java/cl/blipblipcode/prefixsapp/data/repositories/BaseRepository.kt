@@ -1,4 +1,4 @@
-package cl.blipblipcode.prefixsapp.data.repository
+package cl.blipblipcode.prefixsapp.data.repositories
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

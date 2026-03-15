@@ -1,4 +1,4 @@
-package cl.blipblipcode.prefixsapp.data.repository
+package cl.blipblipcode.prefixsapp.data.repositories
 
 import dagger.Lazy
 import cl.blipblipcode.prefixsapp.data.local.dao.PrefixRuleDao

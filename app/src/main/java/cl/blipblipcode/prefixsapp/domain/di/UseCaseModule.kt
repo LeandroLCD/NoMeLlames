@@ -9,6 +9,7 @@ import cl.blipblipcode.prefixsapp.domain.useCase.blockedcall.*
 import cl.blipblipcode.prefixsapp.domain.useCase.history.*
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.*
 import cl.blipblipcode.prefixsapp.domain.useCase.settings.*
+import cl.blipblipcode.prefixsapp.domain.useCase.version.*
 import javax.inject.Singleton
 
 @Suppress("unused")
@@ -176,4 +177,17 @@ abstract class UseCaseModule {
     abstract fun bindDeleteAllPrefixRulesUseCase(
         useCase: DeleteAllPrefixRulesUseCase
     ): IDeleteAllPrefixRulesUseCase
+
+    // Version Use Cases
+    @Binds
+    @Singleton
+    abstract fun bindObserveVersionStatusUseCase(
+        useCase: ObserveVersionStatusUseCase
+    ): IObserveVersionStatusUseCase
+
+    @Binds
+    @Singleton
+    abstract fun bindCheckVersionStatusUseCase(
+        useCase: CheckVersionStatusUseCase
+    ): ICheckVersionStatusUseCase
 }

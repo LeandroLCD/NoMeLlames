@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -104,5 +106,24 @@ object DataModule {
     @Named(AppConstants.Prefs.NAME)
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(AppConstants.Prefs.NAME, Context.MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseRemoteConfig(): FirebaseRemoteConfig {
+        return FirebaseRemoteConfig.getInstance().also { config ->
+            config.setDefaultsAsync(mapOf(
+                AppConstants.RemoteConfig.KEY_VERSION_CONFIG to "{\n" +
+                        "  \"release\": \"1.1.0\",\n" +
+                        "  \"min_supported_version\": \"1.0.0\",\n" +
+                        "  \"url_download\": \"https://play.google.com/store/apps/details?id=com.leandrolcd.doganalyzer\"\n" +
+                        "}",
+            ))
+            config.setConfigSettingsAsync(
+                FirebaseRemoteConfigSettings.Builder()
+                    .setMinimumFetchIntervalInSeconds(3600)
+                    .build()
+            )
+        }
     }
 }

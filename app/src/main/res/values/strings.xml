@@ -3,6 +3,10 @@
 
     <!-- Content Descriptions -->
     <string name="back">Volver</string>
+    <string name="close">Cerrar</string>
+    <string name="update_icon_desc">Icono de actualización</string>
+    <string name="warning_icon_desc">Icono de advertencia</string>
+    <string name="security_shield_desc">Escudo de seguridad</string>
 
     <!-- Navigation Tabs -->
     <string name="tab_home">INICIO</string>
@@ -137,4 +141,18 @@
     <string name="security_dialog_enter_pattern_to_continue">Ingresa tu patrón para continuar</string>
     <string name="security_dialog_enable">ACTIVAR</string>
     <string name="security_dialog_disable">DESACTIVAR</string>
+
+    <!-- Update Dialog -->
+    <string name="update_available_title">[ ACTUALIZACIÓN DISPONIBLE ]</string>
+    <string name="update_available_description">Una nueva versión del núcleo de seguridad está lista para su despliegue.</string>
+    <string name="update_available_button_update">ACTUALIZAR AHORA</string>
+    <string name="update_available_button_postpone">POSTPONER</string>
+
+    <!-- Update Required Dialog -->
+    <string name="update_required_title">[ ACTUALIZACIÓN OBLIGATORIA ]</string>
+    <string name="update_required_description">Se requiere una actualización crítica para mantener la integridad del cortafuegos maestro.</string>
+    <string name="update_required_button">ACTUALIZAR</string>
+    <string name="update_required_footer">KERNEL SECURITY PROTOCOL ACTIVE</string>
+    <string name="v_critical">v%1$s-CRITICAL</string>
+    <string name="v_stable">v%1$s-STABLE</string>
 </resources>

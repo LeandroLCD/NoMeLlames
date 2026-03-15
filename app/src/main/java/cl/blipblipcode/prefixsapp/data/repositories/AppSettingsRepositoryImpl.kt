@@ -1,4 +1,4 @@
-package cl.blipblipcode.prefixsapp.data.repository
+package cl.blipblipcode.prefixsapp.data.repositories
 
 import cl.blipblipcode.prefixsapp.data.local.dao.AppSettingsDao
 import cl.blipblipcode.prefixsapp.data.local.entities.AppSettingsEntity
