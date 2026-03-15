@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -63,11 +65,13 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.biometric.ktx)
+    implementation(libs.firebase.crashlytics)
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.timber)
     implementation(project(":specialbottombar"))
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)

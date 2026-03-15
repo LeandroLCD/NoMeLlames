@@ -3,7 +3,6 @@ package cl.blipblipcode.prefixsapp
 import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.telephony.TelephonyManager
-import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import cl.blipblipcode.prefixsapp.data.local.static.CountryDialingCodeProvider
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
@@ -16,10 +15,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SpamCallScreeningService : CallScreeningService() {
+class SpamCallPrefixService : CallScreeningService() {
 
     @Inject
     lateinit var blockedCallRepository: BlockedCallRepository
@@ -37,17 +37,13 @@ class SpamCallScreeningService : CallScreeningService() {
     private var skipNotification: Boolean = true
     private var countryDialingCode: String? = null
 
-    companion object {
-        private const val TAG = "PrefixsApp"
-    }
-
     override fun onCreate() {
         super.onCreate()
         loadPrefixRules()
         countryDialingCode = detectCountryDialingCode()
         
-        Log.i(TAG, "Detected country dialing code: ${countryDialingCode ?: "unknown"}")
-        Log.i(TAG, "Loaded ${cachedPrefixRules.size} prefix rules from database")
+        Timber.i("Detected country dialing code: ${countryDialingCode ?: "unknown"}")
+        Timber.i("Loaded ${cachedPrefixRules.size} prefix rules from database")
     }
 
     private fun loadPrefixRules() {
@@ -56,7 +52,7 @@ class SpamCallScreeningService : CallScreeningService() {
                 prefixRepository.getAllPrefixRules().first()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading prefix rules", e)
+            Timber.e(e, "Error loading prefix rules")
             cachedPrefixRules = emptyList()
         }
     }
@@ -70,7 +66,7 @@ class SpamCallScreeningService : CallScreeningService() {
             .apply {
                 when (matchResult) {
                     is MatchResult.Blocked -> {
-                        Log.i(TAG, "Blocking call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
+                        Timber.i("Blocking call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
                         setDisallowCall(true)
                         setRejectCall(true)
                         setSkipCallLog(skipCallLog)
@@ -81,7 +77,7 @@ class SpamCallScreeningService : CallScreeningService() {
                         }
                     }
                     is MatchResult.Allowed -> {
-                        Log.i(TAG, "Allowing call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
+                        Timber.i("Allowing call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
                         setDisallowCall(false)
                         setRejectCall(false)
 
@@ -90,7 +86,7 @@ class SpamCallScreeningService : CallScreeningService() {
                         }
                     }
                     is MatchResult.NoMatch -> {
-                        Log.i(TAG, "No rule matched for $phoneNumber - allowing call")
+                        Timber.i("No rule matched for $phoneNumber - allowing call")
                         setDisallowCall(false)
                         setRejectCall(false)
 
@@ -138,7 +134,7 @@ class SpamCallScreeningService : CallScreeningService() {
         try {
             blockedCallRepository.insertBlockedCall(phoneNumber, matchedPrefix)
         } catch (e: Exception) {
-            Log.e(TAG, "Error saving blocked call", e)
+            Timber.e(e, "Error saving blocked call")
         }
     }
 
@@ -146,7 +142,7 @@ class SpamCallScreeningService : CallScreeningService() {
         try {
             allowedCallRepository.insertAllowedCall(phoneNumber)
         } catch (e: Exception) {
-            Log.e(TAG, "Error saving allowed call", e)
+            Timber.e(e, "Error saving allowed call")
         }
     }
 
