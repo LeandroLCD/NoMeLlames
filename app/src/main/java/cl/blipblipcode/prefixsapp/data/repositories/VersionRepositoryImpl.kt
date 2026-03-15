@@ -2,11 +2,15 @@ package cl.blipblipcode.prefixsapp.data.repositories
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import cl.blipblipcode.prefixsapp.data.repositories.dto.VersionConfigDto
 import cl.blipblipcode.prefixsapp.domain.model.VersionStatus
 import cl.blipblipcode.prefixsapp.domain.repositories.VersionRepository
 import cl.blipblipcode.prefixsapp.utils.AppConstants
+import com.google.firebase.remoteconfig.ConfigUpdate
+import com.google.firebase.remoteconfig.ConfigUpdateListener
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,17 +18,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import androidx.core.content.edit
-import com.google.firebase.remoteconfig.ConfigUpdate
-import com.google.firebase.remoteconfig.ConfigUpdateListener
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
-import timber.log.Timber
-import kotlin.concurrent.timer
 
 @Singleton
 class VersionRepositoryImpl @Inject constructor(

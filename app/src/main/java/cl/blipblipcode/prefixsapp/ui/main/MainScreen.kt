@@ -2,7 +2,6 @@ package cl.blipblipcode.prefixsapp.ui.main
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -40,6 +39,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.exception.PrefixAlreadyExistsException
@@ -58,7 +58,6 @@ import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
 import cl.blipblipcode.prefixsapp.ui.widget.dialog.versionControl.UpdateAvailableDialog
 import cl.blipblipcode.prefixsapp.ui.widget.dialog.versionControl.UpdateRequiredDialog
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 object TabIds {
     val HOME = SpecialBottom.Id("home")
