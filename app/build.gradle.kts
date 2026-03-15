@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.andresfelipecaicedo.nomellames"
+    namespace = "cl.blipblipcode.prefixsapp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.andresfelipecaicedo.nomellames"
+        applicationId = "cl.blipblipcode.prefixsapp"
         minSdk = 24
         targetSdk = 36
         versionCode = 4

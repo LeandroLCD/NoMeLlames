@@ -7,7 +7,7 @@
         tools:ignore="SmsAndCallLogPolicy" />
 
     <application
-        android:name=".NoMeLlamesApp"
+        android:name=".PrefixsApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,11 +15,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NoMeLlames">
+        android:theme="@style/Theme.PrefixsApp">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.NoMeLlames.Splash">
+            android:theme="@style/Theme.PrefixsApp.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

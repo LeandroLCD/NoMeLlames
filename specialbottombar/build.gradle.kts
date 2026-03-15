@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.andresfelipecaicedo.nomellames.specialbottombar"
+    namespace = "cl.blipblipcode.prefixsapp.specialbottombar"
     compileSdk {
         version = release(36)
     }

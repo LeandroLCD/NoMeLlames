@@ -23,7 +23,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SpamCallBlocker"
+rootProject.name = "PreFixApp"
 include(":app")
 include(":specialbottombar")
 include(":specialbottombar")

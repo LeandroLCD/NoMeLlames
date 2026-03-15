@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.NoMeLlames" parent="android:Theme.Material.Light.NoActionBar" >
+    <style name="Theme.PrefixsApp" parent="android:Theme.Material.Light.NoActionBar" >
         <item name="android:windowBackground">@drawable/splash_background</item>
 
     </style>
     /style>
-    <style name="Theme.NoMeLlames.Splash" parent="Theme.NoMeLlames">
+    <style name="Theme.PrefixsApp.Splash" parent="Theme.PrefixsApp">
         <!--Aca se configura un content xml de la forma antigua apartir del api v26 -->
     </style>
 </resources>
