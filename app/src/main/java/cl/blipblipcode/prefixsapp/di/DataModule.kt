@@ -110,13 +110,13 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseRemoteConfig(): FirebaseRemoteConfig {
+    fun provideFirebaseRemoteConfig(@ApplicationContext context: Context): FirebaseRemoteConfig {
         return FirebaseRemoteConfig.getInstance().also { config ->
             config.setDefaultsAsync(mapOf(
                 AppConstants.RemoteConfig.KEY_VERSION_CONFIG to "{\n" +
                         "  \"release\": \"1.0.0\",\n" +
                         "  \"min_supported_version\": \"1.0.0\",\n" +
-                        "  \"url_download\": \"https://play.google.com/store/apps/details?id=com.leandrolcd.doganalyzer\"\n" +
+                        "  \"url_download\": \"https://play.google.com/store/apps/details?id=${context.packageName}\"\n" +
                         "}",
             ))
             config.setConfigSettingsAsync(
