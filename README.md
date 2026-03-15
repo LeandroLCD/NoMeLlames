@@ -13,7 +13,6 @@
 
 Bloquea automáticamente llamadas entrantes de prefijos telefónicos configurables usando la API nativa `CallScreeningService` de Android. Enfocado en el mercado colombiano con soporte para prefijos `+57`.
 
-> Anteriormente conocido como **NoMeLlames**.
 
 [Características](#-características) •
 [Arquitectura](#-arquitectura) •
@@ -41,12 +40,12 @@ Bloquea automáticamente llamadas entrantes de prefijos telefónicos configurabl
 ## ✨ Características
 
 - 🚫 **Bloqueo por prefijo** — Rechaza llamadas de números que comiencen con prefijos configurados con reglas `BLOCK` / `ALLOW`
-- 🇨🇴 **Prefijos colombianos preconfigurados** — Soporte nativo para el código de país `+57`
+- 🌍 **Soporte mundial de prefijos** — Base de datos con ~195 países identificados por código ISO
 - 📜 **Historial completo** — Registro de llamadas bloqueadas y permitidas con número, prefijo coincidente y fecha/hora
 - ⚙️ **Comportamiento configurable** — Oculta llamadas del registro del sistema y suprime notificaciones
 - 🎨 **Material You** — Tema dinámico en Android 12+ con soporte para modo oscuro
 - 🔒 **Seguridad biométrica** — Acceso protegido con huella dactilar o patrón
-- 🔄 **Servicio en segundo plano** — Funciona sin tener la app abierta mediante `CallScreeningService`
+- 🔄 **Servicio en segundo plano** — Funciona sin tener la app abierta mediante `SpamCallPrefixService`
 - 🧩 **Arquitectura limpia** — Capas bien definidas: UI, Dominio y Datos
 
 ---
