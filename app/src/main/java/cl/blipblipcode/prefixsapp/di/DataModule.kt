@@ -114,7 +114,7 @@ object DataModule {
         return FirebaseRemoteConfig.getInstance().also { config ->
             config.setDefaultsAsync(mapOf(
                 AppConstants.RemoteConfig.KEY_VERSION_CONFIG to "{\n" +
-                        "  \"release\": \"1.1.0\",\n" +
+                        "  \"release\": \"1.0.0\",\n" +
                         "  \"min_supported_version\": \"1.0.0\",\n" +
                         "  \"url_download\": \"https://play.google.com/store/apps/details?id=com.leandrolcd.doganalyzer\"\n" +
                         "}",
