@@ -1,4 +1,4 @@
-<div align="center">
+<div style="text-align: center;">
 
 # 📵 PrefixApp
 
@@ -6,7 +6,7 @@
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0+-purple.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Android](https://img.shields.io/badge/Android-API%2024+-green.svg?style=flat&logo=android)](https://developer.android.com)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-UI-blue.svg?style=flat&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-UI-blue.svg?style=flat&logo=jetpackcompose)](https://developer.android.com)
 [![Room](https://img.shields.io/badge/Room-Persistencia-orange.svg?style=flat)](https://developer.android.com/training/data-storage/room)
 [![Hilt](https://img.shields.io/badge/Hilt-DI-red.svg?style=flat)](https://dagger.dev/hilt/)
 [![Version](https://img.shields.io/badge/version-1.3-brightgreen.svg?style=flat)](https://github.com/LeandroLCD/NoMeLlames)
@@ -150,7 +150,7 @@ prefixapp/
 ├── app/
 │   └── src/main/java/.../
 │       ├── MainActivity.kt                  # Actividad principal con navegación Compose (4 tabs)
-│       ├── SpamCallScreeningService.kt      # Servicio de filtrado de llamadas
+│       ├── SpamCallPrefixService.kt      # Servicio de filtrado de llamadas
 │       ├── data/
 │       │   ├── local/
 │       │   │   ├── dao/                     # DAOs: PrefixRuleDao, BlockedCallDao, AllowedCallDao…
@@ -208,7 +208,7 @@ Este proyecto está licenciado bajo la **Licencia MIT** — ver el archivo [LICE
 
 ---
 
-<div align="center">
+<div style="text-align: center;">
 
 **Hecho con ❤️ para la comunidad Android**
 
