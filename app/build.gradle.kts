@@ -32,6 +32,21 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders += mapOf(
+                "buildserver" to "release",
+            )
+        }
+        create("apk"){
+            applicationIdSuffix = ".apk"
+            manifestPlaceholders += mapOf(
+                "buildserver" to "apk",
+            )
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders += mapOf(
+                "buildserver" to "debug",
+            )
         }
     }
 

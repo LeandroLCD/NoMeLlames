@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import cl.blipblipcode.prefixsapp.data.repositories.dto.VersionConfigDto
+import cl.blipblipcode.prefixsapp.domain.model.BuildType
 import cl.blipblipcode.prefixsapp.domain.model.VersionStatus
 import cl.blipblipcode.prefixsapp.domain.repositories.VersionRepository
 import cl.blipblipcode.prefixsapp.utils.AppConstants
@@ -51,6 +52,9 @@ class VersionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun checkVersionStatus(): Result<VersionStatus> = makeSuspendCall {
+        if(BuildType.getBuildType(context) != BuildType.Release) {
+            return@makeSuspendCall VersionStatus.UpToDate
+        }
         val config = fetchOrGetCachedConfig()
         Timber.d("Config: $config")
         val currentVersion = getCurrentAppVersion()

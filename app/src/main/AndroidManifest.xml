@@ -35,6 +35,9 @@
                 <action android:name="android.telecom.CallScreeningService" />
             </intent-filter>
         </service>
+        <meta-data
+            android:name="cl.blipblipcode.prefixsapp.build"
+            android:value="${buildserver}" />
     </application>
 
 </manifest>
