@@ -20,6 +20,7 @@ enum class BuildType {
                 }
 
             }catch (e: Exception){
+                e.printStackTrace()
                 Debug
             }
         }

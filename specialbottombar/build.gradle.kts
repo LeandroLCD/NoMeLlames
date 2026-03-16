@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import shadow.bundletool.com.android.tools.r8.internal.tR
 
 plugins {
     alias(libs.plugins.android.library)
