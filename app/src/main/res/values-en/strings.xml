@@ -79,7 +79,7 @@
     <string name="history_unknown_operator">Unknown operator</string>
 
     <!-- Settings Screen -->
-    <string name="history_title">[ SETTINGS ]</string>
+    <string name="settings_title">[ SETTINGS ]</string>
     <string name="settings_skip_call_log_title">Hide from call log</string>
     <string name="settings_skip_call_log_description">Blocked calls will not appear in the phone\'s call log</string>
     <string name="settings_skip_notification_title">Hide notifications</string>
