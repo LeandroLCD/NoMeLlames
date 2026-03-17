@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
+import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
 import cl.blipblipcode.prefixsapp.ui.widget.icons.Locked
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +64,8 @@ fun HomeTopBar(
                     text = stringResource(R.string.home_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
+                    letterSpacing = 2.sp,
+                    color = CyanAccent
                 )
             }
         },

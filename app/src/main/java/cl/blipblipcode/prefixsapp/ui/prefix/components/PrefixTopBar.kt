@@ -35,7 +35,7 @@ fun PrefixTopBar(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 ),
-                color = Color.White
+                color = CyanAccent
             )
         },
         navigationIcon = {
