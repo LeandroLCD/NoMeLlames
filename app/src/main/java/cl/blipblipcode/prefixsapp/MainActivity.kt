@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.window.SplashScreenView
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,13 +16,13 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import dagger.hilt.android.AndroidEntryPoint
 import cl.blipblipcode.prefixsapp.ui.main.MainScreen
 import cl.blipblipcode.prefixsapp.ui.security.SecurityScreen
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsViewModel
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 import cl.blipblipcode.prefixsapp.utils.AppConstants
 import cl.blipblipcode.prefixsapp.utils.biometric.BiometricHelper
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {

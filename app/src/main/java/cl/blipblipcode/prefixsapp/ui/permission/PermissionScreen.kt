@@ -273,10 +273,9 @@ private fun PermissionTopAppBar(
             )
         },
         actions = {
-            // Placeholder to keep title centered with navigationIcon
             Spacer(modifier = Modifier.width(52.dp))
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent
         )
     )
