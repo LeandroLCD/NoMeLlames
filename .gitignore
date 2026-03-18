@@ -11,6 +11,10 @@ local.properties
 /apk/
 /debug/
 
+# Firebase / Google Services (sensitive config)
+google-services.json
+**/google-services.json
+
 # Signing
 *.jks
 *.keystore
