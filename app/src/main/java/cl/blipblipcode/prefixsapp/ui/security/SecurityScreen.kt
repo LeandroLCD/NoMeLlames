@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +26,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,12 +46,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
+import cl.blipblipcode.prefixsapp.BuildConfig
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.ui.settings.components.dialog.PatternInputGrid
 import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
 import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
 import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
+import cl.blipblipcode.prefixsapp.ui.widget.icons.Finger
 import cl.blipblipcode.prefixsapp.utils.biometric.BiometricHelper
 
 enum class SecurityMode {
@@ -79,21 +81,6 @@ fun SecurityScreen(
     val authTitle = stringResource(R.string.settings_auth_title)
     val authSubtitle = stringResource(R.string.settings_auth_subtitle)
     val authFailedMsg = stringResource(R.string.security_auth_failed)
-
-    // Auto-trigger biometric auth on launch if in fingerprint mode
-    LaunchedEffect(currentMode) {
-        if (currentMode == SecurityMode.FINGERPRINT && showBiometric && activity != null) {
-            BiometricHelper.authenticate(
-                activity = activity,
-                title = authTitle,
-                subtitle = authSubtitle,
-                onSuccess = onAuthSuccess,
-                onError = { error ->
-                    authError = error.ifEmpty { authFailedMsg }
-                }
-            )
-        }
-    }
 
     Box(
         modifier = modifier
@@ -135,7 +122,7 @@ fun SecurityScreen(
                 SecurityMode.FINGERPRINT -> {
                     FingerprintScannerSection(
                         onRetry = {
-                            if (activity != null) {
+                            activity?.let {
                                 authError = null
                                 BiometricHelper.authenticate(
                                     activity = activity,
@@ -196,30 +183,64 @@ fun SecurityScreen(
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
-
-            OutlinedButton(
-                onClick = onCancel,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(4.dp),
-                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.security_cancel),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        letterSpacing = 2.sp,
-                        fontWeight = FontWeight.Bold
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Absolute.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(
+                    onClick = onCancel,
+                    modifier = Modifier
+                        .height(56.dp),
+                    shape = RoundedCornerShape(4.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
-                )
+                ) {
+                    Text(
+                        text = stringResource(R.string.security_cancel),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            letterSpacing = 2.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        activity?.let {
+                            BiometricHelper.authenticate(
+                                activity = it,
+                                title = authTitle,
+                                subtitle = authSubtitle,
+                                onSuccess = onAuthSuccess,
+                                onError = { error ->
+                                    authError = error.ifEmpty { authFailedMsg }
+                                }
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .height(56.dp),
+                    shape = RoundedCornerShape(4.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.security_auth),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            letterSpacing = 2.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SecurityFooter(version = "4.0.2-SEC")
+            SecurityFooter(version = BuildConfig.VERSION_NAME)
         }
     }
 }
@@ -322,7 +343,7 @@ private fun FingerprintScannerSection(
             }
 
             Icon(
-                painter = painterResource(id = R.drawable.ic_fingerprint),
+                Icons.Finger,
                 contentDescription = null,
                 tint = primaryColor,
                 modifier = Modifier.size(80.dp)
@@ -332,7 +353,7 @@ private fun FingerprintScannerSection(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = if (error != null) error else stringResource(R.string.security_scanning),
+            text = error ?: stringResource(R.string.security_scanning),
             style = MaterialTheme.typography.labelLarge.copy(
                 letterSpacing = 4.sp,
                 fontWeight = FontWeight.Bold

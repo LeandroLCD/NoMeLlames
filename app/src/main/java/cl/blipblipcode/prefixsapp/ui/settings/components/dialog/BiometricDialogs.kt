@@ -164,7 +164,7 @@ private fun SecurityBaseDialog(
                     }
 
                     OutlinedButton(
-                        onClick = onConfirm,
+                        onClick = { onConfirm.invoke() },
                         shape = RoundedCornerShape(4.dp),
                         border = BorderStroke(1.dp, confirmColor),
                         colors = ButtonDefaults.outlinedButtonColors(

@@ -113,8 +113,9 @@
     <string name="security_system_safe">SYSTEM SAFE</string>
     <string name="security_access_restricted">ACCESS RESTRICTED</string>
     <string name="security_id_label">ID: %1$s</string>
-    <string name="security_scanning">SCANNING…</string>
-    <string name="security_touch_sensor">TOUCH SENSOR TO AUTHENTICATE</string>
+    <string name="security_scanning">Authentication Required</string>
+    <string name="security_touch_sensor">BIOMETRIC</string>
+    <string name="security_auth">AUTHENTICATE</string>
     <string name="security_or_else">OR ELSE</string>
     <string name="security_enter_pattern">ENTER PATTERN</string>
     <string name="security_cancel">CANCEL</string>
@@ -155,4 +156,29 @@
     <string name="update_required_footer">KERNEL SECURITY PROTOCOL ACTIVE</string>
     <string name="v_critical">v%1$s-CRITICAL</string>
     <string name="v_stable">v%1$s-STABLE</string>
+
+    <!-- Permission Screen -->
+    <string name="permission_title">[ ACCESS REQUEST ]</string>
+    <string name="permission_protocol">SECURITY PROTOCOL</string>
+    <string name="permission_description">For %1$s to function, we need permission to analyze incoming calls and compare them with your security history.</string>
+    <string name="permission_required_label">REQUIRED PERMISSIONS</string>
+    <string name="permission_read_phone_state_title">READ_PHONE_STATE</string>
+    <string name="permission_read_phone_state_desc">Phone state for real-time detection.</string>
+    <string name="permission_read_call_log_title">READ_CALL_LOG</string>
+    <string name="permission_read_call_log_desc">Call log for filtering known SPAM.</string>
+    <string name="permission_grant_access">[ GRANT ACCESS ]</string>
+    <string name="permission_skip">SKIP FOR NOW</string>
+
+    <!-- Critical Setting Screen -->
+    <string name="critical_setting_title">[ CRITICAL CONFIGURATION ]</string>
+    <string name="critical_setting_access_title">Security Access</string>
+    <string name="critical_setting_description">PreFixApp must be set as your default protection app to intercept and block spam in real-time.</string>
+    <string name="critical_setting_auto_block_title">Auto Block</string>
+    <string name="critical_setting_auto_block_desc">Filters calls and compares with your rules.</string>
+    <string name="critical_setting_set_default">SET AS DEFAULT</string>
+    <string name="critical_setting_android_protocol">Action required by Android security protocol</string>
+    <string name="critical_setting_footer_version">NOMELAMES_SEC_V4.0</string>
+    <string name="critical_call_in">INCOMING</string>
+    <string name="critical_protected">PROTECTED</string>
+    <string name="critical_system_active">SYSTEM ACTIVE</string>
 </resources>

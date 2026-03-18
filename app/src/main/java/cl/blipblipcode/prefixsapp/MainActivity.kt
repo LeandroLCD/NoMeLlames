@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
 import cl.blipblipcode.prefixsapp.ui.main.MainScreen
 import cl.blipblipcode.prefixsapp.ui.security.SecurityScreen
@@ -25,7 +26,7 @@ import cl.blipblipcode.prefixsapp.utils.AppConstants
 import cl.blipblipcode.prefixsapp.utils.biometric.BiometricHelper
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private var isCallScreeningEnabled by mutableStateOf(false)
     private var permissionsGranted by mutableStateOf(false)
@@ -66,8 +67,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             splashScreen.setOnExitAnimationListener(SplashScreenView::remove)
         }else{
-            //por aca se hace en veriones anteriores
-            //setContentView(R.layout.main_activity) generalmente un linear layout con fondo blanco
+            setContentView(R.layout.main_activity)
         }
 
         legacyScreeningConfigured = settingsPrefs.getBoolean(AppConstants.Prefs.KEY_LEGACY_SCREENING_CONFIGURED, false)

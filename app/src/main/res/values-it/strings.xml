@@ -113,8 +113,9 @@
     <string name="security_system_safe">SISTEMA SICURO</string>
     <string name="security_access_restricted">ACCESSO LIMITATO</string>
     <string name="security_id_label">ID: %1$s</string>
-    <string name="security_scanning">SCANSIONE IN CORSO…</string>
-    <string name="security_touch_sensor">TOCCA IL SENSORE PER AUTENTICARTI</string>
+    <string name="security_scanning">Richiede Autenticazione</string>
+    <string name="security_touch_sensor">BIOMETRICA</string>
+    <string name="security_auth">AUTENTICA</string>
     <string name="security_or_else">OPPURE</string>
     <string name="security_enter_pattern">INSERISCI SEGNO</string>
     <string name="security_cancel">ANNULLA</string>
@@ -155,4 +156,29 @@
     <string name="update_required_footer">KERNEL SECURITY PROTOCOL ACTIVE</string>
     <string name="v_critical">v%1$s-CRITICAL</string>
     <string name="v_stable">v%1$s-STABLE</string>
+
+    <!-- Permission Screen -->
+    <string name="permission_title">[ RICHIESTA DI ACCESSO ]</string>
+    <string name="permission_protocol">PROTOCOLLO DI SICUREZZA</string>
+    <string name="permission_description">Affinché %1$s funzioni, abbiamo bisogno del permesso per analizzare le chiamate in entrata e confrontarle con la tua cronologia di sicurezza.</string>
+    <string name="permission_required_label">PERMESSI RICHIESTI</string>
+    <string name="permission_read_phone_state_title">READ_PHONE_STATE</string>
+    <string name="permission_read_phone_state_desc">Stato del telefono per il rilevamento in tempo reale.</string>
+    <string name="permission_read_call_log_title">READ_CALL_LOG</string>
+    <string name="permission_read_call_log_desc">Registro chiamate per il filtraggio dello SPAM noto.</string>
+    <string name="permission_grant_access">[ CONCEDI ACCESSO ]</string>
+    <string name="permission_skip">SALTA PER ORA</string>
+
+    <!-- Critical Setting Screen -->
+    <string name="critical_setting_title">[ CONFIGURAZIONE CRITICA ]</string>
+    <string name="critical_setting_access_title">Accesso di Sicurezza</string>
+    <string name="critical_setting_description">PreFixApp deve essere impostata come app di protezione predefinita per intercettare e bloccare lo spam in tempo reale.</string>
+    <string name="critical_setting_auto_block_title">Blocco Automatico</string>
+    <string name="critical_setting_auto_block_desc">Filtra le chiamate e le confronta con le tue regole.</string>
+    <string name="critical_setting_set_default">IMPOSTA COME PREDEFINITA</string>
+    <string name="critical_setting_android_protocol">Azione richiesta dal protocollo di sicurezza di Android</string>
+    <string name="critical_setting_footer_version">NOMELAMES_SEC_V4.0</string>
+    <string name="critical_call_in">IN ENTRATA</string>
+    <string name="critical_protected">PROTETTO</string>
+    <string name="critical_system_active">SISTEMA ATTIVO</string>
 </resources>

@@ -34,7 +34,7 @@
     <string name="home_status_online" translatable="false">ONLINE</string>
     <string name="home_status_offline" translatable="false">OFFLINE</string>
     <string name="home_system_active">SISTEMA ATIVO</string>
-    <string name="home_system_inactive">SISTEMA DESATIVADO</string>
+    <string name="home_system_inactive">SISTEMA DESACTIVADO</string>
     <string name="home_interception">INTERCEPTAÇÃO DETERMINÍSTICA</string>
     <string name="home_firewall_master">FIREWALL MESTRE</string>
     <string name="home_blocked_label">BLOQUEADAS</string>
@@ -113,8 +113,9 @@
     <string name="security_system_safe">SISTEMA SEGURO</string>
     <string name="security_access_restricted">ACESSO RESTRITO</string>
     <string name="security_id_label">ID: %1$s</string>
-    <string name="security_scanning">ESCANEANDO…</string>
-    <string name="security_touch_sensor">TOQUE NO SENSOR PARA AUTENTICAR</string>
+    <string name="security_scanning">Requer Autenticação</string>
+    <string name="security_touch_sensor">BIOMÉTRICA</string>
+    <string name="security_auth">AUTENTICAR</string>
     <string name="security_or_else">OU ENTÃO</string>
     <string name="security_enter_pattern">INSERIR PADRÃO</string>
     <string name="security_cancel">CANCELAR</string>
@@ -155,4 +156,29 @@
     <string name="update_required_footer">KERNEL SECURITY PROTOCOL ACTIVE</string>
     <string name="v_critical">v%1$s-CRITICAL</string>
     <string name="v_stable">v%1$s-STABLE</string>
+
+    <!-- Permission Screen -->
+    <string name="permission_title">[ SOLICITAÇÃO DE ACESSO ]</string>
+    <string name="permission_protocol">PROTOCOLO DE SEGURANÇA</string>
+    <string name="permission_description">Para que o %1$s funcione, precisamos de permissão para analisar as chamadas recebidas e compará-las com o seu histórico de segurança.</string>
+    <string name="permission_required_label">PERMISSÕES NECESSÁRIAS</string>
+    <string name="permission_read_phone_state_title">READ_PHONE_STATE</string>
+    <string name="permission_read_phone_state_desc">Estado do telefone para detecção em tempo real.</string>
+    <string name="permission_read_call_log_title">READ_CALL_LOG</string>
+    <string name="permission_read_call_log_desc">Registro de chamadas para filtragem de SPAM conhecido.</string>
+    <string name="permission_grant_access">[ CONCEDER ACESSO ]</string>
+    <string name="permission_skip">PULAR POR ENQUANTO</string>
+
+    <!-- Critical Setting Screen -->
+    <string name="critical_setting_title">[ CONFIGURAÇÃO CRÍTICA ]</string>
+    <string name="critical_setting_access_title">Acesso de Segurança</string>
+    <string name="critical_setting_description">PreFixApp deve ser definido como seu aplicativo de proteção padrão para interceptar e bloquear spam em tempo real.</string>
+    <string name="critical_setting_auto_block_title">Bloqueio Automático</string>
+    <string name="critical_setting_auto_block_desc">Filtra as chamadas e as compara com as suas regras.</string>
+    <string name="critical_setting_set_default">DEFINIR COMO PADRÃO</string>
+    <string name="critical_setting_android_protocol">Ação exigida pelo protocolo de segurança do Android</string>
+    <string name="critical_setting_footer_version">NOMELAMES_SEC_V4.0</string>
+    <string name="critical_call_in">RECEBIDA</string>
+    <string name="critical_protected">PROTEGIDO</string>
+    <string name="critical_system_active">SISTEMA ATIVO</string>
 </resources>

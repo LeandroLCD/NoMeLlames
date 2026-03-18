@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -106,6 +107,7 @@ class SettingsViewModel @Inject constructor(
             _eventFlow.emit(SettingsEvent.RequestAuth(
                 onSuccess = {
                     _securityState.update { it.copy(biometricLock = true) }
+                    Timber.d(_securityState.value.toString())
                     prefs.edit { putBoolean(KEY_BIOMETRIC_LOCK, true) }
                 }
             ))
