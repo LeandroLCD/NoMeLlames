@@ -72,24 +72,6 @@ fun PermissionScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(top = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(2.dp))
-                        .border(BorderStroke(1.dp, primaryColor.copy(alpha = 0.5f)), RoundedCornerShape(2.dp))
-                        .padding(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Locked,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        tint = primaryColor
-                    )
-                }
-            }
 
             // Main Content
             Column(

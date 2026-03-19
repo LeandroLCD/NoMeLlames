@@ -16,13 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import cl.blipblipcode.prefixsapp.ui.main.MainScreen
 import cl.blipblipcode.prefixsapp.ui.navigation.NavGraph
-import cl.blipblipcode.prefixsapp.ui.security.SecurityScreen
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsViewModel
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 import cl.blipblipcode.prefixsapp.utils.AppConstants
-import cl.blipblipcode.prefixsapp.utils.biometric.BiometricHelper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
