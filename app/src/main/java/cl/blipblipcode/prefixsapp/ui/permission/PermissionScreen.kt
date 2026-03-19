@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
-import cl.blipblipcode.prefixsapp.ui.widget.icons.CallLog
 import cl.blipblipcode.prefixsapp.ui.widget.icons.Locked
 
 @Composable
