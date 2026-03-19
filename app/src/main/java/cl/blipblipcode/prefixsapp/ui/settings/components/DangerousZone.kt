@@ -28,8 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
+import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 
 @Composable
  fun DangerousZone(
@@ -45,7 +44,7 @@ import cl.blipblipcode.prefixsapp.ui.theme.TextGray
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "⚠",
-                color = BlockedRed,
+                color = MaterialTheme.colorScheme.error,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -56,7 +55,7 @@ import cl.blipblipcode.prefixsapp.ui.theme.TextGray
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = BlockedRed
+                color = MaterialTheme.colorScheme.error
             )
         }
         
@@ -66,7 +65,7 @@ import cl.blipblipcode.prefixsapp.ui.theme.TextGray
             onClick = onPurgeClick,
             enabled = !isPurging,
             color = Color.Transparent,
-            border = BorderStroke(1.dp, BlockedRed),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
             shape = RoundedCornerShape(2.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -78,14 +77,14 @@ import cl.blipblipcode.prefixsapp.ui.theme.TextGray
                 if (isPurging) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
-                        color = BlockedRed,
+                        color = MaterialTheme.colorScheme.error,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Icon(
                         Icons.Filled.Delete,
                         contentDescription = null,
-                        tint = BlockedRed,
+                        tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -93,7 +92,7 @@ import cl.blipblipcode.prefixsapp.ui.theme.TextGray
                 Text(
                     text = stringResource(R.string.settings_purge_database),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = BlockedRed
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
@@ -103,7 +102,7 @@ import cl.blipblipcode.prefixsapp.ui.theme.TextGray
         Text(
             text = stringResource(R.string.settings_purge_description),
             style = MaterialTheme.typography.bodySmall,
-            color = TextGray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )

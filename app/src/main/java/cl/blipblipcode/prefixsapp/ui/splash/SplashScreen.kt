@@ -37,8 +37,8 @@ fun SplashScreen(
         when {
             requiresAuth -> onNavigation(Screen.Security)
             isCallScreeningEnabled && permissionsGranted -> onNavigation(Screen.Main)
-            !permissionsGranted -> onNavigation(Screen.Permission)
-            else -> onNavigation(Screen.CriticalSetting)
+            !isCallScreeningEnabled -> onNavigation(Screen.CriticalSetting)
+            else -> onNavigation(Screen.Permission)
         }
     }
     val primaryColor = MaterialTheme.colorScheme.primary

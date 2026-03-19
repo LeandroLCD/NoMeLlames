@@ -78,7 +78,7 @@ El proyecto sigue **Clean Architecture** con separación en capas y el patrón *
 
 ## ⚙️ Cómo funciona
 
-NoMeLlames se registra como servicio de filtrado de llamadas predeterminado en Android. Al recibir una llamada:
+PreFixApp se registra como servicio de filtrado de llamadas predeterminado en Android. Al recibir una llamada:
 
 1. **Normaliza** el número eliminando el código de país `+57`
 2. **Evalúa** la lista de prefijos aplicando la regla del prefijo más largo coincidente

@@ -8,7 +8,7 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-// Dashboard Colors
+// Dashboard Colors — Dark theme
 val CyanAccent = Color(0xFF00E5FF)
 val DarkBg = Color(0xFF0A0A0A)
 val CardBg = Color(0xFF121212)
@@ -23,3 +23,24 @@ val DividerColor = Color(0xFF1A1A1A)
 
 // Transparency variants
 val BlockedRedTransparent = Color(0x1AFF003D)
+
+// Light Theme Colors
+val CyanDeep = Color(0xFF006782)          // Cyan oscuro legible sobre blanco
+val CyanContainer = Color(0xFFB8EEFF)     // Wash cyan para contenedores
+val OnCyanContainer = Color(0xFF001F28)   // Texto sobre CyanContainer
+
+val PurpleDeep = Color(0xFF7B009B)        // Purple oscuro legible sobre blanco
+val PurpleContainer = Color(0xFFF5D9FF)  // Wash purple para contenedores
+val OnPurpleContainer = Color(0xFF2D0048) // Texto sobre PurpleContainer
+
+val RedDeep = Color(0xFF9C0031)           // Red oscuro legible sobre blanco
+val RedContainer = Color(0xFFFFD9E2)      // Wash red para contenedores
+val OnRedContainer = Color(0xFF40001A)    // Texto sobre RedContainer
+
+val LightBg = Color(0xFFF6FAFB)           // Blanco frío con tinte cyan
+val LightOnBg = Color(0xFF191C1E)         // Casi negro con tinte frío
+val LightSurfaceVariant = Color(0xFFDCE4E7)
+val LightOnSurfaceVariant = Color(0xFF404C50)
+val LightOutline = Color(0xFF6F797B)
+val LightOutlineVariant = Color(0xFFBFC8CA)
+

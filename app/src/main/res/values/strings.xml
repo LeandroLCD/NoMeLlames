@@ -27,7 +27,7 @@
     <string name="home_open_settings">Abrir Ajustes</string>
     <string name="home_active">Activo</string>
     <string name="home_active_description_modern">El bloqueo de llamadas spam esta funcionando</string>
-    <string name="home_active_description_legacy">Configuracion manual aplicada. Verifica que NoMeLlames siga como app de filtrado.</string>
+    <string name="home_active_description_legacy">Configuracion manual aplicada. Verifica que PREFIXAPP siga como app de filtrado.</string>
     <string name="home_disable">Desactivar</string>
 
     <!-- New Dashboard Strings -->
@@ -177,7 +177,7 @@
     <string name="critical_setting_auto_block_desc">Filtra llamadas y compara con tus reglas.</string>
     <string name="critical_setting_set_default">ESTABLECER COMO PREDETERMINADA</string>
     <string name="critical_setting_android_protocol">Acción requerida por el protocolo de seguridad de Android</string>
-    <string name="critical_setting_footer_version">NOMELAMES_SEC_V4.0</string>
+    <string name="critical_setting_footer_version">PREFIXAPP_SEC_V%1$s</string>
     <string name="critical_call_in">ENTRANTE</string>
     <string name="critical_protected">PROTEGIDO</string>
     <string name="critical_system_active">SISTEMA ACTIVO</string>

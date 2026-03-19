@@ -35,9 +35,6 @@ import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.ui.prefix.components.PrefixInputSection
 import cl.blipblipcode.prefixsapp.ui.prefix.components.PrefixList
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DividerColor
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +69,7 @@ fun PrefixScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = CyanAccent)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
             is PrefixUiState.Content -> {
@@ -121,7 +118,7 @@ private fun PrefixContent(
         Surface(
             color = Color.Transparent,
             modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp),
-            border = BorderStroke(1.dp, CyanAccent),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(2.dp)
         ) {
             Row(
@@ -131,19 +128,19 @@ private fun PrefixContent(
                 Box(
                     modifier = Modifier
                         .size(6.dp)
-                        .background(CyanAccent)
+                        .background(MaterialTheme.colorScheme.primary)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.prefix_active_rules, rulesCount),
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = CyanAccent
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
-        HorizontalDivider(color = DividerColor, thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
 
         if (state.isEmpty) {
             Box(
@@ -153,7 +150,7 @@ private fun PrefixContent(
                 Text(
                     text = stringResource(R.string.prefix_empty),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = TextGray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {

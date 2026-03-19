@@ -34,11 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
 
 /**
  * Dialog to enable biometric authentication
@@ -71,7 +67,7 @@ fun DisableBiometricDialog(
         title = stringResource(R.string.security_dialog_disable_biometric_title),
         description = stringResource(R.string.security_dialog_disable_biometric_description),
         confirmText = stringResource(R.string.security_dialog_disable),
-        confirmColor = BlockedRed,
+        confirmColor = MaterialTheme.colorScheme.error,
         onConfirm = onConfirm,
         onDismiss = onDismiss
     )
@@ -88,8 +84,9 @@ private fun SecurityBaseDialog(
     confirmText: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    confirmColor: Color = CyanAccent
+    confirmColor: Color = Color.Unspecified
 ) {
+    val resolvedColor = if (confirmColor == Color.Unspecified) MaterialTheme.colorScheme.primary else confirmColor
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -99,8 +96,8 @@ private fun SecurityBaseDialog(
                 .fillMaxWidth()
                 .padding(24.dp),
             shape = RoundedCornerShape(4.dp),
-            color = DarkBg,
-            border = BorderStroke(1.dp, confirmColor.copy(alpha = 0.3f))
+            color = MaterialTheme.colorScheme.background,
+            border = BorderStroke(1.dp, resolvedColor.copy(alpha = 0.3f))
         ) {
             Column(
                 modifier = Modifier.padding(12.dp),
@@ -113,7 +110,7 @@ private fun SecurityBaseDialog(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     ),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )
 
@@ -122,7 +119,7 @@ private fun SecurityBaseDialog(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -130,12 +127,12 @@ private fun SecurityBaseDialog(
                     modifier = Modifier
                         .size(56.dp)
                         .background(
-                            color = confirmColor.copy(alpha = 0.1f),
+                            color = resolvedColor.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(4.dp)
                         )
                         .border(
                             width = 1.dp,
-                            color = confirmColor.copy(alpha = 0.3f),
+                            color = resolvedColor.copy(alpha = 0.3f),
                             shape = RoundedCornerShape(4.dp)
                         ),
                     contentAlignment = Alignment.Center
@@ -143,7 +140,7 @@ private fun SecurityBaseDialog(
                     Icon(
                         painter = painterResource(id = icon),
                         contentDescription = null,
-                        tint = confirmColor,
+                        tint = resolvedColor,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -159,16 +156,16 @@ private fun SecurityBaseDialog(
                         Text(
                             text = stringResource(R.string.security_cancel),
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CyanAccent
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
 
                     OutlinedButton(
                         onClick = { onConfirm.invoke() },
                         shape = RoundedCornerShape(4.dp),
-                        border = BorderStroke(1.dp, confirmColor),
+                        border = BorderStroke(1.dp, resolvedColor),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = confirmColor
+                            contentColor = resolvedColor
                         )
                     ) {
                         Text(

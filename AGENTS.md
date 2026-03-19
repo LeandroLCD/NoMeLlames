@@ -1,4 +1,4 @@
-tens# AGENTS.md - NoMeLlames
+tens# AGENTS.md - PreFixApp
 
 ## Project Overview
 Android spam call blocker app using `CallScreeningService` API. Blocks incoming calls from configurable phone prefixes with BLOCK/ALLOW rules. Colombian market focus (defaults to +57 prefixes).
@@ -16,7 +16,7 @@ di/          → Hilt modules (DataModule, RepositoryModule, UseCaseModule)
 ### Key Components
 - **SpamCallScreeningService** - Core service handling call screening via Android's CallScreeningService API
 - **MainActivity** - Single activity hosting Compose navigation with 4 tabs (Home, Prefixes, History, Settings)
-- **NoMeLlamesApp** - Hilt application entry point
+- **PreFixApp** - Hilt application entry point
 
 ### Data Flow
 1. `SpamCallScreeningService.onScreenCall()` receives incoming calls

@@ -14,8 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +28,7 @@ fun SettingsTopBar(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 ),
-                color = CyanAccent
+                color = MaterialTheme.colorScheme.primary
             )
         },
         navigationIcon = {
@@ -38,12 +36,12 @@ fun SettingsTopBar(
                 Icon(
                     Icons.Filled.ArrowBackIosNew,
                     contentDescription = stringResource(R.string.back),
-                    tint = CyanAccent
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DarkBg
+            containerColor = MaterialTheme.colorScheme.background
         )
     )
 }

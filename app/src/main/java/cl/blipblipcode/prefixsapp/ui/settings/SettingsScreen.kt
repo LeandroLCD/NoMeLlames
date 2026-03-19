@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,9 +38,6 @@ import cl.blipblipcode.prefixsapp.ui.settings.components.dialog.PurgeConfirmatio
 import cl.blipblipcode.prefixsapp.ui.settings.components.dialog.VerifyPatternDialog
 import cl.blipblipcode.prefixsapp.ui.settings.state.SecurityState
 import cl.blipblipcode.prefixsapp.ui.settings.state.SettingDialog
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
-import cl.blipblipcode.prefixsapp.ui.theme.DividerColor
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 import cl.blipblipcode.prefixsapp.utils.biometric.BiometricHelper
 
@@ -97,7 +95,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = CyanAccent)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
             is SettingsUiState.Content -> {
@@ -137,7 +135,7 @@ private fun SettingsContent(
         ) {
             SettingsSectionHeader(title = stringResource(R.string.settings_section_motor))
 
-            HorizontalDivider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggleItem(
                 title = stringResource(R.string.settings_skip_call_log_title),
@@ -146,7 +144,7 @@ private fun SettingsContent(
                 onCheckedChange = onSkipCallLogChanged
             )
 
-            HorizontalDivider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
 
             SettingsToggleItem(
                 title = stringResource(R.string.settings_skip_notification_title),
@@ -168,7 +166,7 @@ private fun SettingsContent(
                     onCheckedChange = onBiometricLockChanged
                 )
 
-                HorizontalDivider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
             }
 
             SettingsToggleItem(
@@ -236,7 +234,7 @@ private fun SettingsContent(
 @Composable
 fun SettingsScreenPreview() {
     PrefixsAppTheme(darkTheme = true) {
-        Box(modifier = Modifier.background(DarkBg)) {
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             SettingsContent(
                 state = SettingsUiState.Content(
                     skipCallLog = true,

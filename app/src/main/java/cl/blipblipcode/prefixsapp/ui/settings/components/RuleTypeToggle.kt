@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cl.blipblipcode.prefixsapp.ui.theme.AllowedCyan
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
 
 @Composable
 fun RuleTypeToggle(
@@ -26,7 +24,7 @@ fun RuleTypeToggle(
     Box(
         modifier = modifier
             .size(width = 54.dp, height = 28.dp)
-            .border(1.dp, CyanAccent, RoundedCornerShape(2.dp))
+            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             .clickable { onToggle() }
             .padding(2.dp)
     ) {
@@ -35,7 +33,7 @@ fun RuleTypeToggle(
                 .fillMaxHeight()
                 .width(24.dp)
                 .align(if (isAllowed) Alignment.CenterEnd else Alignment.CenterStart)
-                .background(if (isAllowed) AllowedCyan else BlockedRed)
+                .background(if (isAllowed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
         )
     }
 }

@@ -28,10 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
-import cl.blipblipcode.prefixsapp.ui.theme.AllowedCyan
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.DarkGray
-import cl.blipblipcode.prefixsapp.ui.theme.DividerColor
 
 @Composable
 fun PrefixList(
@@ -48,7 +44,7 @@ fun PrefixList(
                 prefixRule = prefixRule,
                 onRemove = { onRemovePrefix(prefixRule) }
             )
-            HorizontalDivider(color = DividerColor, thickness = 1.dp)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
         }
     }
 }
@@ -59,7 +55,7 @@ fun PrefixItem(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val statusColor = if (prefixRule.isBlocked) BlockedRed else AllowedCyan
+    val statusColor = if (prefixRule.isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
     val statusText = if (prefixRule.isBlocked) {
         stringResource(R.string.prefix_status_blocked)
     } else {
@@ -98,7 +94,7 @@ fun PrefixItem(
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(R.string.prefix_delete),
-                tint = DarkGray,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
         }

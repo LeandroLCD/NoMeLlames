@@ -34,7 +34,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -54,7 +53,6 @@ import cl.blipblipcode.prefixsapp.ui.prefix.PrefixScreen
 import cl.blipblipcode.prefixsapp.ui.prefix.components.PrefixTopBar
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsScreen
 import cl.blipblipcode.prefixsapp.ui.settings.components.SettingsTopBar
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
 import cl.blipblipcode.prefixsapp.ui.widget.dialog.versionControl.UpdateAvailableDialog
 import cl.blipblipcode.prefixsapp.ui.widget.dialog.versionControl.UpdateRequiredDialog
 import kotlinx.coroutines.launch
@@ -178,8 +176,8 @@ fun MainScreen(
                 SnackbarHost(hostState = snackbarHostState) { data ->
                     Snackbar(
                         snackbarData = data,
-                        containerColor = BlockedRed,
-                        contentColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
                         shape = RoundedCornerShape(4.dp)
                     )
                 }

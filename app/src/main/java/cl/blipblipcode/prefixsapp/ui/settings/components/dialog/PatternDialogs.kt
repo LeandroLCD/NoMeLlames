@@ -36,11 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
 
 /**
  * Dialog to enable pattern lock with pattern input
@@ -67,8 +63,8 @@ fun EnablePatternDialog(
                 .fillMaxWidth()
                 .padding(24.dp),
             shape = RoundedCornerShape(4.dp),
-            color = DarkBg,
-            border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.3f))
+            color = MaterialTheme.colorScheme.background,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -83,7 +79,7 @@ fun EnablePatternDialog(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     ),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -95,7 +91,7 @@ fun EnablePatternDialog(
                         stringResource(R.string.security_dialog_draw_pattern)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
@@ -126,12 +122,12 @@ fun EnablePatternDialog(
                             }
                         }
                     },
-                    errorColor = if (error != null) BlockedRed else null
+                    errorColor = if (error != null) MaterialTheme.colorScheme.error else null
                 )
                 Text(
                     text = error.orEmpty(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = BlockedRed
+                    color = MaterialTheme.colorScheme.error
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -145,7 +141,7 @@ fun EnablePatternDialog(
                         Text(
                             text = stringResource(R.string.security_cancel),
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CyanAccent
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -177,8 +173,8 @@ fun DisablePatternDialog(
                 .fillMaxWidth()
                 .padding(24.dp),
             shape = RoundedCornerShape(4.dp),
-            color = DarkBg,
-            border = BorderStroke(1.dp, BlockedRed.copy(alpha = 0.3f))
+            color = MaterialTheme.colorScheme.background,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -191,7 +187,7 @@ fun DisablePatternDialog(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     ),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -199,7 +195,7 @@ fun DisablePatternDialog(
                 Text(
                     text = stringResource(R.string.security_dialog_enter_current_pattern),
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
@@ -216,14 +212,14 @@ fun DisablePatternDialog(
                             enteredPattern = emptyList()
                         }
                     },
-                    errorColor = if (error != null) BlockedRed else null,
-                    accentColor = BlockedRed
+                    errorColor = if (error != null) MaterialTheme.colorScheme.error else null,
+                    accentColor = MaterialTheme.colorScheme.error
                 )
 
                 Text(
                     text = error.orEmpty(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = BlockedRed
+                    color = MaterialTheme.colorScheme.error
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -237,7 +233,7 @@ fun DisablePatternDialog(
                         Text(
                             text = stringResource(R.string.security_cancel),
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CyanAccent
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -255,13 +251,14 @@ fun PatternInputGrid(
     onPatternComplete: (List<Int>) -> Unit,
     modifier: Modifier = Modifier,
     errorColor: Color? = null,
-    accentColor: Color = CyanAccent
+    accentColor: Color = Color.Unspecified
 ) {
+    val resolvedAccentColor = if (accentColor == Color.Unspecified) MaterialTheme.colorScheme.primary else accentColor
     val currentPattern = remember { mutableStateListOf<Int>() }
     var isDragging by remember { mutableStateOf(false) }
-    
-    val activeColor = errorColor ?: accentColor
-    val inactiveColor = Color.White.copy(alpha = 0.1f)
+
+    val inactiveColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
+    val activeColor = errorColor ?: resolvedAccentColor
 
     Canvas(
         modifier = modifier
@@ -400,8 +397,8 @@ fun VerifyPatternDialog(
                 .fillMaxWidth()
                 .padding(24.dp),
             shape = RoundedCornerShape(4.dp),
-            color = DarkBg,
-            border = BorderStroke(1.dp, CyanAccent.copy(alpha = 0.3f))
+            color = MaterialTheme.colorScheme.background,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -414,7 +411,7 @@ fun VerifyPatternDialog(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     ),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -422,7 +419,7 @@ fun VerifyPatternDialog(
                 Text(
                     text = stringResource(R.string.security_dialog_enter_pattern_to_continue),
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
@@ -439,13 +436,13 @@ fun VerifyPatternDialog(
                             enteredPattern = emptyList()
                         }
                     },
-                    errorColor = if (error != null) BlockedRed else null
+                    errorColor = if (error != null) MaterialTheme.colorScheme.error else null
                 )
 
                 Text(
                     text = error.orEmpty(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = BlockedRed
+                    color = MaterialTheme.colorScheme.error
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -459,7 +456,7 @@ fun VerifyPatternDialog(
                         Text(
                             text = stringResource(R.string.security_cancel),
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CyanAccent
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

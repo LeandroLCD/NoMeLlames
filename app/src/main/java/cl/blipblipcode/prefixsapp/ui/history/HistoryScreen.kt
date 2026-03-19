@@ -51,16 +51,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IGetCallHistoryUseCase
-import cl.blipblipcode.prefixsapp.ui.theme.AllowedCyan
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRedTransparent
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
-import cl.blipblipcode.prefixsapp.ui.theme.DarkGray
-import cl.blipblipcode.prefixsapp.ui.theme.DividerColor
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
-import cl.blipblipcode.prefixsapp.ui.theme.PurpleAccent
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -111,7 +102,7 @@ private fun HistoryContentContainer(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = CyanAccent)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
 
@@ -126,8 +117,8 @@ private fun HistoryContentContainer(
         Surface(
             modifier = Modifier.size(56.dp).align(Alignment.BottomEnd).padding(16.dp),
             shape = RoundedCornerShape(4.dp),
-            color = DarkBg,
-            border = BorderStroke(1.dp, if (canExport) CyanAccent else DarkGray)
+            color = MaterialTheme.colorScheme.background,
+            border = BorderStroke(1.dp, if (canExport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)
         ) {
             IconButton(
                 onClick = onExportClick,
@@ -136,14 +127,14 @@ private fun HistoryContentContainer(
                 if (isExporting) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = CyanAccent,
+                        color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Icon(
                         Icons.Outlined.Download,
                         contentDescription = null,
-                        tint = if (canExport) CyanAccent else TextGray
+                        tint = if (canExport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -166,7 +157,7 @@ private fun HistoryContent(
             onFilterSelected = onFilterSelected
         )
 
-        HorizontalDivider(color = DividerColor, thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
 
         if (state.isEmpty) {
             Box(
@@ -176,7 +167,7 @@ private fun HistoryContent(
                 Text(
                     text = stringResource(R.string.history_empty),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = TextGray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {
@@ -194,7 +185,7 @@ private fun HistoryContent(
                             item = item,
                             dateFormat = dateFormat
                         )
-                        HorizontalDivider(color = DividerColor, thickness = 1.dp)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                     }
                 }
             }
@@ -206,7 +197,7 @@ private fun HistoryContent(
 private fun DateHeader(date: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = DarkBg
+        color = MaterialTheme.colorScheme.background
     ) {
         Text(
             text = date,
@@ -214,7 +205,7 @@ private fun DateHeader(date: String) {
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             ),
-            color = PurpleAccent,
+            color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
     }
@@ -266,7 +257,7 @@ private fun FilterButton(
         color = Color.Transparent,
         border = BorderStroke(
             width = 1.dp,
-            color = if (isSelected) PurpleAccent else DarkGray
+            color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
         )
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -274,7 +265,7 @@ private fun FilterButton(
                 text = text,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = if (isSelected) Color.White else TextGray
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         }
@@ -287,7 +278,7 @@ private fun HistoryItem(
     dateFormat: SimpleDateFormat
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val statusColor = if (item.isBlocked) BlockedRed else AllowedCyan
+    val statusColor = if (item.isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
     val statusText = if (item.isBlocked) {
         stringResource(R.string.history_status_blocked)
     } else {
@@ -307,13 +298,13 @@ private fun HistoryItem(
             Text(
                 text = dateFormat.format(Date(item.timestamp)),
                 style = MaterialTheme.typography.bodySmall,
-                color = TextGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.width(75.dp)
             )
             Text(
                 text = item.phoneNumber,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -336,12 +327,12 @@ private fun HistoryItem(
                 Text(
                     text = stringResource(R.string.history_operator_label),
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextGray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = stringResource(R.string.history_unknown_operator),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -349,28 +340,28 @@ private fun HistoryItem(
                 Text(
                     text = stringResource(R.string.history_matching_rule_label),
                     style = MaterialTheme.typography.labelSmall,
-                    color = TextGray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 item.matchedPrefix?.let { prefix ->
                     Box(
                         modifier = Modifier
-                            .border(1.dp, BlockedRed, RoundedCornerShape(2.dp))
-                            .background(BlockedRedTransparent)
+                            .border(1.dp, MaterialTheme.colorScheme.error, RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "[$prefix] - DETERMINISTIC_BLOCK",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = BlockedRed
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 } ?: run {
                     Text(
                         text = stringResource(R.string.history_no_matched_rule),
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextGray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

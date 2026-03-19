@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cl.blipblipcode.prefixsapp.BuildConfig
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 import cl.blipblipcode.prefixsapp.ui.widget.icons.CallLog
@@ -56,12 +57,11 @@ fun CriticalSettingScreen(
     onBackStack: () -> Unit = {},
     onConfirm: () -> Unit = {}
 ) {
-    val backgroundColor = Color(0xFF102022)
-    val primaryColor = Color(0xFF13DDEC)
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = backgroundColor,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
                 modifier = Modifier.drawBehind {
@@ -73,7 +73,7 @@ fun CriticalSettingScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundColor
+                    containerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {
                     Text(
@@ -120,7 +120,7 @@ fun CriticalSettingScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f), RoundedCornerShape(2.dp))
                             .border(
                                 BorderStroke(1.dp, primaryColor.copy(alpha = 0.5f)),
                                 RoundedCornerShape(2.dp)
@@ -147,7 +147,7 @@ fun CriticalSettingScreen(
                 Text(
                     text = stringResource(R.string.critical_setting_description),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     textAlign = TextAlign.Center,
                     lineHeight = 20.sp,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -190,12 +190,12 @@ fun CriticalSettingScreen(
                                 imageVector = Icons.CallLog,
                                 contentDescription = null,
                                 modifier = Modifier.size(36.dp),
-                                tint = Color.White.copy(alpha = 0.3f)
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                             )
                             Text(
                                 text = stringResource(R.string.critical_call_in),
                                 fontSize = 8.sp,
-                                color = Color.White.copy(alpha = 0.3f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
                             )
@@ -265,7 +265,6 @@ fun CriticalSettingScreen(
                     SettingOptionItem(
                         title = stringResource(R.string.critical_setting_auto_block_title),
                         subtitle = stringResource(R.string.critical_setting_auto_block_desc),
-                        primaryColor = primaryColor
                     )
                 }
             }
@@ -285,8 +284,8 @@ fun CriticalSettingScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryColor,
-                        contentColor = backgroundColor
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(8.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
@@ -302,7 +301,7 @@ fun CriticalSettingScreen(
                 Text(
                     text = stringResource(R.string.critical_setting_android_protocol),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.3f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
                     letterSpacing = 0.5.sp
@@ -318,7 +317,7 @@ fun CriticalSettingScreen(
                         .width(48.dp)
                         .background(primaryColor.copy(alpha = 0.2f)))
                     Text(
-                        text = stringResource(R.string.critical_setting_footer_version),
+                        text = stringResource(R.string.critical_setting_footer_version, BuildConfig.VERSION_NAME),
                         style = MaterialTheme.typography.labelSmall,
                         color = primaryColor.copy(alpha = 0.4f),
                         fontWeight = FontWeight.Bold,
@@ -338,9 +337,8 @@ fun CriticalSettingScreen(
 private fun SettingOptionItem(
     title: String,
     subtitle: String,
-    primaryColor: Color
 ) {
-
+    val primaryColor = MaterialTheme.colorScheme.primary
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -355,7 +353,7 @@ private fun SettingOptionItem(
             colors = CheckboxDefaults.colors(
                 checkedColor = primaryColor,
                 uncheckedColor = primaryColor.copy(alpha = 0.2f),
-                checkmarkColor = Color(0xFF102022)
+                checkmarkColor = MaterialTheme.colorScheme.background
             ),
             modifier = Modifier.size(24.dp)
         )
@@ -364,14 +362,14 @@ private fun SettingOptionItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 fontSize = 11.sp
             )
         }

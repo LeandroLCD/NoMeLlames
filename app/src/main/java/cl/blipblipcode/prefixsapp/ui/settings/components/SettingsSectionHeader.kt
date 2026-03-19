@@ -12,8 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DividerColor
+import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 
 @Composable
 fun SettingsSectionHeader(title: String) {
@@ -24,9 +23,9 @@ fun SettingsSectionHeader(title: String) {
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             ),
-            color = CyanAccent
+            color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(color = DividerColor, thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
     }
 }

@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +33,7 @@ import java.util.Locale
 @Composable
 fun ThreatItem(blockedCall: BlockedCall) {
     val isBlocked = !blockedCall.matchedPrefix.contains("FAMILIA")
+    val errorColor = MaterialTheme.colorScheme.error
 
     Row(
         modifier = Modifier
@@ -44,7 +44,7 @@ fun ThreatItem(blockedCall: BlockedCall) {
             .drawBehind {
                 if (isBlocked) {
                     drawLine(
-                        color = Color.Red,
+                        color = errorColor,
                         start = Offset(0f, 0f),
                         end = Offset(0f, size.height),
                         strokeWidth = 4.dp.toPx()
@@ -59,7 +59,7 @@ fun ThreatItem(blockedCall: BlockedCall) {
                 .size(32.dp)
                 .clip(RoundedCornerShape(2.dp))
                 .background(
-                    if (isBlocked) Color.Red.copy(alpha = 0.1f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                    if (isBlocked) MaterialTheme.colorScheme.error.copy(alpha = 0.1f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(
                         alpha = 0.2f
                     )
                 ),
@@ -68,7 +68,7 @@ fun ThreatItem(blockedCall: BlockedCall) {
             Icon(
                 if (isBlocked) Icons.Filled.Block else Icons.Filled.History,
                 contentDescription = null,
-                tint = if (isBlocked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(16.dp)
             )
         }

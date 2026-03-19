@@ -17,8 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
+import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,20 +30,20 @@ fun PrefixTopBar() {
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 ),
-                color = CyanAccent
+                color = MaterialTheme.colorScheme.primary
             )
         },
         navigationIcon = {
             Icon(
                 Icons.Rounded.PhoneLocked,
                 contentDescription = null,
-                tint = CyanAccent,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DarkBg,
-            titleContentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onBackground
         )
     )
 }

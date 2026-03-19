@@ -33,11 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.AllowedCyan
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkGray
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
 
 @Composable
 fun PrefixInputSection(
@@ -53,14 +48,14 @@ fun PrefixInputSection(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .border(1.dp, DarkGray, RoundedCornerShape(2.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "+",
             style = MaterialTheme.typography.titleLarge,
-            color = TextGray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.width(12.dp))
         Box(modifier = Modifier.weight(1f)) {
@@ -68,14 +63,14 @@ fun PrefixInputSection(
                 Text(
                     text = stringResource(R.string.prefix_new_placeholder),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextGray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
-                cursorBrush = SolidColor(CyanAccent),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -101,7 +96,7 @@ fun PrefixInputSection(
             },
             enabled = enabled,
             color = Color.Transparent,
-            border = BorderStroke(1.dp, if (enabled) CyanAccent else DarkGray),
+            border = BorderStroke(1.dp, if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
             shape = RoundedCornerShape(2.dp),
             modifier = Modifier.height(36.dp)
         ) {
@@ -112,7 +107,7 @@ fun PrefixInputSection(
                 Text(
                     text = stringResource(R.string.prefix_add),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = if (enabled) CyanAccent else TextGray
+                    color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -129,7 +124,7 @@ fun RuleTypeToggle(
         modifier = modifier
             .width(54.dp)
             .height(28.dp)
-            .border(1.dp, CyanAccent, RoundedCornerShape(2.dp))
+            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             .clickable { onToggle() }
             .padding(2.dp)
     ) {
@@ -138,7 +133,7 @@ fun RuleTypeToggle(
                 .fillMaxHeight()
                 .width(24.dp)
                 .align(if (isAllowed) Alignment.CenterEnd else Alignment.CenterStart)
-                .background(if (isAllowed) AllowedCyan else BlockedRed)
+                .background(if (isAllowed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
         )
     }
 }

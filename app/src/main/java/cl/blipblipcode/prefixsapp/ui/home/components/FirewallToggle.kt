@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,7 +39,7 @@ fun FirewallToggle(isEnabled: Boolean, onToggle: () -> Unit) {
             modifier = Modifier
                 .size(width = 54.dp, height = 28.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(if (isEnabled) MaterialTheme.colorScheme.primary else Color.DarkGray)
+                .background(if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                 .toggleable(isEnabled) { onToggle() }
                 .padding(2.dp)
         ) {
@@ -49,7 +48,7 @@ fun FirewallToggle(isEnabled: Boolean, onToggle: () -> Unit) {
                     .fillMaxHeight()
                     .width(24.dp)
                     .align(if (isEnabled) Alignment.CenterEnd else Alignment.CenterStart)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.onPrimary)
             )
         }
         Spacer(modifier = Modifier.width(16.dp))

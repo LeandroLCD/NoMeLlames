@@ -15,16 +15,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
-import cl.blipblipcode.prefixsapp.ui.theme.TextGray
 
 @Composable
 fun PurgeConfirmationDialog(
@@ -34,7 +29,7 @@ fun PurgeConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = { if (!isPurging) onDismiss() },
-        containerColor = DarkBg,
+        containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(4.dp),
         title = {
             Text(
@@ -43,21 +38,21 @@ fun PurgeConfirmationDialog(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = BlockedRed
+                color = MaterialTheme.colorScheme.error
             )
         },
         text = {
             Text(
                 text = stringResource(R.string.settings_purge_dialog_message),
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextGray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         confirmButton = {
             Surface(
                 onClick = onConfirm,
                 enabled = !isPurging,
-                color = BlockedRed,
+                color = MaterialTheme.colorScheme.error,
                 shape = RoundedCornerShape(2.dp)
             ) {
                 Row(
@@ -67,7 +62,7 @@ fun PurgeConfirmationDialog(
                     if (isPurging) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onError,
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -75,7 +70,7 @@ fun PurgeConfirmationDialog(
                     Text(
                         text = stringResource(R.string.settings_purge_dialog_confirm),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onError
                     )
                 }
             }
@@ -88,7 +83,7 @@ fun PurgeConfirmationDialog(
                 Text(
                     text = stringResource(R.string.settings_purge_dialog_cancel),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = CyanAccent
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

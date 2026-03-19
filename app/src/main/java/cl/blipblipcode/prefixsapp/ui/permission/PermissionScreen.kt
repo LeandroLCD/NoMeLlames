@@ -56,14 +56,13 @@ fun PermissionScreen(
     onPermissionGranted: () -> Unit = {},
     onPermissionDenied: () -> Unit = {}
 ) {
-    val backgroundColor = Color(0xFF102022)
-    val primaryColor = Color(0xFF13DDEC)
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = backgroundColor,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            PermissionTopAppBar(primaryColor = primaryColor)
+            PermissionTopAppBar()
         }
     ) { paddingValues ->
         Column(
@@ -83,7 +82,7 @@ fun PermissionScreen(
                 Text(
                     text = stringResource(id = R.string.permission_protocol),
                     style = MaterialTheme.typography.titleMedium,
-                    color = primaryColor,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -107,7 +106,7 @@ fun PermissionScreen(
                 Text(
                     text = annotatedString,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.inverseSurface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                     lineHeight = 16.sp,
                     modifier = Modifier
@@ -136,7 +135,7 @@ fun PermissionScreen(
                 Text(
                     text = stringResource(id = R.string.permission_required_label),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.5.sp,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -146,7 +145,6 @@ fun PermissionScreen(
                     icon = Icons.Filled.PhonelinkSetup,
                     title = stringResource(id = R.string.permission_read_phone_state_title),
                     description = stringResource(id = R.string.permission_read_phone_state_desc),
-                    primaryColor = primaryColor
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -155,7 +153,6 @@ fun PermissionScreen(
                     icon = Icons.CallLog,
                     title = stringResource(id = R.string.permission_read_call_log_title),
                     description = stringResource(id = R.string.permission_read_call_log_desc),
-                    primaryColor = primaryColor
                 )
             }
 
@@ -172,8 +169,8 @@ fun PermissionScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryColor,
-                        contentColor = backgroundColor
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(2.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
@@ -203,9 +200,9 @@ fun PermissionScreen(
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.White.copy(alpha = 0.6f)
+                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     ),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)),
                     shape = RoundedCornerShape(2.dp)
                 ) {
                     Text(
@@ -223,9 +220,9 @@ fun PermissionScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PermissionTopAppBar(
-    primaryColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     CenterAlignedTopAppBar(
         modifier = modifier.drawBehind {
             drawLine(
@@ -239,7 +236,7 @@ private fun PermissionTopAppBar(
             Text(
                 text = stringResource(id = R.string.permission_title),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
@@ -268,9 +265,9 @@ private fun PermissionItem(
     icon: ImageVector,
     title: String,
     description: String,
-    primaryColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -297,13 +294,13 @@ private fun PermissionItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.5f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
         }
     }

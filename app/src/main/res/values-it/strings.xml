@@ -177,7 +177,7 @@
     <string name="critical_setting_auto_block_desc">Filtra le chiamate e le confronta con le tue regole.</string>
     <string name="critical_setting_set_default">IMPOSTA COME PREDEFINITA</string>
     <string name="critical_setting_android_protocol">Azione richiesta dal protocollo di sicurezza di Android</string>
-    <string name="critical_setting_footer_version">NOMELAMES_SEC_V4.0</string>
+    <string name="critical_setting_footer_version">PREFIXAPP_SEC_V%1$s</string>
     <string name="critical_call_in">IN ENTRATA</string>
     <string name="critical_protected">PROTETTO</string>
     <string name="critical_system_active">SISTEMA ATTIVO</string>

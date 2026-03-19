@@ -16,8 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
-import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
 import cl.blipblipcode.prefixsapp.ui.widget.icons.CallLog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +29,7 @@ fun HistoryTopBar(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp,
-                    color = CyanAccent
+                    color = MaterialTheme.colorScheme.primary
                 )
             )
         },
@@ -39,14 +37,14 @@ fun HistoryTopBar(modifier: Modifier = Modifier) {
             Icon(
                 Icons.CallLog,
                 contentDescription = null,
-                tint = CyanAccent,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .size(24.dp)
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DarkBg
+            containerColor = MaterialTheme.colorScheme.background
         )
     )
 }

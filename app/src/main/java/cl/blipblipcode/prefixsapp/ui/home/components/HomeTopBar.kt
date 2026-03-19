@@ -25,15 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
-import cl.blipblipcode.prefixsapp.ui.theme.CyanAccent
 import cl.blipblipcode.prefixsapp.ui.widget.icons.Locked
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar(permission: Boolean) {
     val primaryColor = MaterialTheme.colorScheme.primary
-    val statusColor = if (permission) primaryColor else BlockedRed
+    val statusColor = if (permission) primaryColor else MaterialTheme.colorScheme.error
     val statusRes = if (permission) R.string.home_status_online else R.string.home_status_offline
 
     TopAppBar(
@@ -60,7 +58,7 @@ fun HomeTopBar(permission: Boolean) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp,
-                    color = CyanAccent
+                    color = primaryColor
                 )
             }
         },

@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.ui.home.model.Permission
-import cl.blipblipcode.prefixsapp.ui.theme.BlockedRed
 import cl.blipblipcode.prefixsapp.ui.widget.icons.Logo
 
 @Composable
@@ -79,7 +78,7 @@ fun StatusSection(permission: Permission) {
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-        val systemColor = if (permission.isActive) primaryColor else BlockedRed
+        val systemColor = if (permission.isActive) primaryColor else MaterialTheme.colorScheme.error
         val systemRes = if (permission.isActive) R.string.home_system_active else R.string.home_system_inactive
 
         Text(
