@@ -25,20 +25,18 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
+    allPermission: Boolean,
     requiresAuth: Boolean,
     modifier: Modifier = Modifier,
-    isCallScreeningEnabled: Boolean,
-    permissionsGranted: Boolean,
     onNavigation: (Screen) -> Unit
 ) {
 
     LaunchedEffect(Unit) {
-        delay(600)
+        delay(300)
         when {
             requiresAuth -> onNavigation(Screen.Security)
-            isCallScreeningEnabled && permissionsGranted -> onNavigation(Screen.Main)
-            !isCallScreeningEnabled -> onNavigation(Screen.CriticalSetting)
-            else -> onNavigation(Screen.Permission)
+            allPermission-> onNavigation(Screen.Main(0))
+            else -> onNavigation(Screen.Main(1))
         }
     }
     val primaryColor = MaterialTheme.colorScheme.primary

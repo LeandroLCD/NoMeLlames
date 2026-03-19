@@ -25,6 +25,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,7 @@ import cl.blipblipcode.prefixsapp.ui.history.HistoryScreen
 import cl.blipblipcode.prefixsapp.ui.history.components.HistoryTopBar
 import cl.blipblipcode.prefixsapp.ui.home.HomeScreen
 import cl.blipblipcode.prefixsapp.ui.home.components.HomeTopBar
+import cl.blipblipcode.prefixsapp.ui.navigation.Screen
 import cl.blipblipcode.prefixsapp.ui.prefix.PrefixScreen
 import cl.blipblipcode.prefixsapp.ui.prefix.components.PrefixTopBar
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsScreen
@@ -66,14 +68,25 @@ object TabIds {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    isEnabled: Boolean,
+    index:Int,
+    isCallScreeningEnabled: Boolean,
     permissionsGranted: Boolean,
     supportsRoleRequest: Boolean,
-    onRequestPermissions: () -> Unit,
+    onRequestPermissions: (Screen) -> Unit,
     onDisableRole: () -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
+
     val tabIdCurrent by viewModel.tabIdCurrent.collectAsState()
+
+    LaunchedEffect(index){
+        when(index){
+            0 -> viewModel.setTabIdCurrent(TabIds.HOME)
+            1 -> viewModel.setTabIdCurrent(TabIds.PREFIXES)
+            2 -> viewModel.setTabIdCurrent(TabIds.HISTORY)
+            else -> viewModel.setTabIdCurrent(TabIds.SETTINGS)
+        }
+    }
     val unseenCount by viewModel.unseenCount.collectAsState()
 
     val homeTag = stringResource(R.string.tab_home)
@@ -189,10 +202,15 @@ fun MainScreen(
                 AnimatedContent(tabIdCurrent, Modifier) { current ->
                     when (current) {
                         TabIds.HOME -> HomeScreen(
-                            isEnabled = isEnabled,
+                            isCallScreeningEnabled = isCallScreeningEnabled,
                             permissionsGranted = permissionsGranted,
                             supportsRoleRequest = supportsRoleRequest,
-                            onRequestPermissions = onRequestPermissions,
+                            onRequestPermissions = {
+                                when{
+                                    !isCallScreeningEnabled -> onRequestPermissions(Screen.CriticalSetting)
+                                    !permissionsGranted -> onRequestPermissions(Screen.Permission)
+                                }
+                            },
                             onGoHistory = { viewModel.setTabIdCurrent(TabIds.HISTORY) },
                             onDisableRole = onDisableRole
                         )

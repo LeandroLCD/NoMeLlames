@@ -48,7 +48,7 @@
     <string name="prefix_title">[ PREFIXES ]</string>
     <string name="prefix_description">Do not include the country code.\nExample: write 907, not +56907.</string>
     <string name="prefix_new_label">New prefix</string>
-    <string name="prefix_new_placeholder">ENTER PREF</string>
+    <string name="prefix_new_placeholder">ENTER PREFIX</string>
     <string name="prefix_add">ADD</string>
     <string name="prefix_delete">Delete</string>
     <string name="prefix_empty">No prefixes configured</string>

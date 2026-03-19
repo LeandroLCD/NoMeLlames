@@ -8,7 +8,7 @@ sealed interface Screen: NavKey {
     @Serializable
     data object Splash: Screen
     @Serializable
-    data object Main: Screen
+    data class Main(val index:Int): Screen
     @Serializable
     data object Permission: Screen
     @Serializable

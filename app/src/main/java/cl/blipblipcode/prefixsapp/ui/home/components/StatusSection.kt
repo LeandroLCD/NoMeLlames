@@ -33,7 +33,7 @@ import cl.blipblipcode.prefixsapp.ui.home.model.Permission
 import cl.blipblipcode.prefixsapp.ui.widget.icons.Logo
 
 @Composable
-fun StatusSection(permission: Permission) {
+fun StatusSection(permission: Permission, prefixCount: Int) {
     val primaryColor = MaterialTheme.colorScheme.primary
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -115,6 +115,15 @@ fun StatusSection(permission: Permission) {
             text = text,
             modifier = Modifier.padding(top = 8.dp)
         )
+        if(prefixCount == 0){
+            Text(
+                text = "Requiere Configurar Prefijos",
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
     }
 }
 

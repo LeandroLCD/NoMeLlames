@@ -149,11 +149,6 @@ fun PermissionScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                PermissionItem(
-                    icon = Icons.CallLog,
-                    title = stringResource(id = R.string.permission_read_call_log_title),
-                    description = stringResource(id = R.string.permission_read_call_log_desc),
-                )
             }
 
             // Action Area

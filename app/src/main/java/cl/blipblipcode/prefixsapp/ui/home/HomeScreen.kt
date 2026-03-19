@@ -33,7 +33,7 @@ import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 
 @Composable
 fun HomeScreen(
-    isEnabled: Boolean,
+    isCallScreeningEnabled: Boolean,
     modifier: Modifier = Modifier,
     permissionsGranted: Boolean,
     supportsRoleRequest: Boolean,
@@ -45,8 +45,8 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val permission by viewModel.permission.collectAsState()
 
-    LaunchedEffect(isEnabled, permissionsGranted, supportsRoleRequest) {
-        viewModel.updateSystemState(isEnabled, permissionsGranted, supportsRoleRequest)
+    LaunchedEffect(isCallScreeningEnabled, permissionsGranted, supportsRoleRequest) {
+        viewModel.updateSystemState(isCallScreeningEnabled, permissionsGranted, supportsRoleRequest)
     }
 
     Surface(
@@ -89,7 +89,7 @@ private fun HomeContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { StatusSection(permission) }
+        item { StatusSection(permission, state.prefixCount) }
         item { FirewallToggle(isEnabled = permission.isActive, onToggle = onToggleMaster) }
         item { StatsSection(blocked = state.blockedCount, allowed = state.allowedCount) }
         state.lastUpdate?.let {

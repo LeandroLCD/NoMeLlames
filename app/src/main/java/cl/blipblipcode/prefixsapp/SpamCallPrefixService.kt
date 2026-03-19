@@ -158,7 +158,8 @@ class SpamCallPrefixService : CallScreeningService() {
 
     private fun detectCountryDialingCode(): String? {
         val tm = getSystemService(TELEPHONY_SERVICE) as? TelephonyManager
-        val countryIso = (tm?.simCountryIso ?: tm?.networkCountryIso)?.uppercase()
+        val simIso = try { tm?.simCountryIso } catch (_: SecurityException) { null }
+        val countryIso = (simIso ?: tm?.networkCountryIso)?.uppercase()
         return CountryDialingCodeProvider.getDialingCode(applicationContext, countryIso)
     }
 
