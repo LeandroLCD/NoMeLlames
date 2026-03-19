@@ -28,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
-import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 
 @Composable
  fun DangerousZone(
