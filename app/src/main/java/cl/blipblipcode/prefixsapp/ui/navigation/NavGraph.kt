@@ -13,23 +13,28 @@ import cl.blipblipcode.prefixsapp.ui.main.MainScreen
 import cl.blipblipcode.prefixsapp.ui.permission.CriticalSettingScreen
 import cl.blipblipcode.prefixsapp.ui.permission.PermissionScreen
 import cl.blipblipcode.prefixsapp.ui.security.SecurityScreen
+import cl.blipblipcode.prefixsapp.ui.splash.SplashScreen
 import cl.blipblipcode.prefixsapp.utils.biometric.BiometricHelper
 
 @Composable
-fun NavGraph(
-    biometricLockEnabled: Boolean,
-    patternLockEnabled: Boolean,
-    storedPattern: List<Int>,
-    isCallScreeningEnabled: Boolean,
-    permissionsGranted: Boolean,
-    supportsCallScreeningRole: Boolean,
-    onAuthSuccess: (Boolean) -> Unit
-) {
-    val backStack = rememberNavBackStack(Screen.Security)
+fun MainActivity.NavGraph() {
+    val backStack = rememberNavBackStack(Screen.Splash)
+    val activity = this
 
     val entries = entryProvider<NavKey> {
+        entry<Screen.Splash> {
+            SplashScreen(
+                isCallScreeningEnabled = isCallScreeningEnabled,
+                requiresAuth = biometricLockEnabled || patternLockEnabled,
+                permissionsGranted = permissionsGranted,
+                onNavigation = { screen ->
+                    backStack.add(screen)
+                    backStack.removeIf { it == Screen.Splash }
+                },
+            )
+
+        }
         entry<Screen.Security> {
-            val activity = LocalActivity.current as MainActivity
             SecurityScreen(
                 showBiometric = biometricLockEnabled && BiometricHelper.canAuthenticateWithBiometrics(
                     activity
@@ -37,9 +42,12 @@ fun NavGraph(
                 showPattern = patternLockEnabled && storedPattern.isNotEmpty(),
                 storedPattern = storedPattern,
                 onAuthSuccess = {
-                    onAuthSuccess(true)
-                    backStack.add(Screen.Main)
-                    backStack.removeIf { it != Screen.Main }
+                    if (permissionsGranted && isCallScreeningEnabled) {
+                        backStack.add(Screen.Main)
+                    } else {
+                        backStack.add(Screen.CriticalSetting)
+                    }
+                    backStack.removeIf { it == Screen.Security }
                 },
                 onCancel = { activity.finishAffinity() }
             )
@@ -49,35 +57,39 @@ fun NavGraph(
                 isEnabled = isCallScreeningEnabled,
                 permissionsGranted = permissionsGranted,
                 supportsRoleRequest = supportsCallScreeningRole,
-                onRequestPermissions = { requestPermissions() },
+                onRequestPermissions = { backStack.add(Screen.Permission) },
                 onDisableRole = {
                     if (!supportsCallScreeningRole) {
-                        persistLegacyScreeningConfigured(false)
-                        checkCallScreeningRole()
+                        activity.persistLegacyScreeningConfigured(false)
+                        activity.checkCallScreeningRole()
                     }
-                    openDefaultAppsSettings()
+                    activity.openDefaultAppsSettings()
                 }
             )
         }
         entry<Screen.CriticalSetting> {
             CriticalSettingScreen(
                 onBackStack = {
-                    backStack.removeLastOrNull()
+                    backStack.removeIf { it == Screen.CriticalSetting }
+                    backStack.add(Screen.Main)
                 },
                 onConfirm = {
-                    backStack.removeLastOrNull()
+                    activity.requestCallScreeningRole()
+                    backStack.removeIf { it == Screen.CriticalSetting }
+                    backStack.add(Screen.Permission)
                 }
             )
         }
         entry<Screen.Permission> {
             PermissionScreen(
                 onPermissionGranted = {
-                    backStack.add(Screen.Main)
+                    activity.requestPermissions()
                     backStack.removeIf { it == Screen.Permission }
+                    backStack.add(Screen.Main)
                 },
                 onPermissionDenied = {
-                    backStack.add(Screen.Main)
                     backStack.removeIf { it == Screen.Permission }
+                    backStack.add(Screen.Main)
                 }
             )
         }
@@ -90,6 +102,6 @@ fun NavGraph(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
-        onBack = { backStack.removeLastOrNull() })
-
+        onBack = { backStack.removeLastOrNull() }
+    )
 }

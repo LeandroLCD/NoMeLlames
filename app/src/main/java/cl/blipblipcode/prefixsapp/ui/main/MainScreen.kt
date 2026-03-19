@@ -138,7 +138,6 @@ fun MainScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val versionStatus by viewModel.versionStatus.collectAsState()
     var dialogDismiss by rememberSaveable {
         mutableStateOf(false)
@@ -148,15 +147,12 @@ fun MainScreen(
         Scaffold(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
-                .navigationBarsPadding()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+                .navigationBarsPadding(),
             topBar = {
                 AnimatedContent(tabIdCurrent, Modifier) { current ->
                     when (current) {
-                        TabIds.HOME -> HomeTopBar(permissionsGranted, scrollBehavior)
-                        TabIds.PREFIXES -> PrefixTopBar(
-                            scrollBehavior = scrollBehavior
-                        )
+                        TabIds.HOME -> HomeTopBar(permissionsGranted)
+                        TabIds.PREFIXES -> PrefixTopBar()
 
                         TabIds.HISTORY -> HistoryTopBar()
                         TabIds.SETTINGS -> SettingsTopBar {

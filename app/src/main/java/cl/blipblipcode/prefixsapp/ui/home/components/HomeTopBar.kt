@@ -32,16 +32,12 @@ import cl.blipblipcode.prefixsapp.ui.widget.icons.Locked
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopBar(
-    permission: Boolean,
-    scrollBehavior: TopAppBarScrollBehavior? = null
-) {
+fun HomeTopBar(permission: Boolean) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val statusColor = if (permission) primaryColor else BlockedRed
     val statusRes = if (permission) R.string.home_status_online else R.string.home_status_offline
 
     TopAppBar(
-        scrollBehavior = scrollBehavior,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(

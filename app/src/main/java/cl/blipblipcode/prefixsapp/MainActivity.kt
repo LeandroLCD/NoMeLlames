@@ -17,6 +17,7 @@ import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import cl.blipblipcode.prefixsapp.ui.main.MainScreen
+import cl.blipblipcode.prefixsapp.ui.navigation.NavGraph
 import cl.blipblipcode.prefixsapp.ui.security.SecurityScreen
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsViewModel
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
@@ -27,17 +28,17 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
-    private var isCallScreeningEnabled by mutableStateOf(false)
-    private var permissionsGranted by mutableStateOf(false)
+    var isCallScreeningEnabled by mutableStateOf(false)
+    var permissionsGranted by mutableStateOf(false)
     private var legacyScreeningConfigured by mutableStateOf(false)
     
     // Security state
     private var isAuthenticated by mutableStateOf(false)
-    private var biometricLockEnabled by mutableStateOf(false)
-    private var patternLockEnabled by mutableStateOf(false)
-    private var storedPattern by mutableStateOf<List<Int>>(emptyList())
+    var biometricLockEnabled by mutableStateOf(false)
+    var patternLockEnabled by mutableStateOf(false)
+    var storedPattern by mutableStateOf<List<Int>>(emptyList())
 
-    private val supportsCallScreeningRole: Boolean
+    val supportsCallScreeningRole: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     private val settingsPrefs by lazy {
@@ -48,8 +49,11 @@ class MainActivity : FragmentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         permissionsGranted = permissions.values.all { it }
-        if (permissionsGranted) {
-            requestCallScreeningRole()
+        when {
+            permissionsGranted -> requestCallScreeningRole()
+            permissions.entries.any { (permission, granted) ->
+                !granted && !shouldShowRequestPermissionRationale(permission)
+            } -> openAppSettings()
         }
     }
 
@@ -76,31 +80,7 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             PrefixsAppTheme {
-                val requiresAuth = (biometricLockEnabled || patternLockEnabled) && !isAuthenticated
-                
-                if (requiresAuth) {
-                    SecurityScreen(
-                        showBiometric = biometricLockEnabled && BiometricHelper.canAuthenticateWithBiometrics(this),
-                        showPattern = patternLockEnabled && storedPattern.isNotEmpty(),
-                        storedPattern = storedPattern,
-                        onAuthSuccess = { isAuthenticated = true },
-                        onCancel = { finishAffinity() }
-                    )
-                } else {
-                    MainScreen(
-                        isEnabled = isCallScreeningEnabled,
-                        permissionsGranted = permissionsGranted,
-                        supportsRoleRequest = supportsCallScreeningRole,
-                        onRequestPermissions = { requestPermissions() },
-                        onDisableRole = {
-                            if (!supportsCallScreeningRole) {
-                                persistLegacyScreeningConfigured(false)
-                                checkCallScreeningRole()
-                            }
-                            openDefaultAppsSettings()
-                        }
-                    )
-                }
+                NavGraph()
             }
         }
     }
@@ -131,7 +111,7 @@ class MainActivity : FragmentActivity() {
         checkCallScreeningRole()
     }
 
-    private fun checkCallScreeningRole() {
+    fun checkCallScreeningRole() {
         if (supportsCallScreeningRole) {
             val roleManager = getSystemService(RoleManager::class.java)
             isCallScreeningEnabled = roleManager?.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) == true
@@ -141,7 +121,7 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun requestPermissions() {
+    fun requestPermissions() {
         permissionLauncher.launch(
             arrayOf(
                 Manifest.permission.READ_PHONE_STATE,
@@ -150,7 +130,7 @@ class MainActivity : FragmentActivity() {
         )
     }
 
-    private fun requestCallScreeningRole() {
+    fun requestCallScreeningRole() {
         if (supportsCallScreeningRole) {
             val roleManager = getSystemService(RoleManager::class.java) ?: return
             if (roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) &&
@@ -167,12 +147,20 @@ class MainActivity : FragmentActivity() {
         checkCallScreeningRole()
     }
 
-    private fun persistLegacyScreeningConfigured(value: Boolean) {
+    fun persistLegacyScreeningConfigured(value: Boolean) {
         legacyScreeningConfigured = value
         settingsPrefs.edit { putBoolean(AppConstants.Prefs.KEY_LEGACY_SCREENING_CONFIGURED, value) }
     }
 
-    private fun openDefaultAppsSettings() {
+    internal fun openDefaultAppsSettings() {
         startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+    }
+
+    internal fun openAppSettings() {
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = android.net.Uri.fromParts("package", packageName, null)
+            }
+        )
     }
 }

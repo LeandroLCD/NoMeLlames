@@ -278,7 +278,9 @@ fun CriticalSettingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
-                    onClick = onConfirm,
+                    onClick = {
+                        onConfirm.invoke()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -292,6 +294,7 @@ fun CriticalSettingScreen(
                     Text(
                         text = stringResource(R.string.critical_setting_set_default),
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
                         letterSpacing = 1.sp
                     )
                 }

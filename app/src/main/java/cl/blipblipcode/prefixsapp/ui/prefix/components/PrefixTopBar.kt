@@ -23,11 +23,8 @@ import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrefixTopBar(
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-) {
+fun PrefixTopBar() {
     CenterAlignedTopAppBar(
-        scrollBehavior = scrollBehavior,
         title = {
             Text(
                 text = stringResource(R.string.prefix_title),
