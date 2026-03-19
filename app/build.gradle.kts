@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.biometric.ktx)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
+    implementation(libs.bundles.navigation3)
     implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
