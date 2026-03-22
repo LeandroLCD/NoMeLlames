@@ -69,7 +69,7 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     // Primary: Cyan profundo — legible sobre blanco
-    primary = CyanDeep,
+    primary = Color(0xFF00D1E0),
     onPrimary = Color.White,
     primaryContainer = CyanContainer,
     onPrimaryContainer = OnCyanContainer,
@@ -90,7 +90,7 @@ private val LightColorScheme = lightColorScheme(
     // Error
     error = Color(0xFFBA1A1A),
     onError = Color.White,
-    errorContainer = Color(0xFFFFDAD6),
+    errorContainer = Color(0xFFD1D1D6),
     onErrorContainer = Color(0xFF410002),
 
     // Background: blanco frío con tinte cyan
@@ -98,10 +98,10 @@ private val LightColorScheme = lightColorScheme(
     onBackground = LightOnBg,
 
     // Surface y variantes
-    surface = LightBg,
+    surface = Color(0xFFEAE9E9),
     onSurface = LightOnBg,
     surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = LightOnSurfaceVariant,
+    onSurfaceVariant = DarkGray,
     surfaceTint = CyanDeep,
     surfaceBright = Color.White,
     surfaceDim = Color(0xFFD6DADB),

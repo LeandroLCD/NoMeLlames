@@ -37,8 +37,8 @@ val RedDeep = Color(0xFF9C0031)           // Red oscuro legible sobre blanco
 val RedContainer = Color(0xFFFFD9E2)      // Wash red para contenedores
 val OnRedContainer = Color(0xFF40001A)    // Texto sobre RedContainer
 
-val LightBg = Color(0xFFF6FAFB)           // Blanco frío con tinte cyan
-val LightOnBg = Color(0xFF191C1E)         // Casi negro con tinte frío
+val LightBg = Color(0xFFF8F9FA)           // Blanco frío con tinte cyan
+val LightOnBg = Color(0xFF232323)         // Casi negro con tinte frío
 val LightSurfaceVariant = Color(0xFFDCE4E7)
 val LightOnSurfaceVariant = Color(0xFF404C50)
 val LightOutline = Color(0xFF6F797B)

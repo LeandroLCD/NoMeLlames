@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cl.blipblipcode.prefixsapp.ui.navigation.Screen
 import cl.blipblipcode.prefixsapp.ui.theme.DarkBg
+import cl.blipblipcode.prefixsapp.ui.theme.DarkGray
 import cl.blipblipcode.prefixsapp.ui.widget.icons.Logo
 import kotlinx.coroutines.delay
 
@@ -71,7 +72,7 @@ fun SplashScreen(
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(DarkGray)
                     .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
