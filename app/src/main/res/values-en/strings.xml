@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">PreFixApp</string>
 
     <!-- Content Descriptions -->
@@ -103,7 +103,7 @@
     <string name="settings_purge_dialog_title">⚠ CONFIRM PURGE</string>
     <string name="settings_purge_dialog_message">This action will permanently delete all call history and configured rules.\n\nThis operation cannot be undone.</string>
     <string name="settings_purge_dialog_confirm">PURGE</string>
-    <string name="settings_purge_dialog_cancel">CANCEL</string>
+    <string name="settings_purge_dialog_cancel" tools:ignore="ButtonCase">CANCEL</string>
     <string name="settings_purge_completed">Database purged successfully</string>
     <string name="settings_auth_title">Authentication required</string>
     <string name="settings_auth_subtitle">Confirm your identity to continue</string>
@@ -118,7 +118,7 @@
     <string name="security_auth">AUTHENTICATE</string>
     <string name="security_or_else">OR ELSE</string>
     <string name="security_enter_pattern">ENTER PATTERN</string>
-    <string name="security_cancel">CANCEL</string>
+    <string name="security_cancel" tools:ignore="ButtonCase">CANCEL</string>
     <string name="security_version_label">VERSION %1$s</string>
     <string name="security_encryption_label">AES-256 ENCRYPTION</string>
     <string name="security_auth_failed">Authentication failed</string>
