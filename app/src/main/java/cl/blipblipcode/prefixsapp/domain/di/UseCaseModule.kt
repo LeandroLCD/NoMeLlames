@@ -111,6 +111,18 @@ abstract class UseCaseModule {
         useCase: UpdatePrefixSyncUseCase
     ): IUpdatePrefixSyncUseCase
 
+    @Binds
+    @Singleton
+    abstract fun bindGetThemeAppUseCase(
+        useCase: GetThemeAppUseCase
+    ): IGetThemeAppUseCase
+
+    @Binds
+    @Singleton
+    abstract fun bindSetThemeAppUseCase(
+        useCase: SetThemeAppUseCase
+    ): ISetThemeAppUseCase
+
     // Prefix Use Cases
     @Binds
     @Singleton

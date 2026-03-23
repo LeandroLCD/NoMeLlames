@@ -2,6 +2,9 @@ package cl.blipblipcode.prefixsapp.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -20,6 +23,10 @@ import cl.blipblipcode.prefixsapp.data.local.database.AppDatabase
 import cl.blipblipcode.prefixsapp.utils.AppConstants
 import javax.inject.Named
 import javax.inject.Singleton
+
+private val Context.appPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = AppConstants.Prefs.DATASTORE_NAME
+)
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -106,6 +113,12 @@ object DataModule {
     @Named(AppConstants.Prefs.NAME)
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(AppConstants.Prefs.NAME, Context.MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppPreferencesDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return context.appPreferencesDataStore
     }
 
     @Provides

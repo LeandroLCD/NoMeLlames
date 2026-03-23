@@ -27,7 +27,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cl.blipblipcode.prefixsapp.R
+import cl.blipblipcode.prefixsapp.domain.model.ThemeApp
 import cl.blipblipcode.prefixsapp.ui.settings.components.DangerousZone
+import cl.blipblipcode.prefixsapp.ui.settings.components.SettingThemeItem
 import cl.blipblipcode.prefixsapp.ui.settings.components.SettingsSectionHeader
 import cl.blipblipcode.prefixsapp.ui.settings.components.SettingsToggleItem
 import cl.blipblipcode.prefixsapp.ui.settings.components.dialog.DisableBiometricDialog
@@ -58,6 +60,7 @@ fun SettingsScreen(
     val requireSecurityMsg = stringResource(R.string.settings_require_security)
     val purgeCompletedMsg = stringResource(R.string.settings_purge_completed)
     val eventFlow by viewModel.eventFlow.collectAsStateWithLifecycle(null)
+    val theme by viewModel.themeApp.collectAsStateWithLifecycle()
 
     // Handle events
     LaunchedEffect(eventFlow) {
@@ -101,8 +104,10 @@ fun SettingsScreen(
             is SettingsUiState.Content -> {
                 SettingsContent(
                     state = state,
+                    theme = theme,
                     securityState = securityState,
                     dialogState = dialogState,
+                    onThemeChanged = viewModel::setThemeApp,
                     onSkipCallLogChanged = viewModel::setSkipCallLog,
                     onSkipNotificationChanged = viewModel::setSkipNotification,
                     onBiometricLockChanged = viewModel::setBiometricLock,
@@ -117,14 +122,16 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     state: SettingsUiState.Content,
+    modifier: Modifier = Modifier,
+    theme: ThemeApp,
+    onThemeChanged: (ThemeApp) -> Unit,
     securityState: SecurityState,
     dialogState: SettingDialog,
     onSkipCallLogChanged: (Boolean) -> Unit,
     onSkipNotificationChanged: (Boolean) -> Unit,
     onBiometricLockChanged: (Boolean) -> Unit,
     onPatternLockChanged: (Boolean) -> Unit,
-    onPurgeDatabase: () -> Unit,
-    modifier: Modifier = Modifier
+    onPurgeDatabase: () -> Unit
 ) {
     Box(modifier.fillMaxSize()) {
         Column(
@@ -152,6 +159,17 @@ private fun SettingsContent(
                 checked = state.skipNotification,
                 onCheckedChange = onSkipNotificationChanged
             )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+
+            SettingThemeItem(
+                theme = theme,
+                onThemeChanged = onThemeChanged
+            )
+
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -240,6 +258,7 @@ fun SettingsScreenPreview() {
                     skipCallLog = true,
                     skipNotification = true
                 ),
+                theme = ThemeApp.System,
                 securityState = SecurityState(
                     biometricLock = true,
                     patternLock = false,
@@ -247,6 +266,7 @@ fun SettingsScreenPreview() {
                     hasDeviceCredential = true,
                     currentPattern = emptyList()
                 ),
+                onThemeChanged = {},
                 dialogState = SettingDialog.Idle,
                 onSkipCallLogChanged = {},
                 onSkipNotificationChanged = {},

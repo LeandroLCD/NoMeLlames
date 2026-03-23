@@ -16,14 +16,21 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cl.blipblipcode.prefixsapp.domain.model.ThemeApp
+import cl.blipblipcode.prefixsapp.domain.useCase.settings.IGetThemeAppUseCase
 import cl.blipblipcode.prefixsapp.ui.navigation.NavGraph
 import cl.blipblipcode.prefixsapp.ui.settings.SettingsViewModel
 import cl.blipblipcode.prefixsapp.ui.theme.PrefixsAppTheme
 import cl.blipblipcode.prefixsapp.utils.AppConstants
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
+
+    @Inject
+    lateinit var getThemeApp: IGetThemeAppUseCase
 
     var isCallScreeningEnabled by mutableStateOf(false)
     var permissionsGranted by mutableStateOf(false)
@@ -76,7 +83,8 @@ class MainActivity : FragmentActivity() {
         checkPermissionsAndRole()
 
         setContent {
-            PrefixsAppTheme {
+            val theme by getThemeApp.invoke().collectAsStateWithLifecycle(ThemeApp.System)
+            PrefixsAppTheme(themeApp = theme) {
                 NavGraph()
             }
         }

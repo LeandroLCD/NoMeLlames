@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.timber)
+    implementation(libs.androidx.datastore.preferences)
     implementation(project(":specialbottombar"))
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)

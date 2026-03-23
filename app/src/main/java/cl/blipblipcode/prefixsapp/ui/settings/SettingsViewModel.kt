@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cl.blipblipcode.prefixsapp.domain.model.ThemeApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IClearAllHistoryUseCase
@@ -13,6 +14,8 @@ import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipCallLogUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipNotificationUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.ISetSkipCallLogUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.ISetSkipNotificationUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.settings.IGetThemeAppUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.settings.ISetThemeAppUseCase
 import cl.blipblipcode.prefixsapp.ui.settings.state.SecurityState
 import cl.blipblipcode.prefixsapp.ui.settings.state.SettingDialog
 import cl.blipblipcode.prefixsapp.utils.AppConstants
@@ -37,12 +40,22 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     getSkipCallLogUseCase: IGetSkipCallLogUseCase,
     getSkipNotificationUseCase: IGetSkipNotificationUseCase,
+    getThemeAppUseCase: IGetThemeAppUseCase,
     private val setSkipCallLogUseCase: ISetSkipCallLogUseCase,
     private val setSkipNotificationUseCase: ISetSkipNotificationUseCase,
     private val clearAllHistoryUseCase: IClearAllHistoryUseCase,
     private val deleteAllPrefixesUseCase: IDeleteAllPrefixRulesUseCase,
+    private val setThemeAppUseCase: ISetThemeAppUseCase,
     @Named(AppConstants.Prefs.NAME) private val prefs: SharedPreferences
 ) : ViewModel() {
+
+    val themeApp = getThemeAppUseCase.invoke()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000L),
+            ThemeApp.System
+        )
+
 
     // Security state
     private val _securityState = MutableStateFlow(
@@ -101,10 +114,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun setThemeApp(theme: ThemeApp) {
+        viewModelScope.launch {
+            setThemeAppUseCase.invoke(theme)
+        }
+    }
+
     fun onConfirmEnableBiometric() {
         viewModelScope.launch {
             _dialogState.value = SettingDialog.Idle
-            _eventFlow.emit(SettingsEvent.RequestAuth(
+            _eventFlow.emit(
+                SettingsEvent.RequestAuth(
                 onSuccess = {
                     _securityState.update { it.copy(biometricLock = true) }
                     Timber.d(_securityState.value.toString())
@@ -117,7 +137,8 @@ class SettingsViewModel @Inject constructor(
     fun onConfirmDisableBiometric() {
         viewModelScope.launch {
             _dialogState.value = SettingDialog.Idle
-            _eventFlow.emit(SettingsEvent.RequestAuth(
+            _eventFlow.emit(
+                SettingsEvent.RequestAuth(
                 onSuccess = {
                     _securityState.update { it.copy(biometricLock = false) }
                     prefs.edit { putBoolean(KEY_BIOMETRIC_LOCK, false) }
@@ -165,7 +186,8 @@ class SettingsViewModel @Inject constructor(
             // If biometric is enabled, use biometric authentication
             securityState.biometricLock -> {
                 viewModelScope.launch {
-                    _eventFlow.emit(SettingsEvent.RequestAuth(
+                    _eventFlow.emit(
+                        SettingsEvent.RequestAuth(
                         onSuccess = { showPurgeConfirmationDialog() }
                     ))
                 }
@@ -205,7 +227,8 @@ class SettingsViewModel @Inject constructor(
                 SettingDialog.PurgeConfirmation(
                     onConfirm = {},
                     onDismiss = ::dismissDialog,
-                    isPurging = true)
+                    isPurging = true
+                )
             )
             clearAllHistoryUseCase().onSuccess {
                 deleteAllPrefixesUseCase.invoke().onSuccess {

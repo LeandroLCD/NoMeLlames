@@ -26,6 +26,7 @@ firebaseConfig = "23.0.1"
 kotlinxSerializationJson = "1.10.0"
 lifecycleViewmodelNav3 = "2.11.0-alpha02"
 navigationVersion = "1.0.1"
+datastore = "1.1.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigationVersion" }
 navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigationVersion" }
 navigation3-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 [bundles]
 navigation3 = ["navigation3-runtime", "navigation3-ui", "navigation3-viewmodel"]
