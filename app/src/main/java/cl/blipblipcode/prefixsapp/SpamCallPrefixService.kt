@@ -40,10 +40,12 @@ class SpamCallPrefixService : CallScreeningService() {
     override fun onCreate() {
         super.onCreate()
         loadPrefixRules()
+        loadSettings()
         countryDialingCode = detectCountryDialingCode()
         
         Timber.i("Detected country dialing code: ${countryDialingCode ?: "unknown"}")
         Timber.i("Loaded ${cachedPrefixRules.size} prefix rules from database")
+        Timber.i("Settings - skipCallLog: $skipCallLog, skipNotification: $skipNotification")
     }
 
     private fun loadPrefixRules() {
@@ -54,6 +56,17 @@ class SpamCallPrefixService : CallScreeningService() {
         } catch (e: Exception) {
             Timber.e(e, "Error loading prefix rules")
             cachedPrefixRules = emptyList()
+        }
+    }
+
+    private fun loadSettings() {
+        try {
+            skipCallLog = prefixRepository.skipCallLog.value
+            skipNotification = prefixRepository.skipNotification.value
+        } catch (e: Exception) {
+            Timber.e(e, "Error loading settings, using defaults")
+            skipCallLog = true
+            skipNotification = true
         }
     }
 
