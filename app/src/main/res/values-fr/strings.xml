@@ -181,4 +181,12 @@
     <string name="critical_call_in">ENTRANT</string>
     <string name="critical_protected">PROTÉGÉ</string>
     <string name="critical_system_active">SYSTÈME ACTIF</string>
+    <string name="appearance">Apparence</string>
+    <string name="system">Système</string>
+    <string name="dark">Sombre</string>
+    <string name="light">Clair</string>
+    <string name="pink">Rose</string>
+    <string name="green">Vert</string>
+    <string name="solaris">Solaris</string>
+    <string name="theme_description">Choisissez entre le mode clair, sombre, rose, vert, solaris ou suivre le système</string>
 </resources>

@@ -186,7 +186,7 @@
     <string name="dark">Oscuro</string>
     <string name="light">Claro</string>
     <string name="pink">Rosa</string>
-    <string name="green">Green</string>
+    <string name="green">Verde</string>
     <string name="solaris">Solaris</string>
     <string name="theme_description">Elige entre el modo claro, oscuro, rosa, verde, solaris o seguir el sistema</string>
 </resources>
