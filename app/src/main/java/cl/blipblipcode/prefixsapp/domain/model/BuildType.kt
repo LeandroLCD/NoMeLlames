@@ -13,8 +13,9 @@ enum class BuildType {
                 val packageManager = cxt.packageManager
                 val applicationInfo = packageManager.getApplicationInfo(cxt.packageName,
                     PackageManager.GET_META_DATA)
-                when(applicationInfo.metaData.getString("cl.blipblipcode.prefixsapp.build")) {
-                    "releas" -> Release
+                val buildType = applicationInfo.metaData.getString("cl.blipblipcode.prefixsapp.build")
+                when(buildType) {
+                    "release" -> Release
                     "apk" -> Apk
                     else -> Debug
                 }
