@@ -10,7 +10,8 @@ sealed interface HistoryUiState {
         val historyItems: List<HistoryItem> = emptyList(),
         val selectedFilter: IGetCallHistoryUseCase.HistoryFilter = IGetCallHistoryUseCase.HistoryFilter.ALL,
         val isExporting: Boolean = false,
-        val exportMessage: String? = null
+        val exportedFilePath: String? = null,
+        val exportErrorMessage: String? = null
     ) : HistoryUiState {
         val isEmpty: Boolean get() = historyItems.isEmpty()
         val canExport: Boolean get() = historyItems.isNotEmpty() && !isExporting

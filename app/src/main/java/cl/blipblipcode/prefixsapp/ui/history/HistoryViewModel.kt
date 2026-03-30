@@ -74,7 +74,8 @@ class HistoryViewModel @Inject constructor(
                     _uiState.update {
                         (it as? HistoryUiState.Content)?.copy(
                             isExporting = false,
-                            exportMessage = filePath
+                            exportedFilePath = filePath,
+                            exportErrorMessage = null
                         ) ?: it
                     }
                 }
@@ -82,7 +83,8 @@ class HistoryViewModel @Inject constructor(
                     _uiState.update {
                         (it as? HistoryUiState.Content)?.copy(
                             isExporting = false,
-                            exportMessage = "Error: ${error.message}"
+                            exportedFilePath = null,
+                            exportErrorMessage = error.message
                         ) ?: it
                     }
                 }
@@ -91,7 +93,10 @@ class HistoryViewModel @Inject constructor(
 
     fun clearExportMessage() {
         _uiState.update {
-            (it as? HistoryUiState.Content)?.copy(exportMessage = null) ?: it
+            (it as? HistoryUiState.Content)?.copy(
+                exportedFilePath = null,
+                exportErrorMessage = null
+            ) ?: it
         }
     }
 

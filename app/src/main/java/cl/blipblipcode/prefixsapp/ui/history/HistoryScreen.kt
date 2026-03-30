@@ -1,6 +1,7 @@
 package cl.blipblipcode.prefixsapp.ui.history
 
-import android.widget.Toast
+import android.content.ClipData
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -22,13 +23,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,22 +45,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IGetCallHistoryUseCase
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun HistoryScreen(
@@ -61,22 +77,76 @@ fun HistoryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val clipboardManager = LocalClipboard.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    // Handle export message
+    val exportSuccessLabel = stringResource(R.string.history_export_success_snackbar)
+    val exportOpenLabel = stringResource(R.string.history_export_open)
+    val exportErrorLabel = stringResource(R.string.history_export_error)
+    val copiedLabel = stringResource(R.string.history_phone_copied)
+
     LaunchedEffect(uiState) {
-        val state = uiState as? HistoryUiState.Content
-        state?.exportMessage?.let { message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        val state = uiState as? HistoryUiState.Content ?: return@LaunchedEffect
+
+        state.exportedFilePath?.let { filePath ->
+            val result = snackbarHostState.showSnackbar(
+                message = exportSuccessLabel,
+                actionLabel = exportOpenLabel,
+                duration = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                val file = File(filePath)
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "text/csv")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+            }
+            viewModel.clearExportMessage()
+        }
+
+        state.exportErrorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = exportErrorLabel,
+                duration = SnackbarDuration.Long
+            )
             viewModel.clearExportMessage()
         }
     }
 
-    HistoryContentContainer(
-        uiState = uiState,
-        onFilterSelected = { viewModel.setFilter(it) },
-        onExportClick = { viewModel.exportHistory() },
-        modifier = modifier
-    )
+    Box(modifier = modifier.fillMaxSize()) {
+        HistoryContentContainer(
+            uiState = uiState,
+            onFilterSelected = { viewModel.setFilter(it) },
+            onExportClick = { viewModel.exportHistory() },
+            onPhoneNumberClick = { phoneNumber ->
+                val clipData = ClipData.newPlainText("phone_number", phoneNumber)
+                scope.launch {
+                    clipboardManager.setClipEntry(ClipEntry(clipData))
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                containerColor = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                actionColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(4.dp)
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +155,8 @@ private fun HistoryContentContainer(
     uiState: HistoryUiState,
     modifier: Modifier = Modifier,
     onFilterSelected: (IGetCallHistoryUseCase.HistoryFilter) -> Unit,
-    onExportClick: () -> Unit
+    onExportClick: () -> Unit,
+    onPhoneNumberClick: (String) -> Unit
 ) {
     val canExport = (uiState as? HistoryUiState.Content)?.canExport == true
     val isExporting = (uiState as? HistoryUiState.Content)?.isExporting == true
@@ -108,20 +179,21 @@ private fun HistoryContentContainer(
                 HistoryContent(
                     state = uiState,
                     onFilterSelected = onFilterSelected,
+                    onPhoneNumberClick = onPhoneNumberClick,
                     modifier = Modifier.fillMaxSize()
                 )
             }
         }
         Surface(
-            modifier = Modifier.size(56.dp).align(Alignment.BottomEnd).padding(16.dp),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            enabled = canExport && !isExporting,
             shape = RoundedCornerShape(4.dp),
             color = MaterialTheme.colorScheme.background,
-            border = BorderStroke(1.dp, if (canExport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)
+            shadowElevation = if(canExport && !isExporting) 8.dp else 0.dp,
+            border = BorderStroke(1.dp, if (canExport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+            onClick = onExportClick
         ) {
-            IconButton(
-                onClick = onExportClick,
-                enabled = canExport
-            ) {
+            Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center){
                 if (isExporting) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
@@ -131,10 +203,12 @@ private fun HistoryContentContainer(
                 } else {
                     Icon(
                         Icons.Outlined.Download,
+                        modifier = Modifier.size(24.dp),
                         contentDescription = null,
                         tint = if (canExport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
             }
         }
     }
@@ -145,6 +219,7 @@ private fun HistoryContentContainer(
 private fun HistoryContent(
     state: HistoryUiState.Content,
     onFilterSelected: (IGetCallHistoryUseCase.HistoryFilter) -> Unit,
+    onPhoneNumberClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dateFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
@@ -174,16 +249,20 @@ private fun HistoryContent(
                     stickyHeader {
                         DateHeader(date = date)
                     }
-                    
+
                     items(
                         items = items,
                         key = { "${it.type}_${it.id}" }
                     ) { item ->
                         HistoryItem(
                             item = item,
-                            dateFormat = dateFormat
+                            dateFormat = dateFormat,
+                            onPhoneNumberClick = onPhoneNumberClick
                         )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            thickness = 1.dp
+                        )
                     }
                 }
             }
@@ -273,10 +352,12 @@ private fun FilterButton(
 @Composable
 private fun HistoryItem(
     item: HistoryItem,
-    dateFormat: SimpleDateFormat
+    dateFormat: SimpleDateFormat,
+    onPhoneNumberClick: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val statusColor = if (item.isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val statusColor =
+        if (item.isBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
     val statusText = if (item.isBlocked) {
         stringResource(R.string.history_status_blocked)
     } else {
@@ -321,50 +402,51 @@ private fun HistoryItem(
         }
 
         AnimatedVisibility(visible = expanded && item.isBlocked) {
-            Column(modifier = Modifier.padding(top = 16.dp)) {
-                Text(
-                    text = stringResource(R.string.history_operator_label),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = stringResource(R.string.history_unknown_operator),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.padding(top = 16.dp)) {
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.history_matching_rule_label),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                item.matchedPrefix?.let { prefix ->
-                    Box(
-                        modifier = Modifier
-                            .border(1.dp, MaterialTheme.colorScheme.error, RoundedCornerShape(2.dp))
-                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "[$prefix] - DETERMINISTIC_BLOCK",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                } ?: run {
                     Text(
-                        text = stringResource(R.string.history_no_matched_rule),
-                        style = MaterialTheme.typography.bodySmall,
+                        text = stringResource(R.string.history_matching_rule_label),
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    item.matchedPrefix?.let { prefix ->
+                        Box(
+                            modifier = Modifier
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.error,
+                                    RoundedCornerShape(2.dp)
+                                )
+                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "[$prefix] - DETERMINISTIC_BLOCK",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    } ?: run {
+                        Text(
+                            text = stringResource(R.string.history_no_matched_rule),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
+                IconButton(onClick = { onPhoneNumberClick(item.phoneNumber) }) {
+                    Icon(Icons.Outlined.CopyAll, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                }
+
             }
+
         }
     }
 }
-
-

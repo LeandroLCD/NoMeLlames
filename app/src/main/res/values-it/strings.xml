@@ -73,7 +73,10 @@
     <string name="history_empty">Nessun record nella cronologia</string>
     <string name="history_matched_prefix">Prefisso: %1$s</string>
     <string name="history_export_success">File esportato: %1$s</string>
+    <string name="history_export_success_snackbar">Cronologia esportata con successo</string>
+    <string name="history_export_open">Apri</string>
     <string name="history_export_error">Errore durante l\'esportazione</string>
+    <string name="history_phone_copied">Numero copiato negli appunti</string>
     <string name="history_exporting">Esportazione in corso…</string>
     <string name="history_no_matched_rule">Nessuna regola corrispondente</string>
     <string name="history_unknown_operator">Operatore sconosciuto</string>

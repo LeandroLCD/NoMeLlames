@@ -73,7 +73,10 @@
     <string name="history_empty">Aucun enregistrement dans l\'historique</string>
     <string name="history_matched_prefix">Préfixe : %1$s</string>
     <string name="history_export_success">Fichier exporté : %1$s</string>
+    <string name="history_export_success_snackbar">Historique exporté avec succès</string>
+    <string name="history_export_open">Ouvrir</string>
     <string name="history_export_error">Erreur lors de l\'exportation</string>
+    <string name="history_phone_copied">Numéro copié dans le presse-papiers</string>
     <string name="history_exporting">Exportation en cours…</string>
     <string name="history_no_matched_rule">Aucune règle correspondante</string>
     <string name="history_unknown_operator">Opérateur inconnu</string>

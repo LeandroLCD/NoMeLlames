@@ -21,30 +21,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.ThemeApp
+import timber.log.Timber
 
 @Composable
-fun SettingThemeItem(theme: ThemeApp, onThemeChanged: (ThemeApp) -> Unit) {
+fun SettingThemeItem(theme: ThemeApp,
+                     modifier:Modifier = Modifier,
+                     onThemeChanged: (ThemeApp) -> Unit) {
     var spander by remember {
         mutableStateOf(false)
     }
     var size by remember {
-        mutableStateOf(Size.Zero)
+        mutableStateOf(DpSize.Zero)
     }
-    Column(Modifier.padding(16.dp)) {
+    val density = LocalDensity.current
+
+    Column(modifier
+        .padding(16.dp)
+        .onGloballyPositioned{
+            with(density){
+
+                size = it.size.toSize().toDpSize()
+            }
+            Timber.d("onGloballyPositioned $size")
+        }) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .onGloballyPositioned{
-                    size = it.size.toSize()
-                }
                 .clickable { spander = !spander },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -75,11 +86,11 @@ fun SettingThemeItem(theme: ThemeApp, onThemeChanged: (ThemeApp) -> Unit) {
         }
         DropdownMenu(
             expanded = spander,
-            modifier = Modifier.width(size.width.dp),
+            modifier = Modifier.width(size.width),
             onDismissRequest = {
             spander = false
         }) {
-            ThemeApp.entries.forEach { tm->
+            ThemeApp.entries.forEach { tm ->
                 val text = when(tm){
                     ThemeApp.System -> stringResource(R.string.system)
                     ThemeApp.Dark -> stringResource(R.string.dark)
@@ -87,7 +98,6 @@ fun SettingThemeItem(theme: ThemeApp, onThemeChanged: (ThemeApp) -> Unit) {
                     ThemeApp.Pink -> stringResource(R.string.pink)
                     ThemeApp.Green -> stringResource(R.string.green)
                     ThemeApp.Solaris -> stringResource(R.string.solaris)
-
                 }
 
                 DropdownMenuItem(text = {
