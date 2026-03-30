@@ -27,7 +27,6 @@ import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,10 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,11 +61,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IGetCallHistoryUseCase
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlinx.coroutines.launch
 
 @Composable
 fun HistoryScreen(
@@ -76,6 +73,7 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val export by viewModel.export.collectAsState()
     val context = LocalContext.current
     val clipboardManager = LocalClipboard.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -84,12 +82,10 @@ fun HistoryScreen(
     val exportSuccessLabel = stringResource(R.string.history_export_success_snackbar)
     val exportOpenLabel = stringResource(R.string.history_export_open)
     val exportErrorLabel = stringResource(R.string.history_export_error)
-    val copiedLabel = stringResource(R.string.history_phone_copied)
 
-    LaunchedEffect(uiState) {
-        val state = uiState as? HistoryUiState.Content ?: return@LaunchedEffect
+    LaunchedEffect(export) {
 
-        state.exportedFilePath?.let { filePath ->
+        export.exportedFilePath?.let { filePath ->
             val result = snackbarHostState.showSnackbar(
                 message = exportSuccessLabel,
                 actionLabel = exportOpenLabel,
@@ -112,7 +108,7 @@ fun HistoryScreen(
             viewModel.clearExportMessage()
         }
 
-        state.exportErrorMessage?.let {
+        export.exportErrorMessage?.let {
             snackbarHostState.showSnackbar(
                 message = exportErrorLabel,
                 duration = SnackbarDuration.Long
@@ -124,6 +120,7 @@ fun HistoryScreen(
     Box(modifier = modifier.fillMaxSize()) {
         HistoryContentContainer(
             uiState = uiState,
+            export = export,
             onFilterSelected = { viewModel.setFilter(it) },
             onExportClick = { viewModel.exportHistory() },
             onPhoneNumberClick = { phoneNumber ->
@@ -153,13 +150,14 @@ fun HistoryScreen(
 @Composable
 private fun HistoryContentContainer(
     uiState: HistoryUiState,
+    export: Export,
     modifier: Modifier = Modifier,
     onFilterSelected: (IGetCallHistoryUseCase.HistoryFilter) -> Unit,
     onExportClick: () -> Unit,
     onPhoneNumberClick: (String) -> Unit
 ) {
     val canExport = (uiState as? HistoryUiState.Content)?.canExport == true
-    val isExporting = (uiState as? HistoryUiState.Content)?.isExporting == true
+    val isExporting = export.isExporting
 
     Box(
         modifier = modifier

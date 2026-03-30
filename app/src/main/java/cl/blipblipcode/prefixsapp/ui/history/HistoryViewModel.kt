@@ -8,11 +8,14 @@ import cl.blipblipcode.prefixsapp.domain.useCase.history.IExportHistoryToCsvUseC
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IGetCallHistoryUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,10 +27,28 @@ class HistoryViewModel @Inject constructor(
     private val clearAllHistoryUseCase: IClearAllHistoryUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<HistoryUiState>(HistoryUiState.Loading)
-    val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
     private val _selectedFilter = MutableStateFlow(IGetCallHistoryUseCase.HistoryFilter.ALL)
+
+    private val _export = MutableStateFlow(Export())
+    val export: StateFlow<Export> = _export.asStateFlow()
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState = _selectedFilter
+        .flatMapLatest { filter ->
+            getCallHistoryUseCase.invoke(filter)
+        }.mapLatest { result ->
+            HistoryUiState.Content(
+                historyItems = result,
+                selectedFilter = _selectedFilter.value
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = HistoryUiState.Loading
+        )
+
 
     init {
         observeHistory()
@@ -35,25 +56,7 @@ class HistoryViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeHistory() {
-        _selectedFilter
-            .flatMapLatest { filter ->
-                getCallHistoryUseCase(filter)
-            }
-            .onEach { historyItems ->
-                _uiState.update { currentState ->
-                    when (currentState) {
-                        is HistoryUiState.Loading -> HistoryUiState.Content(
-                            historyItems = historyItems,
-                            selectedFilter = _selectedFilter.value
-                        )
-                        is HistoryUiState.Content -> currentState.copy(
-                            historyItems = historyItems,
-                            selectedFilter = _selectedFilter.value
-                        )
-                    }
-                }
-            }
-            .launchIn(viewModelScope)
+
     }
 
     fun setFilter(filter: IGetCallHistoryUseCase.HistoryFilter) {
@@ -61,42 +64,42 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun exportHistory() {
-        val currentState = _uiState.value
+        val currentState = uiState.value
         if (currentState !is HistoryUiState.Content || !currentState.canExport) return
 
         viewModelScope.launch {
-            _uiState.update {
-                (it as? HistoryUiState.Content)?.copy(isExporting = true) ?: it
+            _export.update {
+                it.copy(isExporting = true)
             }
 
             exportHistoryToCsvUseCase(currentState.historyItems)
                 .onSuccess { filePath ->
-                    _uiState.update {
-                        (it as? HistoryUiState.Content)?.copy(
+                    _export.update {
+                        Export(
                             isExporting = false,
                             exportedFilePath = filePath,
                             exportErrorMessage = null
-                        ) ?: it
+                        )
                     }
                 }
                 .onFailure { error ->
-                    _uiState.update {
-                        (it as? HistoryUiState.Content)?.copy(
+                    _export.update {
+                        Export(
                             isExporting = false,
                             exportedFilePath = null,
                             exportErrorMessage = error.message
-                        ) ?: it
+                        )
                     }
                 }
         }
     }
 
     fun clearExportMessage() {
-        _uiState.update {
-            (it as? HistoryUiState.Content)?.copy(
+        _export.update {
+            it.copy(
                 exportedFilePath = null,
                 exportErrorMessage = null
-            ) ?: it
+            )
         }
     }
 

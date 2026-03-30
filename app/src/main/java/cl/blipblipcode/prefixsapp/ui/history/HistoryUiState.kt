@@ -9,12 +9,9 @@ sealed interface HistoryUiState {
     data class Content(
         val historyItems: List<HistoryItem> = emptyList(),
         val selectedFilter: IGetCallHistoryUseCase.HistoryFilter = IGetCallHistoryUseCase.HistoryFilter.ALL,
-        val isExporting: Boolean = false,
-        val exportedFilePath: String? = null,
-        val exportErrorMessage: String? = null
     ) : HistoryUiState {
         val isEmpty: Boolean get() = historyItems.isEmpty()
-        val canExport: Boolean get() = historyItems.isNotEmpty() && !isExporting
+        val canExport: Boolean get() = historyItems.isNotEmpty()
         
         // Group items by date for sticky headers
         val groupedByDate: Map<String, List<HistoryItem>> by lazy {
