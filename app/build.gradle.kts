@@ -5,18 +5,21 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "dev.andresfelipecaicedo.nomellames"
+    namespace = "cl.blipblipcode.prefixsapp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.andresfelipecaicedo.nomellames"
+        applicationId = "cl.blipblipcode.prefixsapp"
         minSdk = 24
         targetSdk = 36
         versionCode = 4
-        versionName = "1.3"
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,9 +28,32 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+                // alternativa:
+                // debugSymbolLevel = "FULL"
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
+            )
+            manifestPlaceholders += mapOf(
+                "buildserver" to "release",
+            )
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                nativeSymbolUploadEnabled = true
+            }
+        }
+        create("apk"){
+            applicationIdSuffix = ".apk"
+            manifestPlaceholders += mapOf(
+                "buildserver" to "apk",
+            )
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders += mapOf(
+                "buildserver" to "debug",
             )
         }
     }
@@ -39,6 +65,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -63,11 +90,17 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.biometric.ktx)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.config)
+    implementation(libs.bundles.navigation3)
+    implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.timber)
+    implementation(libs.androidx.datastore.preferences)
     implementation(project(":specialbottombar"))
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)

@@ -6,10 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "dev.andresfelipecaicedo.nomellames.specialbottombar"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "cl.blipblipcode.prefixsapp.specialbottombar"
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -25,6 +23,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        create("apk"){
         }
     }
 

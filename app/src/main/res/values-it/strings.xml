@@ -1,0 +1,195 @@
+<resources>
+    <string name="app_name">PreFixApp</string>
+
+    <!-- Descrizioni dei Contenuti -->
+    <string name="back">Indietro</string>
+    <string name="close">Chiudi</string>
+    <string name="update_icon_desc">Icona aggiornamento</string>
+    <string name="warning_icon_desc">Icona di avviso</string>
+    <string name="security_shield_desc">Scudo di sicurezza</string>
+
+    <!-- Schede di Navigazione -->
+    <string name="tab_home">HOME</string>
+    <string name="tab_prefixes">PREFISSI</string>
+    <string name="tab_history">CRONOLOGIA</string>
+    <string name="tab_settings">IMPOSTAZIONI</string>
+
+    <!-- Schermata Home -->
+    <string name="home_title"><P>PREFIXAPP</P></string>
+    <string name="home_no_prefixes_title">Nessun prefisso configurato</string>
+    <string name="home_no_prefixes_description">Vai alla scheda \"Prefissi\" per aggiungere i prefissi o i numeri che desideri bloccare.\n\nNon includere il prefisso internazionale.\nEsempio: scrivi 320, non +57320.</string>
+    <string name="home_blocking_prefixes">Blocco chiamate da %1$d prefissi configurati</string>
+    <string name="home_permissions_needed">Permessi necessari per funzionare</string>
+    <string name="home_grant_permissions">Concedi Permessi</string>
+    <string name="home_configure_filter_modern">Imposta questa app come filtro chiamate</string>
+    <string name="home_configure_filter_legacy">In Android 7–9 devi attivarla manualmente in Impostazioni > App > App predefinite</string>
+    <string name="home_configure_as_filter">Imposta come Filtro</string>
+    <string name="home_open_settings">Apri Impostazioni</string>
+    <string name="home_active">Attivo</string>
+    <string name="home_active_description_modern">Il blocco delle chiamate spam è attivo</string>
+    <string name="home_active_description_legacy">Configurazione manuale applicata. Verifica che PreFixApp sia ancora l\'app di filtraggio.</string>
+    <string name="home_disable">Disattiva</string>
+
+    <!-- Nuove stringhe Dashboard -->
+    <string name="home_status_online" translatable="false">ONLINE</string>
+    <string name="home_status_offline" translatable="false">OFFLINE</string>
+    <string name="home_system_active">SISTEMA ATTIVO</string>
+    <string name="home_system_inactive">SISTEMA INATTIVO</string>
+    <string name="home_interception">INTERCETTAZIONE DETERMINISTICA</string>
+    <string name="home_firewall_master">FIREWALL MASTER</string>
+    <string name="home_blocked_label">BLOCCATE</string>
+    <string name="home_allowed_label">CONSENTITE</string>
+    <string name="home_last_update_label">ULTIMO AGG. REGOLE</string>
+    <string name="home_last_update_time">%1$s FA</string>
+    <string name="home_recent_threats_title">MINACCE RECENTI</string>
+    <string name="home_view_all">VEDI TUTTO</string>
+
+    <!-- Schermata Prefissi -->
+    <string name="prefix_title">[ PREFISSI ]</string>
+    <string name="prefix_description">Non includere il prefisso internazionale.\nEsempio: scrivi 907, non +56907.</string>
+    <string name="prefix_new_label">Nuovo prefisso</string>
+    <string name="prefix_new_placeholder">INSERISCI PREF</string>
+    <string name="prefix_add">AGGIUNGI</string>
+    <string name="prefix_delete">Elimina</string>
+    <string name="prefix_empty">Nessun prefisso configurato</string>
+    <string name="prefix_active_rules">REGOLE ATTIVE: %1$d</string>
+    <string name="prefix_status_blocked">BLC</string>
+    <string name="prefix_status_allowed">CON</string>
+    <string name="prefix_error_already_exists">Il prefisso \'%1$s\' esiste già come regola %2$s</string>
+    <string name="prefix_error_generic">Errore durante l\'aggiunta del prefisso</string>
+    <string name="prefix_rule_type_block">BLOCCATA</string>
+    <string name="prefix_rule_type_allow">CONSENTITA</string>
+
+    <!-- Schermata Cronologia -->
+    <string name="history_title">[ CRONOLOGIA ]</string>
+    <string name="history_filter_all">TUTTO</string>
+    <string name="history_filter_blocked">BLOCCATO</string>
+    <string name="history_filter_allowed">CONSENTITO</string>
+    <string name="history_operator_label">OPERATORE</string>
+    <string name="history_matching_rule_label">REGOLA CORRISPONDENTE</string>
+    <string name="history_status_blocked">BLC</string>
+    <string name="history_status_allowed">CON</string>
+    <string name="history_clear">Pulisci</string>
+    <string name="history_empty">Nessun record nella cronologia</string>
+    <string name="history_matched_prefix">Prefisso: %1$s</string>
+    <string name="history_export_success">File esportato: %1$s</string>
+    <string name="history_export_success_snackbar">Cronologia esportata con successo</string>
+    <string name="history_export_open">Apri</string>
+    <string name="history_export_error">Errore durante l\'esportazione</string>
+    <string name="history_phone_copied">Numero copiato negli appunti</string>
+    <string name="history_exporting">Esportazione in corso…</string>
+    <string name="history_no_matched_rule">Nessuna regola corrispondente</string>
+    <string name="history_unknown_operator">Operatore sconosciuto</string>
+
+    <!-- Schermata Impostazioni -->
+    <string name="settings_title">[ IMPOSTAZIONI ]</string>
+    <string name="settings_skip_call_log_title">Nascondi dal registro chiamate</string>
+    <string name="settings_skip_call_log_description">Le chiamate bloccate non appariranno nel registro chiamate del telefono</string>
+    <string name="settings_skip_notification_title">Nascondi notifiche</string>
+    <string name="settings_skip_notification_description">Non mostrare notifiche di chiamata persa per le chiamate bloccate</string>
+
+    <string name="settings_section_motor">MOTORE DI BLOCCO</string>
+    <string name="settings_strict_matching_title">Corrispondenza Stretta</string>
+    <string name="settings_strict_matching_description">Blocco deterministico esatto</string>
+    <string name="settings_heuristic_analysis_title">Analisi Euristica</string>
+    <string name="settings_heuristic_analysis_description">Rilevamento di pattern anomali</string>
+
+    <string name="settings_section_security">SICUREZZA</string>
+    <string name="settings_biometric_lock_title">Blocco Biometrico</string>
+    <string name="settings_biometric_lock_description">Richiedi auth per l\'accesso</string>
+    <string name="settings_pattern_lock_title">Blocco con Segno</string>
+    <string name="settings_pattern_lock_description">Metodo di sicurezza alternativo</string>
+
+    <string name="settings_section_dangerous">ZONA PERICOLOSA</string>
+    <string name="settings_purge_database">PULISCI DATABASE</string>
+    <string name="settings_purge_description">Azione irreversibile. Elimina cronologia e regole.</string>
+    <string name="settings_purge_dialog_title">⚠ CONFERMA PULIZIA</string>
+    <string name="settings_purge_dialog_message">Questa azione eliminerà permanentemente tutta la cronologia chiamate e le regole configurate.\n\nQuesta operazione non può essere annullata.</string>
+    <string name="settings_purge_dialog_confirm">PULISCI</string>
+    <string name="settings_purge_dialog_cancel">ANNULLA</string>
+    <string name="settings_purge_completed">Database pulito con successo</string>
+    <string name="settings_auth_title">Autenticazione richiesta</string>
+    <string name="settings_auth_subtitle">Conferma la tua identità per continuare</string>
+    <string name="settings_require_security">Devi configurare la biometria o un segno per eseguire questa azione</string>
+
+    <!-- Schermata Sicurezza -->
+    <string name="security_system_safe">SISTEMA SICURO</string>
+    <string name="security_access_restricted">ACCESSO LIMITATO</string>
+    <string name="security_id_label">ID: %1$s</string>
+    <string name="security_scanning">Richiede Autenticazione</string>
+    <string name="security_touch_sensor">BIOMETRICA</string>
+    <string name="security_auth">AUTENTICA</string>
+    <string name="security_or_else">OPPURE</string>
+    <string name="security_enter_pattern">INSERISCI SEGNO</string>
+    <string name="security_cancel">ANNULLA</string>
+    <string name="security_version_label">VERSIONE %1$s</string>
+    <string name="security_encryption_label">CRITTOGRAFIA AES-256</string>
+    <string name="security_auth_failed">Autenticazione fallita</string>
+    <string name="security_use_pattern">Usa segno</string>
+    <string name="security_use_fingerprint">Usa impronta</string>
+
+    <!-- Dialog Sicurezza -->
+    <string name="security_dialog_enable_biometric_title">ATTIVA IMPRONTA DIGITALE</string>
+    <string name="security_dialog_enable_biometric_description">L\'autenticazione biometrica sarà richiesta per accedere all\'applicazione.</string>
+    <string name="security_dialog_disable_biometric_title">DISATTIVA IMPRONTA DIGITALE</string>
+    <string name="security_dialog_disable_biometric_description">L\'autenticazione biometrica sarà disabilitata. Dovrai autenticarti per confermare.</string>
+    <string name="security_dialog_enable_pattern_title">CONFIGURA SEGNO</string>
+    <string name="security_dialog_disable_pattern_title">DISATTIVA SEGNO</string>
+    <string name="security_dialog_draw_pattern">Disegna un segno di almeno 4 punti</string>
+    <string name="security_dialog_confirm_pattern">Conferma il segno disegnandolo di nuovo</string>
+    <string name="security_dialog_enter_current_pattern">Inserisci il segno attuale per disattivare</string>
+    <string name="security_dialog_pattern_mismatch">I segni non corrispondono. Riprova.</string>
+    <string name="security_dialog_pattern_too_short">Il segno deve avere almeno 4 punti</string>
+    <string name="security_dialog_wrong_pattern">Segno errato. Riprova.</string>
+    <string name="security_dialog_verify_pattern_title">VERIFICA SEGNO</string>
+    <string name="security_dialog_enter_pattern_to_continue">Inserisci il tuo segno per continuare</string>
+    <string name="security_dialog_enable">ATTIVA</string>
+    <string name="security_dialog_disable">DISATTIVA</string>
+
+    <!-- Dialog Aggiornamento -->
+    <string name="update_available_title">[ AGGIORNAMENTO DISPONIBILE ]</string>
+    <string name="update_available_description">Una nuova versione del core di sicurezza è pronta per l\'installazione.</string>
+    <string name="update_available_button_update">AGGIORNA ORA</string>
+    <string name="update_available_button_postpone">POSPONI</string>
+
+    <!-- Dialog Aggiornamento Obbligatorio -->
+    <string name="update_required_title">[ AGGIORNAMENTO OBBLIGATORIO ]</string>
+    <string name="update_required_description">È necessario un aggiornamento critico per mantenere l\'integrità del firewall principale.</string>
+    <string name="update_required_button">AGGIORNA</string>
+    <string name="update_required_footer">KERNEL SECURITY PROTOCOL ACTIVE</string>
+    <string name="v_critical">v%1$s-CRITICAL</string>
+    <string name="v_stable">v%1$s-STABLE</string>
+
+    <!-- Permission Screen -->
+    <string name="permission_title">[ RICHIESTA DI ACCESSO ]</string>
+    <string name="permission_protocol">PROTOCOLLO DI SICUREZZA</string>
+    <string name="permission_description">Affinché %1$s funzioni, abbiamo bisogno del permesso per analizzare le chiamate in entrata e confrontarle con la tua cronologia di sicurezza.</string>
+    <string name="permission_required_label">PERMESSI RICHIESTI</string>
+    <string name="permission_read_phone_state_title">READ_PHONE_STATE</string>
+    <string name="permission_read_phone_state_desc">Stato del telefono per il rilevamento in tempo reale.</string>
+    <string name="permission_read_call_log_title">READ_CALL_LOG</string>
+    <string name="permission_read_call_log_desc">Registro chiamate per il filtraggio dello SPAM noto.</string>
+    <string name="permission_grant_access">[ CONCEDI ACCESSO ]</string>
+    <string name="permission_skip">SALTA PER ORA</string>
+
+    <!-- Critical Setting Screen -->
+    <string name="critical_setting_title">[ CONFIGURAZIONE CRITICA ]</string>
+    <string name="critical_setting_access_title">Accesso di Sicurezza</string>
+    <string name="critical_setting_description">PreFixApp deve essere impostata come app di protezione predefinita per intercettare e bloccare lo spam in tempo reale.</string>
+    <string name="critical_setting_auto_block_title">Blocco Automatico</string>
+    <string name="critical_setting_auto_block_desc">Filtra le chiamate e le confronta con le tue regole.</string>
+    <string name="critical_setting_set_default">IMPOSTA COME PREDEFINITA</string>
+    <string name="critical_setting_android_protocol">Azione richiesta dal protocollo di sicurezza di Android</string>
+    <string name="critical_setting_footer_version">PREFIXAPP_SEC_V%1$s</string>
+    <string name="critical_call_in">IN ENTRATA</string>
+    <string name="critical_protected">PROTETTO</string>
+    <string name="critical_system_active">SISTEMA ATTIVO</string>
+    <string name="appearance">Aspetto</string>
+    <string name="system">Sistema</string>
+    <string name="dark">Scuro</string>
+    <string name="light">Chiaro</string>
+    <string name="pink">Rosa</string>
+    <string name="green">Verde</string>
+    <string name="solaris">Solaris</string>
+    <string name="theme_description">Scegli tra la modalità chiara, scura, rosa, verde, solaris o segui il sistema</string>
+</resources>

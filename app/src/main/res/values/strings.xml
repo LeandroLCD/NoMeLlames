@@ -3,6 +3,10 @@
 
     <!-- Content Descriptions -->
     <string name="back">Volver</string>
+    <string name="close">Cerrar</string>
+    <string name="update_icon_desc">Icono de actualización</string>
+    <string name="warning_icon_desc">Icono de advertencia</string>
+    <string name="security_shield_desc">Escudo de seguridad</string>
 
     <!-- Navigation Tabs -->
     <string name="tab_home">INICIO</string>
@@ -11,7 +15,7 @@
     <string name="tab_settings">AJUSTES</string>
 
     <!-- Home Screen -->
-    <string name="home_title"><P>PREFIXAPP</P></string>
+    <string name="home_title" translatable="false"><P>PREFIXAPP</P></string>
     <string name="home_no_prefixes_title">No hay prefijos configurados</string>
     <string name="home_no_prefixes_description">Ve a la pestaña "Prefijos" para agregar los prefijos o números que deseas bloquear.\n\nNo incluyas el código de país.\nEjemplo: escribe 320, no +57320.</string>
     <string name="home_blocking_prefixes">Bloquea llamadas de %1$d prefijos configurados</string>
@@ -23,7 +27,7 @@
     <string name="home_open_settings">Abrir Ajustes</string>
     <string name="home_active">Activo</string>
     <string name="home_active_description_modern">El bloqueo de llamadas spam esta funcionando</string>
-    <string name="home_active_description_legacy">Configuracion manual aplicada. Verifica que NoMeLlames siga como app de filtrado.</string>
+    <string name="home_active_description_legacy">Configuracion manual aplicada. Verifica que PREFIXAPP siga como app de filtrado.</string>
     <string name="home_disable">Desactivar</string>
 
     <!-- New Dashboard Strings -->
@@ -35,7 +39,7 @@
     <string name="home_firewall_master">CORTAFUEGOS MAESTRO</string>
     <string name="home_blocked_label">BLOQUEADAS</string>
     <string name="home_allowed_label">PERMITIDAS</string>
-    <string name="home_last_update_label">ÚLTIMA ACTUALIZACIÓN DE REGLAS</string>
+    <string name="home_last_update_label">ÚLTIMA ACT. DE REGLAS</string>
     <string name="home_last_update_time">HACE %1$s</string>
     <string name="home_recent_threats_title">AMENAZAS RECIENTES</string>
     <string name="home_view_all">VER TODO</string>
@@ -69,7 +73,10 @@
     <string name="history_empty">No hay registros en el historial</string>
     <string name="history_matched_prefix">Prefijo: %1$s</string>
     <string name="history_export_success">Archivo exportado: %1$s</string>
+    <string name="history_export_success_snackbar">Historial exportado exitosamente</string>
+    <string name="history_export_open">Abrir</string>
     <string name="history_export_error">Error al exportar</string>
+    <string name="history_phone_copied">Número copiado al portapapeles</string>
     <string name="history_exporting">Exportando…</string>
     <string name="history_no_matched_rule">Sin regla coincidente</string>
     <string name="history_unknown_operator">Operador desconocido</string>
@@ -109,8 +116,9 @@
     <string name="security_system_safe">SISTEMA SEGURO</string>
     <string name="security_access_restricted">ACCESO RESTRINGIDO</string>
     <string name="security_id_label">ID: %1$s</string>
-    <string name="security_scanning">ESCANEANDO…</string>
-    <string name="security_touch_sensor">TOQUE EL SENSOR PARA AUTENTICAR</string>
+    <string name="security_scanning">Requiere Autenticación</string>
+    <string name="security_touch_sensor">BIOMETRICA</string>
+    <string name="security_auth">AUTENTICAR</string>
     <string name="security_or_else">O BIEN</string>
     <string name="security_enter_pattern">INGRESAR PATRÓN</string>
     <string name="security_cancel">CANCELAR</string>
@@ -137,4 +145,51 @@
     <string name="security_dialog_enter_pattern_to_continue">Ingresa tu patrón para continuar</string>
     <string name="security_dialog_enable">ACTIVAR</string>
     <string name="security_dialog_disable">DESACTIVAR</string>
+
+    <!-- Update Dialog -->
+    <string name="update_available_title">[ ACTUALIZACIÓN DISPONIBLE ]</string>
+    <string name="update_available_description">Una nueva versión del núcleo de seguridad está lista para su despliegue.</string>
+    <string name="update_available_button_update">ACTUALIZAR AHORA</string>
+    <string name="update_available_button_postpone">POSTPONER</string>
+
+    <!-- Update Required Dialog -->
+    <string name="update_required_title">[ ACTUALIZACIÓN OBLIGATORIA ]</string>
+    <string name="update_required_description">Se requiere una actualización crítica para mantener la integridad del cortafuegos maestro.</string>
+    <string name="update_required_button">ACTUALIZAR</string>
+    <string name="update_required_footer">KERNEL SECURITY PROTOCOL ACTIVE</string>
+    <string name="v_critical">v%1$s-CRITICAL</string>
+    <string name="v_stable">v%1$s-STABLE</string>
+
+    <!-- Permission Screen -->
+    <string name="permission_title">[ SOLICITUD DE ACCESO ]</string>
+    <string name="permission_protocol">PROTOCOLO DE SEGURIDAD</string>
+    <string name="permission_description">Para que el %1$s funcione, necesitamos permiso para analizar las llamadas entrantes y comparar con tu historial de seguridad.</string>
+    <string name="permission_required_label">PERMISOS REQUERIDOS</string>
+    <string name="permission_read_phone_state_title">READ_PHONE_STATE</string>
+    <string name="permission_read_phone_state_desc">Estado del teléfono para detección en tiempo real.</string>
+    <string name="permission_read_call_log_title">READ_CALL_LOG</string>
+    <string name="permission_read_call_log_desc">Registro de llamadas para filtrado de SPAM conocido.</string>
+    <string name="permission_grant_access">[ CONCEDER ACCESO ]</string>
+    <string name="permission_skip">OMITIR POR AHORA</string>
+
+    <!-- Critical Setting Screen -->
+    <string name="critical_setting_title">[ CONFIGURACIÓN CRÍTICA ]</string>
+    <string name="critical_setting_access_title">Acceso de Seguridad</string>
+    <string name="critical_setting_description">PreFixApp debe ser establecida como tu aplicación de protección predeterminada para interceptar y bloquear spam en tiempo real.</string>
+    <string name="critical_setting_auto_block_title">Bloqueo Automático</string>
+    <string name="critical_setting_auto_block_desc">Filtra llamadas y compara con tus reglas.</string>
+    <string name="critical_setting_set_default">ESTABLECER COMO PREDETERMINADA</string>
+    <string name="critical_setting_android_protocol">Acción requerida por el protocolo de seguridad de Android</string>
+    <string name="critical_setting_footer_version">PREFIXAPP_SEC_V%1$s</string>
+    <string name="critical_call_in">ENTRANTE</string>
+    <string name="critical_protected">PROTEGIDO</string>
+    <string name="critical_system_active">SISTEMA ACTIVO</string>
+    <string name="appearance">Apariencia</string>
+    <string name="system">Sistema</string>
+    <string name="dark">Oscuro</string>
+    <string name="light">Claro</string>
+    <string name="pink">Rosa</string>
+    <string name="green">Verde</string>
+    <string name="solaris">Solaris</string>
+    <string name="theme_description">Elige entre el modo claro, oscuro, rosa, verde, solaris o seguir el sistema</string>
 </resources>

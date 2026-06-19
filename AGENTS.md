@@ -1,4 +1,4 @@
-tens# AGENTS.md - NoMeLlames
+# AGENTS.md - PreFixApp
 
 ## Project Overview
 Android spam call blocker app using `CallScreeningService` API. Blocks incoming calls from configurable phone prefixes with BLOCK/ALLOW rules. Colombian market focus (defaults to +57 prefixes).
@@ -10,16 +10,17 @@ Android spam call blocker app using `CallScreeningService` API. Blocks incoming 
 ui/          → Jetpack Compose screens + ViewModels (@HiltViewModel)
 domain/      → Interfaces (IUseCase), models, repository contracts
 data/        → Room entities, DAOs, repository implementations
-di/          → Hilt modules (DataModule, RepositoryModule, UseCaseModule)
+di/          → Hilt modules (DataModule, RepositoryModule, UseCaseModule, DispatcherModule)
+utils/       → Constants (AppConstants), biometric auth (BiometricHelper)
 ```
 
 ### Key Components
-- **SpamCallScreeningService** - Core service handling call screening via Android's CallScreeningService API
-- **MainActivity** - Single activity hosting Compose navigation with 4 tabs (Home, Prefixes, History, Settings)
-- **NoMeLlamesApp** - Hilt application entry point
+- **SpamCallPrefixService** - Core service handling call screening via Android's CallScreeningService API
+- **MainActivity** - Single activity hosting Navigation3 with screens: Splash, Main (4 tabs), Permission, CriticalSetting, Security
+- **PrefixsApp** - Hilt application entry point
 
 ### Data Flow
-1. `SpamCallScreeningService.onScreenCall()` receives incoming calls
+1. `SpamCallPrefixService.onScreenCall()` receives incoming calls
 2. Loads `PrefixRule` list, matches by longest prefix wins (BLOCK vs ALLOW)
 3. Blocked calls saved via `BlockedCallRepository`, allowed via `AllowedCallRepository`
 4. UI observes changes through `Flow<List<T>>` from DAOs
@@ -52,7 +53,12 @@ class AddPrefixRuleUseCase @Inject constructor(
 ### Room Database
 - Entities in `data/local/entities/` with `Entity` suffix
 - DAOs in `data/local/dao/` with `Dao` suffix
-- Migrations defined in `DataModule.kt`
+- Migrations defined in `DataModule.kt` (current version: 3)
+- Static data in `data/local/static/` (e.g., `CountryDialingCodeProvider`)
+
+### Firebase Integration
+- **Remote Config** - Version checking via `VersionRepository` with `version_config` key
+- **Crashlytics** - Native symbol upload enabled for release builds
 
 ### UI Conventions
 - Screens are stateless composables receiving state + callbacks
@@ -80,11 +86,14 @@ class AddPrefixRuleUseCase @Inject constructor(
 - `:specialbottombar` - Reusable custom bottom navigation component
 
 ## Key Files Reference
-| Purpose              | Location                                     |
-|----------------------|----------------------------------------------|
-| Call screening logic | `SpamCallScreeningService.kt`                |
-| DI setup             | `di/DataModule.kt`, `di/RepositoryModule.kt` |
-| Database schema      | `data/local/database/AppDatabase.kt`         |
-| Theme/colors         | `ui/theme/Color.kt`, `ui/theme/Theme.kt`     |
-| String resources     | `res/values/strings.xml` (Spanish)           |
+| Purpose                  | Location                                         |
+|--------------------------|--------------------------------------------------|
+| Call screening logic     | `SpamCallPrefixService.kt`                       |
+| DI setup                 | `di/DataModule.kt`, `di/RepositoryModule.kt`, `di/DispatcherModule.kt` |
+| Database schema          | `data/local/database/AppDatabase.kt`             |
+| Theme/colors             | `ui/theme/Color.kt`, `ui/theme/Theme.kt`         |
+| String resources         | `res/values/strings.xml` (Spanish)               |
+| Navigation screens       | `ui/navigation/Screen.kt`                        |
+| Biometric authentication | `utils/biometric/BiometricHelper.kt`             |
+| App constants            | `utils/AppConstants.kt`                          |
 

@@ -1,0 +1,14 @@
+package cl.blipblipcode.prefixsapp.domain.useCase.prefix
+
+import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
+import javax.inject.Inject
+
+class AddPrefixUseCase @Inject constructor(
+    private val repository: PrefixRepository
+) : IAddPrefixUseCase {
+    
+    override operator fun invoke(prefix: String) {
+        repository.addPrefix(prefix)
+    }
+}
+

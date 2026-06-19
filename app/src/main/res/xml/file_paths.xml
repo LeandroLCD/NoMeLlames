@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- For files in the internal storage (context.getFilesDir()) -->
+    <files-path name="internal_files" path="." />
+
+    <!-- For files in the internal cache (context.getCacheDir()) -->
+    <cache-path name="internal_cache" path="." />
+
+    <!-- For files in the external storage root (Environment.getExternalStorageDirectory()) -->
+    <external-path name="external_storage" path="." />
+
+    <!-- For files in the app-specific external storage (context.getExternalFilesDir()) -->
+    <external-files-path name="external_app_files" path="." />
+
+    <!-- For files in the app-specific external cache (context.getExternalCacheDir()) -->
+    <external-cache-path name="external_app_cache" path="." />
+</paths>
