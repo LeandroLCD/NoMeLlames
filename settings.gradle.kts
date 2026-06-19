@@ -26,4 +26,3 @@ dependencyResolutionManagement {
 rootProject.name = "PreFixApp"
 include(":app")
 include(":specialbottombar")
-include(":specialbottombar")

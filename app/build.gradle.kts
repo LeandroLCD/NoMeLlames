@@ -23,9 +23,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    firebaseCrashlytics {
-        nativeSymbolUploadEnabled = true
-    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -42,6 +40,9 @@ android {
             manifestPlaceholders += mapOf(
                 "buildserver" to "release",
             )
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                nativeSymbolUploadEnabled = true
+            }
         }
         create("apk"){
             applicationIdSuffix = ".apk"
