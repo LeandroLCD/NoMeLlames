@@ -7,7 +7,6 @@ import javax.inject.Inject
 class GetAllowedCallsCountUseCase @Inject constructor(
     private val allowedCallRepository: AllowedCallRepository
 ) : IGetAllowedCallsCountUseCase {
-    
     override fun invoke(): Flow<Int> {
         return allowedCallRepository.getAllowedCallsCount()
     }
