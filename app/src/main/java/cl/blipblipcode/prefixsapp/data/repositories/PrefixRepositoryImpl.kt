@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.edit
 import dagger.Lazy
 import cl.blipblipcode.prefixsapp.data.local.dao.PrefixRuleDao
 import cl.blipblipcode.prefixsapp.data.local.entities.PrefixRuleEntity
-import cl.blipblipcode.prefixsapp.domain.exception.PrefixAlreadyExistsException
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.domain.repositories.AppSettingsRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
@@ -97,30 +96,18 @@ class PrefixRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getPrefixByValue(prefix: String): PrefixRule? {
+        return prefixRuleDao.getPrefixByValue(prefix)?.mapToDomain()
+    }
+
     override suspend fun addPrefixRule(prefix: String, ruleType: PrefixRule.RuleType): Result<Unit> {
-        val cleanPrefix = prefix.trim().filter { it.isDigit() || it == ' ' }
-        if (cleanPrefix.isEmpty()) {
-            return Result.failure(IllegalArgumentException("El prefijo no puede estar vacío"))
-        }
-        
         return makeSuspendCall {
-            // Check if prefix already exists
-            val existingRule = prefixRuleDao.getPrefixByValue(cleanPrefix)
-            if (existingRule != null) {
-                throw PrefixAlreadyExistsException(
-                    existingPrefix = cleanPrefix,
-                    existingRuleType = existingRule.ruleType
-                )
-            }
-            
-            // Insert new prefix rule
             prefixRuleDao.insertPrefixRule(
                 PrefixRuleEntity(
-                    prefix = cleanPrefix,
+                    prefix = prefix,
                     ruleType = ruleType.name
                 )
             )
-            
             updateSyncStatus()
         }
     }

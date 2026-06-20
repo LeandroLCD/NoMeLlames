@@ -55,14 +55,11 @@ class PrefixViewModel @Inject constructor(
     }
 
     fun addPrefix(input: String, isAllowedRule: Boolean) {
-        if (input.isBlank()) return
-
         viewModelScope.launch {
             val ruleType = if (isAllowedRule) PrefixRule.RuleType.ALLOW else PrefixRule.RuleType.BLOCK
 
             addPrefixRuleUseCase(input, ruleType)
                 .onSuccess {
-                    // Clear input on success
                     _prefixInput.tryEmit("")
                     _isAllowedRule.tryEmit(false)
                 }

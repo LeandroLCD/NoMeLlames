@@ -27,6 +27,9 @@ kotlinxSerializationJson = "1.10.0"
 lifecycleViewmodelNav3 = "2.11.0-alpha02"
 navigationVersion = "1.0.1"
 datastore = "1.1.4"
+mockk = "1.13.13"
+kotlinxCoroutinesTest = "1.9.0"
+turbine = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +63,9 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebaseConfig" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 #Navigation3
 navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigationVersion" }

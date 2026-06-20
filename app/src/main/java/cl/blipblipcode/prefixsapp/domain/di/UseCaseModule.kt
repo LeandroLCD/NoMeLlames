@@ -190,6 +190,24 @@ abstract class UseCaseModule {
         useCase: DeleteAllPrefixRulesUseCase
     ): IDeleteAllPrefixRulesUseCase
 
+    @Binds
+    @Singleton
+    abstract fun bindMatchPrefixRuleUseCase(
+        useCase: MatchPrefixRuleUseCase
+    ): IMatchPrefixRuleUseCase
+
+    @Binds
+    @Singleton
+    abstract fun bindNormalizePhoneNumberUseCase(
+        useCase: NormalizePhoneNumberUseCase
+    ): INormalizePhoneNumberUseCase
+
+    @Binds
+    @Singleton
+    abstract fun bindGetCachedPrefixRulesUseCase(
+        useCase: GetCachedPrefixRulesUseCase
+    ): IGetCachedPrefixRulesUseCase
+
     // Version Use Cases
     @Binds
     @Singleton
