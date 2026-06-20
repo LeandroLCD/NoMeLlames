@@ -1,4 +1,4 @@
-name: App Unit Tests
+name: 🧪 App Unit Tests 🧪
 
 on:
   push:
@@ -18,14 +18,19 @@ concurrency:
   group: app-unit-test-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
 
 jobs:
+
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+      actions: write
 
     steps:
       - name: 📥 Checkout code
@@ -48,7 +53,7 @@ jobs:
           echo "Detected Gradle version: $GRADLE_VERSION"
 
       - name: 📦 Restore Gradle cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.gradle/caches
@@ -87,14 +92,23 @@ jobs:
           comment_title: 🧪 Unit Test Report — :app module
           comment_mode: always
 
-      - name: Upload test report
+      - name: 📄 Upload test report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: unit-test-report
           path: '**/build/reports/tests/testDebugUnitTest/**'
           retention-days: 7
           if-no-files-found: ignore
+
+      - name: 💾 Save Gradle cache
+        if: steps.gradle-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ steps.gradle-cache.outputs.cache-primary-key }}
 
       - name: 🏁 workflow finished
         if: always()
