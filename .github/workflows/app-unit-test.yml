@@ -1,0 +1,113 @@
+name: App Unit Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'app/src/main/java/**/domain/**'
+      - 'app/src/test/**'
+      - '.github/workflows/app-unit-test.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'app/src/main/java/**/domain/**'
+      - 'app/src/test/**'
+      - '.github/workflows/app-unit-test.yml'
+
+concurrency:
+  group: app-unit-test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: Compute Gradle version
+        id: gradle-version
+        run: |
+          GRADLE_VERSION=$(grep '^distributionUrl' gradle/wrapper/gradle-wrapper.properties | sed -E 's|.*gradle-([0-9.]+)-.*|\1|')
+          echo "version=$GRADLE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected Gradle version: $GRADLE_VERSION"
+
+      - name: 📦 Restore Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ steps.gradle-version.outputs.version }}-${{ hashFiles('**/gradle-wrapper.properties', '**/gradle/wrapper/gradle-wrapper.properties', '**/*.gradle*', '**/gradle/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ steps.gradle-version.outputs.version }}-
+            ${{ runner.os }}-gradle-
+
+      - name: Invalidate Gradle cache when version changed
+        if: steps.gradle-version.outputs.cache_hit != 'true'
+        run: |
+          EXISTING_KEYS=$(gh actions-cache list --key "${{ runner.os }}-gradle-" --limit 50 --json key --jq '.[].key' 2>/dev/null || echo "")
+          for KEY in $EXISTING_KEYS; do
+            if [[ "$KEY" != "${{ runner.os }}-gradle-${{ steps.gradle-version.outputs.version }}-"* ]]; then
+              echo "Discarding stale Gradle cache: $KEY"
+              echo "$KEY" | xargs -I {} gh actions-cache delete "{}" || true
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: 🔧 Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: 🧪 Run unit tests
+        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: 📊 Publish unit test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: '**/build/test-results/testDebugUnitTest/TEST-*.xml'
+          check_name: 📋 Unit Test Results — App
+          comment_title: 🧪 Unit Test Report — :app module
+          comment_mode: always
+
+      - name: Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: '**/build/reports/tests/testDebugUnitTest/**'
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 🏁 workflow finished
+        if: always()
+        run: |
+          echo "=================================="
+          echo "🏁 Workflow Unit Tests finished"
+          echo "=================================="
+          echo ""
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ state: SUCCESS"
+          else
+            echo "❌ state: FAILED"
+          fi
+          echo ""
+          echo "📅 Date: $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "=================================="
