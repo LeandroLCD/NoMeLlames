@@ -19,7 +19,7 @@ import javax.inject.Singleton
 class TestDispatcherModule {
     @Provides
     @Singleton
-    fun providesDispatcher() = Dispatchers.IO
+    fun providesDispatcher(): CoroutineDispatcher =  Dispatchers.Main
 
     @Provides
     @Singleton

@@ -57,7 +57,7 @@ class SpamCallPrefixService : CallScreeningService() {
     internal val rulesStateFlow = lazy {
         prefixRepository.getAllPrefixRules().stateIn(
             scope = serviceScope,
-            started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
+            started = kotlinx.coroutines.flow.SharingStarted.Lazily,
             initialValue = emptyList()
         )
     }

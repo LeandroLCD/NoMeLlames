@@ -91,10 +91,4 @@ abstract class TestPrefixModule {
     abstract fun bindNormalizePhoneNumberUseCase(
         useCase: NormalizePhoneNumberUseCase
     ): INormalizePhoneNumberUseCase
-
-    @Binds
-    @Singleton
-    abstract fun bindGetCachedPrefixRulesUseCase(
-        useCase: GetCachedPrefixRulesUseCase
-    ): IGetCachedPrefixRulesUseCase
 }
