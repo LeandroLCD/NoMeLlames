@@ -1,16 +1,11 @@
 package cl.blipblipcode.prefixsapp.domain.useCase.prefix
 
-import app.cash.turbine.test
 import cl.blipblipcode.prefixsapp.core.fakes.FakePrefixRepository
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before

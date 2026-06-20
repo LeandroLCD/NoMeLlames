@@ -25,10 +25,13 @@ class GetRecentBlockedCallsUseCaseTest {
         val limit = 10
 
         //WHEN
-        useCase(limit)
+        useCase.invoke(limit).test {
+            awaitItem()
 
-        //THEN
-        assertEquals(limit, repository.lastRequestedRecentLimit)
+            //THEN
+            assertEquals(limit, repository.lastRequestedRecentLimit)
+        }
+
     }
 
     @Test
