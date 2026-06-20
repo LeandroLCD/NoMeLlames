@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -21,7 +22,7 @@ android {
         versionCode = 4
         versionName = "1.1.2"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "cl.blipblipcode.prefixsapp.HiltTestRunner"
     }
 
     buildTypes {
@@ -67,6 +68,10 @@ android {
         compose = true
         buildConfig = true
     }
+    testFixtures {
+        enable = true
+        androidResources = true
+    }
 }
 
 kotlin{
@@ -107,10 +112,22 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(testFixtures(project(":app")))
+    androidTestImplementation(testFixtures(project(":app")))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Test Fixtures
+    testFixturesImplementation(platform(libs.androidx.compose.bom))
+    testFixturesImplementation(libs.androidx.compose.ui)
+    testFixturesImplementation(libs.androidx.compose.runtime)
+    testFixturesImplementation(libs.junit)
+    testFixturesImplementation(libs.kotlinx.coroutines.test)
+    testFixturesImplementation(libs.turbine)
 }
