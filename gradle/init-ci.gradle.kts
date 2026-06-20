@@ -17,7 +17,7 @@ gradle.projectsLoaded {
                   "client_info": {
                     "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
                     "android_client_info": {
-                      "package_name": "cl.blipblipcode.prefixsapp"
+                      "package_name": "cl.blipblipcode.prefixsapp.debug"
                     }
                   },
                   "oauth_client": [],
