@@ -76,7 +76,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 🧪 Run unit tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+        run: ./gradlew --init-script gradle/init-ci.gradle.kts :app:testDebugUnitTest --no-daemon --stacktrace
 
       - name: 📊 Publish unit test results
         if: always()
