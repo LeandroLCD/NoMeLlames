@@ -1,5 +1,6 @@
 package cl.blipblipcode.prefixsapp.domain.useCase.history
 
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import cl.blipblipcode.prefixsapp.domain.repositories.AllowedCallRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
@@ -11,7 +12,7 @@ class GetCallHistoryUseCase @Inject constructor(
     private val blockedCallRepository: BlockedCallRepository,
     private val allowedCallRepository: AllowedCallRepository
 ) : IGetCallHistoryUseCase {
-    
+
     override fun invoke(filter: IGetCallHistoryUseCase.HistoryFilter): Flow<List<HistoryItem>> {
         return combine(
             blockedCallRepository.getAllBlockedCalls(),
@@ -23,27 +24,28 @@ class GetCallHistoryUseCase @Inject constructor(
                     phoneNumber = call.phoneNumber,
                     timestamp = call.timestamp,
                     type = HistoryItem.CallType.BLOCKED,
-                    matchedPrefix = call.matchedPrefix
+                    blockType = call.blockType,
+                    matchedPrefix = call.matchedPrefix.takeIf { call.blockType is BlockType.Prefix }
                 )
             }
-            
+
             val allowedItems = allowedCalls.map { call ->
                 HistoryItem(
                     id = call.id,
                     phoneNumber = call.phoneNumber,
                     timestamp = call.timestamp,
-                    type = HistoryItem.CallType.ALLOWED
+                    type = HistoryItem.CallType.ALLOWED,
+                    blockType = BlockType.Allow
                 )
             }
-            
+
             val allItems = when (filter) {
                 IGetCallHistoryUseCase.HistoryFilter.ALL -> blockedItems + allowedItems
                 IGetCallHistoryUseCase.HistoryFilter.BLOCKED -> blockedItems
                 IGetCallHistoryUseCase.HistoryFilter.ALLOWED -> allowedItems
             }
-            
+
             allItems.sortedByDescending { it.timestamp }
         }
     }
 }
-
