@@ -4,11 +4,14 @@ import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.telephony.TelephonyManager
 import cl.blipblipcode.prefixsapp.data.local.static.CountryDialingCodeProvider
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.repositories.AllowedCallRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
-import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
+import cl.blipblipcode.prefixsapp.domain.repositories.ContactsRepository
 import cl.blipblipcode.prefixsapp.domain.useCase.allowedcall.IInsertAllowedCallUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.blockedcall.IInsertBlockedCallUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.blocking.IGetBlockNonContactsUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.blocking.IGetBlockPrivateNumbersUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetAllPrefixRulesUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipCallLogUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipNotificationUseCase
@@ -19,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -52,29 +56,51 @@ class SpamCallPrefixService : CallScreeningService() {
     lateinit var insertAllowedCallUseCase: IInsertAllowedCallUseCase
 
     @Inject
+    lateinit var blockPrivateNumbersUseCase: IGetBlockPrivateNumbersUseCase
+
+    @Inject
+    lateinit var blockNonContactsUseCase: IGetBlockNonContactsUseCase
+
+    @Inject
+    lateinit var contactsRepository: ContactsRepository
+
+    @Inject
     lateinit var ioDispatcher: CoroutineDispatcher
+
+    @Inject
+    lateinit var getAllPrefixRulesUseCase: IGetAllPrefixRulesUseCase
+
     private val serviceScope by lazy { CoroutineScope(SupervisorJob() + ioDispatcher) }
-    @Inject lateinit var getAllPrefixRulesUseCase: IGetAllPrefixRulesUseCase
 
     internal val skipCallLog = skipCallLogUseCase.invoke().stateIn(
         scope = serviceScope,
-        started = kotlinx.coroutines.flow.SharingStarted.Lazily,
+        started = SharingStarted.Lazily,
         initialValue = false
     )
     internal val skipNotification = skipNotificationUseCase.invoke().stateIn(
         scope = serviceScope,
-        started = kotlinx.coroutines.flow.SharingStarted.Lazily,
+        started = SharingStarted.Lazily,
         initialValue = false
     )
-    private var countryDialingCode: String? = null
-
+    internal val blockPrivateNumbers = blockPrivateNumbersUseCase.invoke().stateIn(
+        scope = serviceScope,
+        started = SharingStarted.Lazily,
+        initialValue = false
+    )
+    internal val blockNonContacts = blockNonContactsUseCase.invoke().stateIn(
+        scope = serviceScope,
+        started = SharingStarted.Lazily,
+        initialValue = false
+    )
     internal val rulesStateFlow = lazy {
         getAllPrefixRulesUseCase().stateIn(
             scope = serviceScope,
-            started = kotlinx.coroutines.flow.SharingStarted.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = emptyList()
         )
     }
+
+    private var countryDialingCode: String? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -82,57 +108,62 @@ class SpamCallPrefixService : CallScreeningService() {
 
         Timber.i("Detected country dialing code: ${countryDialingCode ?: "unknown"}")
         Timber.i("Settings - skipCallLog: $skipCallLog, skipNotification: $skipNotification")
-
     }
 
     override fun onScreenCall(callDetails: Call.Details) {
-        val phoneNumber = callDetails.handle?.schemeSpecificPart ?: ""
-        val normalizedNumber = normalizePhoneNumberUseCase(phoneNumber, countryDialingCode)
-        val rules = rulesStateFlow.value.value
-        val matchResult = matchPrefixRuleUseCase(rules, normalizedNumber)
+        serviceScope.launch {
+            val phoneNumber = callDetails.handle?.schemeSpecificPart ?: ""
+            val normalizedNumber = normalizePhoneNumberUseCase(phoneNumber, countryDialingCode)
+            val rules = rulesStateFlow.value.value
+            val blockType = decideBlockType(phoneNumber, normalizedNumber, rules)
 
-        val response = CallResponse.Builder()
-            .apply {
-                when (matchResult) {
-                    is MatchResult.Blocked -> {
-                        Timber.i("Blocking call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
+            val response = CallResponse.Builder().apply {
+                when (blockType) {
+                    BlockType.Allow -> {
+                        Timber.i("Allowing call from $phoneNumber")
+                        setDisallowCall(false)
+                        setRejectCall(false)
+                        saveAllowedCall(phoneNumber)
+                    }
+                    else -> {
+                        Timber.i("Blocking call from $phoneNumber - $blockType")
                         setDisallowCall(true)
                         setRejectCall(true)
                         setSkipCallLog(skipCallLog.value)
                         setSkipNotification(skipNotification.value)
-
-                        serviceScope.launch {
-                            saveBlockedCall(phoneNumber, matchResult.prefix)
-                        }
-                    }
-                    is MatchResult.Allowed -> {
-                        Timber.i("Allowing call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
-                        setDisallowCall(false)
-                        setRejectCall(false)
-
-                        serviceScope.launch {
-                            saveAllowedCall(phoneNumber)
-                        }
-                    }
-                    is MatchResult.NoMatch -> {
-                        Timber.i("No rule matched for $phoneNumber - allowing call")
-                        setDisallowCall(false)
-                        setRejectCall(false)
-
-                        serviceScope.launch {
-                            saveAllowedCall(phoneNumber)
-                        }
+                        saveBlockedCall(phoneNumber, blockType)
                     }
                 }
-            }
-            .build()
+            }.build()
 
-        respondToCall(callDetails, response)
+            respondToCall(callDetails, response)
+        }
     }
 
-    private suspend fun saveBlockedCall(phoneNumber: String, matchedPrefix: String) {
+    private suspend fun decideBlockType(
+        phoneNumber: String,
+        normalizedNumber: String,
+        rules: List<cl.blipblipcode.prefixsapp.domain.model.PrefixRule>
+    ): BlockType {
+        if (blockNonContacts.value && phoneNumber.isNotBlank() && contactsRepository.hasContactsPermission()) {
+            val isContact = contactsRepository.isContact(normalizedNumber)
+            if (!isContact) return BlockType.NonContact
+        }
+
+        if (blockPrivateNumbers.value && phoneNumber.isBlank()) {
+            return BlockType.PrivateNumber
+        }
+
+        return when (val matchResult = matchPrefixRuleUseCase(rules, normalizedNumber)) {
+            is MatchResult.Blocked -> BlockType.Prefix(matchResult.prefix)
+            is MatchResult.Allowed -> BlockType.AllowPrefix(matchResult.prefix)
+            MatchResult.NoMatch -> BlockType.Allow
+        }
+    }
+
+    private suspend fun saveBlockedCall(phoneNumber: String, blockType: BlockType) {
         try {
-            insertBlockedCallUseCase(phoneNumber, matchedPrefix)
+            insertBlockedCallUseCase.invoke(phoneNumber, blockType)
         } catch (e: Exception) {
             Timber.e(e, "Error saving blocked call")
         }
