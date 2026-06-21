@@ -18,9 +18,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import cl.blipblipcode.prefixsapp.R
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.BlockedCall
 import cl.blipblipcode.prefixsapp.ui.home.components.FirewallToggle
 import cl.blipblipcode.prefixsapp.ui.home.components.RecentThreatsHeader
@@ -44,6 +47,8 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val permission by viewModel.permission.collectAsState()
+    val isBlockNonContact by viewModel.isBlockNonContact.collectAsState()
+    val isBlockPrivateNumbers by viewModel.isBlockPrivateNumbers.collectAsState()
 
     LaunchedEffect(isCallScreeningEnabled, permissionsGranted, supportsRoleRequest) {
         viewModel.updateSystemState(isCallScreeningEnabled, permissionsGranted, supportsRoleRequest)
@@ -64,7 +69,11 @@ fun HomeScreen(
                 HomeContent(
                     state = state,
                     permission,
+                    isBlockNonContact = isBlockNonContact,
+                    isBlockPrivateNumber = isBlockPrivateNumbers,
                     onGoHistory = onGoHistory,
+                    onTogglePrivateNumber = { viewModel.onChangedBlockPrivateNumbers(!isBlockPrivateNumbers) },
+                    onToggleNonContact = { viewModel.onChangedBlockNonContacts(!isBlockNonContact) },
                     onToggleMaster = {
                         if (permission.isActive) onDisableRole() else onRequestPermissions()
                     }
@@ -79,7 +88,11 @@ fun HomeScreen(
 private fun HomeContent(
     state: HomeUiState.Content,
     permission: Permission,
+    isBlockNonContact: Boolean = false,
+    isBlockPrivateNumber: Boolean = false,
     onGoHistory: () -> Unit,
+    onTogglePrivateNumber: () -> Unit = {},
+    onToggleNonContact: () -> Unit = {},
     onToggleMaster: () -> Unit
 ) {
     LazyColumn(
@@ -91,6 +104,8 @@ private fun HomeContent(
     ) {
         item { StatusSection(permission, state.prefixCount) }
         item { FirewallToggle(isEnabled = permission.isActive, onToggle = onToggleMaster) }
+        item { FirewallToggle(label = stringResource(R.string.private_number), isEnabled = isBlockPrivateNumber, onToggle = onTogglePrivateNumber) }
+        item { FirewallToggle(label = stringResource(R.string.non_contact), isEnabled = isBlockNonContact, onToggle = onToggleNonContact) }
         item { StatsSection(blocked = state.blockedCount, allowed = state.allowedCount) }
         state.lastUpdate?.let {
             item {
@@ -128,9 +143,27 @@ private fun HomePreview() {
                 lastUpdateProgress = 85,
                 lastUpdate = null,
                 recentThreats = listOf(
-                    BlockedCall(1, "+34 91 234 56 78", "SPAM_MADRID_01", 1715868165000),
-                    BlockedCall(2, "+44 20 7123 4567", "INTL_BLOCK_UK", 1715859912000),
-                    BlockedCall(3, "+34 600 11 22 33", "LISTA_BLANCA_FAMILIA", 1715850725000)
+                    BlockedCall(
+                        id = 1,
+                        phoneNumber = "+34 91 234 56 78",
+                        matchedPrefix = "SPAM_MADRID_01",
+                        timestamp = 1715868165000,
+                        blockType = BlockType.Allow
+                    ),
+                    BlockedCall(
+                        id = 2,
+                        phoneNumber = "+44 20 7123 4567",
+                        matchedPrefix = "44",
+                        timestamp = 1715859912000,
+                        blockType = BlockType.Prefix("44")
+                    ),
+                    BlockedCall(
+                        id = 3,
+                        phoneNumber = "+34 600 11 22 33",
+                        matchedPrefix = "34",
+                        timestamp = 1715850725000,
+                        blockType = BlockType.AllowPrefix("34")
+                    )
                 )
             ),
             onGoHistory = { },

@@ -25,7 +25,11 @@ import androidx.compose.ui.unit.sp
 import cl.blipblipcode.prefixsapp.R
 
 @Composable
-fun FirewallToggle(isEnabled: Boolean, onToggle: () -> Unit) {
+fun FirewallToggle(
+    label: String = stringResource(R.string.home_firewall_master),
+    isEnabled: Boolean,
+    onToggle: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -33,13 +37,13 @@ fun FirewallToggle(isEnabled: Boolean, onToggle: () -> Unit) {
             .background(MaterialTheme.colorScheme.surface)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Start
     ) {
         Box(
             modifier = Modifier
                 .size(width = 54.dp, height = 28.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                .background( MaterialTheme.colorScheme.surfaceVariant)
                 .toggleable(isEnabled) { onToggle() }
                 .padding(2.dp)
         ) {
@@ -48,12 +52,12 @@ fun FirewallToggle(isEnabled: Boolean, onToggle: () -> Unit) {
                     .fillMaxHeight()
                     .width(24.dp)
                     .align(if (isEnabled) Alignment.CenterEnd else Alignment.CenterStart)
-                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .background(if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text = stringResource(R.string.home_firewall_master),
+            text = label,
             color = MaterialTheme.colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,

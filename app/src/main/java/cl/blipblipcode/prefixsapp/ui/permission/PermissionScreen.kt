@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.PhonelinkSetup
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -144,6 +145,14 @@ fun PermissionScreen(
                     icon = Icons.Filled.PhonelinkSetup,
                     title = stringResource(id = R.string.permission_read_phone_state_title),
                     description = stringResource(id = R.string.permission_read_phone_state_desc),
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                PermissionItem(
+                    icon = Icons.Filled.Contacts,
+                    title = stringResource(id = R.string.permission_read_contacts_title),
+                    description = stringResource(id = R.string.permission_read_contacts_desc),
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))

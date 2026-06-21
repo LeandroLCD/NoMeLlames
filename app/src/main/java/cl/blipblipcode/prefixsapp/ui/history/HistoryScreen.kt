@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import cl.blipblipcode.prefixsapp.R
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IGetCallHistoryUseCase
 import kotlinx.coroutines.launch
@@ -183,7 +184,9 @@ private fun HistoryContentContainer(
             }
         }
         Surface(
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
             enabled = canExport && !isExporting,
             shape = RoundedCornerShape(4.dp),
             color = MaterialTheme.colorScheme.background,
@@ -413,31 +416,57 @@ private fun HistoryItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-
-                    item.matchedPrefix?.let { prefix ->
-                        Box(
-                            modifier = Modifier
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.error,
-                                    RoundedCornerShape(2.dp)
-                                )
-                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
+                    when(item.blockType) {
+                        BlockType.Allow -> {
                             Text(
-                                text = "[$prefix] - DETERMINISTIC_BLOCK",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.error
+                                text = stringResource(R.string.history_no_matched_rule),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                    } ?: run {
-                        Text(
-                            text = stringResource(R.string.history_no_matched_rule),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        is BlockType.AllowPrefix, is BlockType.Prefix-> {
+                            item.matchedPrefix?.let { prefix ->
+                                Box(
+                                    modifier = Modifier
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.error,
+                                            RoundedCornerShape(2.dp)
+                                        )
+                                        .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.deterministic_block, prefix),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            } ?: run {
+                                Text(
+                                    text = stringResource(R.string.history_no_matched_rule),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        BlockType.NonContact -> {
+                            Text(
+                                text = stringResource(R.string.non_contact_block_type),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        BlockType.PrivateNumber -> {
+                            Text(
+                                text = stringResource(R.string.private_number_block_type),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
+
+
                 }
                 IconButton(onClick = { onPhoneNumberClick(item.phoneNumber) }) {
                     Icon(Icons.Outlined.CopyAll, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
