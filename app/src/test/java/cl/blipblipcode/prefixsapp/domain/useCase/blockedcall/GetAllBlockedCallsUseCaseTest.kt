@@ -2,6 +2,7 @@ package cl.blipblipcode.prefixsapp.domain.useCase.blockedcall
 
 import app.cash.turbine.test
 import cl.blipblipcode.prefixsapp.core.fakes.FakeBlockedCallRepository
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.BlockedCall
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -23,8 +24,8 @@ class GetAllBlockedCallsUseCaseTest {
     fun should_emit_repository_blocked_calls_in_invoke() = runTest {
         //GIVEN
         val calls = listOf(
-            BlockedCall(id = 1, phoneNumber = "+573001234567", matchedPrefix = "+57", timestamp = 100L),
-            BlockedCall(id = 2, phoneNumber = "+573001234568", matchedPrefix = "+57", timestamp = 200L)
+            BlockedCall(id = 1, phoneNumber = "+573001234567", matchedPrefix = "+57", timestamp = 100L, blockType = BlockType.Prefix("+57")),
+            BlockedCall(id = 2, phoneNumber = "+573001234568", matchedPrefix = "+57", timestamp = 200L, blockType = BlockType.Prefix("+57"))
         )
         repository.setAllBlockedCalls(calls)
 

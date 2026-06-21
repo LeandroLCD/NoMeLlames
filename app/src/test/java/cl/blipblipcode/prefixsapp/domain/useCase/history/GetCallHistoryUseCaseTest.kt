@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import cl.blipblipcode.prefixsapp.core.fakes.FakeAllowedCallRepository
 import cl.blipblipcode.prefixsapp.core.fakes.FakeBlockedCallRepository
 import cl.blipblipcode.prefixsapp.domain.model.AllowedCall
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.BlockedCall
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import kotlinx.coroutines.test.runTest
@@ -28,7 +29,13 @@ class GetCallHistoryUseCaseTest {
     @Test
     fun should_emit_combined_history_sorted_by_timestamp_descending_when_filter_is_all_in_invoke() = runTest {
         //GIVEN
-        val blocked = BlockedCall(id = 1, phoneNumber = "+57300", matchedPrefix = "+57", timestamp = 100L)
+        val blocked = BlockedCall(
+            id = 1,
+            phoneNumber = "+57300",
+            matchedPrefix = "+57",
+            timestamp = 100L,
+            blockType = BlockType.Prefix("+57")
+        )
         val allowed = AllowedCall(id = 2, phoneNumber = "+57301", timestamp = 200L)
         blockedRepository.setAllBlockedCalls(listOf(blocked))
         allowedRepository.setAllowedCalls(listOf(allowed))
@@ -44,6 +51,8 @@ class GetCallHistoryUseCaseTest {
             assertEquals(blocked.id, items[1].id)
             assertEquals(HistoryItem.CallType.ALLOWED, items[0].type)
             assertEquals(HistoryItem.CallType.BLOCKED, items[1].type)
+            assertEquals(BlockType.Allow, items[0].blockType)
+            assertEquals(BlockType.Prefix("+57"), items[1].blockType)
             assertEquals("+57", items[1].matchedPrefix)
             cancelAndIgnoreRemainingEvents()
         }
@@ -52,7 +61,13 @@ class GetCallHistoryUseCaseTest {
     @Test
     fun should_emit_only_blocked_items_when_filter_is_blocked_in_invoke() = runTest {
         //GIVEN
-        val blocked = BlockedCall(id = 1, phoneNumber = "+57300", matchedPrefix = "+57", timestamp = 100L)
+        val blocked = BlockedCall(
+            id = 1,
+            phoneNumber = "+57300",
+            matchedPrefix = "+57",
+            timestamp = 100L,
+            blockType = BlockType.Prefix("+57")
+        )
         val allowed = AllowedCall(id = 2, phoneNumber = "+57301", timestamp = 200L)
         blockedRepository.setAllBlockedCalls(listOf(blocked))
         allowedRepository.setAllowedCalls(listOf(allowed))
@@ -66,6 +81,7 @@ class GetCallHistoryUseCaseTest {
             assertEquals(1, items.size)
             assertEquals(blocked.id, items[0].id)
             assertTrue(items[0].isBlocked)
+            assertEquals(BlockType.Prefix("+57"), items[0].blockType)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -73,7 +89,13 @@ class GetCallHistoryUseCaseTest {
     @Test
     fun should_emit_only_allowed_items_when_filter_is_allowed_in_invoke() = runTest {
         //GIVEN
-        val blocked = BlockedCall(id = 1, phoneNumber = "+57300", matchedPrefix = "+57", timestamp = 100L)
+        val blocked = BlockedCall(
+            id = 1,
+            phoneNumber = "+57300",
+            matchedPrefix = "+57",
+            timestamp = 100L,
+            blockType = BlockType.Prefix("+57")
+        )
         val allowed = AllowedCall(id = 2, phoneNumber = "+57301", timestamp = 200L)
         blockedRepository.setAllBlockedCalls(listOf(blocked))
         allowedRepository.setAllowedCalls(listOf(allowed))
@@ -87,6 +109,7 @@ class GetCallHistoryUseCaseTest {
             assertEquals(1, items.size)
             assertEquals(allowed.id, items[0].id)
             assertEquals(HistoryItem.CallType.ALLOWED, items[0].type)
+            assertEquals(BlockType.Allow, items[0].blockType)
             cancelAndIgnoreRemainingEvents()
         }
     }

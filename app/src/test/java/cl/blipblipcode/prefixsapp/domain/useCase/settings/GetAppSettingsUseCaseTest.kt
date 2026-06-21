@@ -24,8 +24,7 @@ class GetAppSettingsUseCaseTest {
         //GIVEN
         val settings = AppSettings(
             lastPrefixUpdateTimestamp = 1_000L,
-            totalPrefixCount = 42,
-            syncStatus = AppSettings.SyncStatus.COMPLETED
+            totalPrefixCount = 42
         )
         repository.setSettings(settings)
 

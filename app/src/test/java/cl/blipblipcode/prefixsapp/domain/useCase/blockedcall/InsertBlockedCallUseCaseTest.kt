@@ -1,6 +1,7 @@
 package cl.blipblipcode.prefixsapp.domain.useCase.blockedcall
 
 import cl.blipblipcode.prefixsapp.core.fakes.FakeBlockedCallRepository
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -18,27 +19,53 @@ class InsertBlockedCallUseCaseTest {
     }
 
     @Test
-    fun should_call_repository_with_phone_and_prefix_in_invoke() = runTest {
+    fun should_call_repository_with_phone_and_prefix_block_type_in_invoke() = runTest {
         //GIVEN
         val phoneNumber = "+573001234567"
-        val matchedPrefix = "+57"
+        val blockType = BlockType.Prefix("+57")
 
         //WHEN
-        useCase(phoneNumber, matchedPrefix)
+        useCase(phoneNumber, blockType)
 
         //THEN
         assertEquals(phoneNumber, repository.lastInsertedPhone)
-        assertEquals(matchedPrefix, repository.lastInsertedMatchedPrefix)
+        assertEquals(blockType, repository.lastInsertedBlockType)
         assertEquals(1, repository.insertCallCount)
     }
 
     @Test
-    fun should_call_repository_once_per_invocation_in_invoke() = runTest {
+    fun should_propagate_private_number_block_type_to_repository_in_invoke() = runTest {
         //GIVEN
+        val phoneNumber = "+573001234567"
+        val blockType = BlockType.PrivateNumber
 
         //WHEN
-        useCase("+573001234567", "+57")
-        useCase("+573001234568", "+57")
+        useCase(phoneNumber, blockType)
+
+        //THEN
+        assertEquals(phoneNumber, repository.lastInsertedPhone)
+        assertEquals(blockType, repository.lastInsertedBlockType)
+    }
+
+    @Test
+    fun should_propagate_non_contact_block_type_to_repository_in_invoke() = runTest {
+        //GIVEN
+        val phoneNumber = "+573001234567"
+        val blockType = BlockType.NonContact
+
+        //WHEN
+        useCase(phoneNumber, blockType)
+
+        //THEN
+        assertEquals(phoneNumber, repository.lastInsertedPhone)
+        assertEquals(blockType, repository.lastInsertedBlockType)
+    }
+
+    @Test
+    fun should_call_repository_once_per_invocation_in_invoke() = runTest {
+        //WHEN
+        useCase("+573001234567", BlockType.Prefix("+57"))
+        useCase("+573001234568", BlockType.Prefix("+57"))
 
         //THEN
         assertEquals(2, repository.insertCallCount)
