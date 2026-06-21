@@ -2,6 +2,7 @@ package cl.blipblipcode.prefixsapp.data.repositories
 
 import cl.blipblipcode.prefixsapp.data.local.dao.BlockedCallDao
 import cl.blipblipcode.prefixsapp.data.local.entities.BlockedCallEntity
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.BlockedCall
 import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,13 +27,18 @@ class BlockedCallRepositoryImpl @Inject constructor(
 
     override suspend fun insertBlockedCall(
         phoneNumber: String,
-        matchedPrefix: String
+        blockType: BlockType
     ): Result<Unit> {
         return makeSuspendCall {
             blockedCallDao.insertBlockedCall(
-                BlockedCallEntity(
-                    phoneNumber = phoneNumber,
-                    matchedPrefix = matchedPrefix
+                BlockedCallEntity.fromDomain(
+                    BlockedCall(
+                        id = 0,
+                        phoneNumber = phoneNumber,
+                        matchedPrefix = blockType.getPrefix.orEmpty(),
+                        blockType = blockType,
+                        timestamp = System.currentTimeMillis(),
+                    )
                 )
             )
         }
