@@ -16,7 +16,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import cl.blipblipcode.prefixsapp.data.local.dao.AllowedCallDao
-import cl.blipblipcode.prefixsapp.data.local.dao.AppSettingsDao
 import cl.blipblipcode.prefixsapp.data.local.dao.BlockedCallDao
 import cl.blipblipcode.prefixsapp.data.local.dao.PrefixRuleDao
 import cl.blipblipcode.prefixsapp.data.local.database.AppDatabase
@@ -36,7 +35,6 @@ object DataModule {
 
     private val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
-            // Create allowed_calls table
             db.execSQL("""
                 CREATE TABLE IF NOT EXISTS allowed_calls (
                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -44,22 +42,11 @@ object DataModule {
                     timestamp INTEGER NOT NULL
                 )
             """.trimIndent())
-            
-            // Create app_settings table
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS app_settings (
-                    id INTEGER PRIMARY KEY NOT NULL,
-                    lastPrefixUpdateTimestamp INTEGER NOT NULL DEFAULT 0,
-                    totalPrefixCount INTEGER NOT NULL DEFAULT 0,
-                    lastSyncStatus TEXT NOT NULL DEFAULT 'NEVER'
-                )
-            """.trimIndent())
         }
     }
 
     private val MIGRATION_2_3 = object : Migration(2, 3) {
         override fun migrate(db: SupportSQLiteDatabase) {
-            // Create prefix_rules table
             db.execSQL("""
                 CREATE TABLE IF NOT EXISTS prefix_rules (
                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -68,11 +55,28 @@ object DataModule {
                     createdAt INTEGER NOT NULL
                 )
             """.trimIndent())
-            
-            // Create unique index on prefix
+
             db.execSQL("""
                 CREATE UNIQUE INDEX IF NOT EXISTS index_prefix_rules_prefix ON prefix_rules(prefix)
             """.trimIndent())
+        }
+    }
+
+    private val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS app_settings")
+        }
+    }
+
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE blocked_calls ADD COLUMN blockType TEXT NOT NULL DEFAULT 'Prefix'"
+            )
+            db.execSQL(
+                "UPDATE blocked_calls SET blockType = matchedPrefix, matchedPrefix = '' " +
+                    "WHERE matchedPrefix IN ('PrivateNumber', 'NonContact')"
+            )
         }
     }
 
@@ -84,7 +88,7 @@ object DataModule {
             AppDatabase::class.java,
             DATABASE_NAME
         )
-        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
         .build()
     }
 
@@ -96,11 +100,6 @@ object DataModule {
     @Provides
     fun provideAllowedCallDao(database: AppDatabase): AllowedCallDao {
         return database.allowedCallDao()
-    }
-
-    @Provides
-    fun provideAppSettingsDao(database: AppDatabase): AppSettingsDao {
-        return database.appSettingsDao()
     }
 
     @Provides

@@ -7,11 +7,15 @@ import dagger.hilt.components.SingletonComponent
 import cl.blipblipcode.prefixsapp.data.repositories.AllowedCallRepositoryImpl
 import cl.blipblipcode.prefixsapp.data.repositories.AppSettingsRepositoryImpl
 import cl.blipblipcode.prefixsapp.data.repositories.BlockedCallRepositoryImpl
+import cl.blipblipcode.prefixsapp.data.repositories.BlockingPreferencesRepositoryImpl
+import cl.blipblipcode.prefixsapp.data.repositories.ContactsRepositoryImpl
 import cl.blipblipcode.prefixsapp.data.repositories.PrefixRepositoryImpl
 import cl.blipblipcode.prefixsapp.data.repositories.VersionRepositoryImpl
 import cl.blipblipcode.prefixsapp.domain.repositories.AllowedCallRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.AppSettingsRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
+import cl.blipblipcode.prefixsapp.domain.repositories.BlockingPreferencesRepository
+import cl.blipblipcode.prefixsapp.domain.repositories.ContactsRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.VersionRepository
 import javax.inject.Singleton
@@ -41,4 +45,15 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindVersionRepository(repository: VersionRepositoryImpl): VersionRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindBlockingPreferencesRepository(
+        repository: BlockingPreferencesRepositoryImpl
+    ): BlockingPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindContactsRepository(
+        repository: ContactsRepositoryImpl
+    ): ContactsRepository
 }
