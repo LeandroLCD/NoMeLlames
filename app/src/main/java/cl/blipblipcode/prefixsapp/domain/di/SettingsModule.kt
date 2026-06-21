@@ -20,12 +20,6 @@ abstract class SettingsModule {
 
     @Binds
     @Singleton
-    abstract fun bindUpdatePrefixSyncUseCase(
-        useCase: UpdatePrefixSyncUseCase
-    ): IUpdatePrefixSyncUseCase
-
-    @Binds
-    @Singleton
     abstract fun bindGetThemeAppUseCase(
         useCase: GetThemeAppUseCase
     ): IGetThemeAppUseCase
