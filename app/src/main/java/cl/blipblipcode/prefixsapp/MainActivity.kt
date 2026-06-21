@@ -109,6 +109,8 @@ class MainActivity : FragmentActivity() {
 
     private fun checkPermissionsAndRole() {
         permissionsGranted = checkSelfPermission(Manifest.permission.READ_PHONE_STATE) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(Manifest.permission.READ_CONTACTS) ==
                 android.content.pm.PackageManager.PERMISSION_GRANTED
 
         checkCallScreeningRole()
@@ -127,7 +129,8 @@ class MainActivity : FragmentActivity() {
     fun requestPermissions() {
         permissionLauncher.launch(
             arrayOf(
-                Manifest.permission.READ_PHONE_STATE
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.READ_CONTACTS
             )
         )
     }
