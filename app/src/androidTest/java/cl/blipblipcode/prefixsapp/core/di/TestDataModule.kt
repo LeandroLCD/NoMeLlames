@@ -3,11 +3,11 @@ package cl.blipblipcode.prefixsapp.core.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
 import cl.blipblipcode.prefixsapp.data.local.dao.AllowedCallDao
-import cl.blipblipcode.prefixsapp.data.local.dao.AppSettingsDao
 import cl.blipblipcode.prefixsapp.data.local.dao.BlockedCallDao
 import cl.blipblipcode.prefixsapp.data.local.dao.PrefixRuleDao
 import cl.blipblipcode.prefixsapp.data.local.database.AppDatabase
@@ -20,12 +20,11 @@ import dagger.Provides
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
+import java.io.File
+import java.util.UUID
 import javax.inject.Named
 import javax.inject.Singleton
 
-private val Context.testAppPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(
-    name = "${AppConstants.Prefs.DATASTORE_NAME}_test"
-)
 
 @Module
 @TestInstallIn(
@@ -51,27 +50,32 @@ object TestDataModule {
         database.allowedCallDao()
 
     @Provides
-    fun provideAppSettingsDao(database: AppDatabase): AppSettingsDao =
-        database.appSettingsDao()
-
-    @Provides
     fun providePrefixRuleDao(database: AppDatabase): PrefixRuleDao =
         database.prefixRuleDao()
 
     @Provides
     @Singleton
     @Named(AppConstants.Prefs.NAME)
-    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+    fun provideSharedPreferences(): SharedPreferences {
+
+        val context = ApplicationProvider.getApplicationContext<Context>()
         return context.getSharedPreferences(
-            "${AppConstants.Prefs.NAME}_test",
+            "${AppConstants.Prefs.NAME}_${UUID.randomUUID()}_test",
             Context.MODE_PRIVATE
         )
     }
 
     @Provides
     @Singleton
-    fun provideAppPreferencesDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
-        return context.testAppPreferencesDataStore
+    fun provideAppPreferencesDataStore(): DataStore<Preferences> {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val name = "test_settings_${UUID.randomUUID()}.preferences_pb"
+
+        return PreferenceDataStoreFactory.create(
+            produceFile = {
+                File(context.cacheDir, name)
+            },
+        )
     }
 
     @Provides

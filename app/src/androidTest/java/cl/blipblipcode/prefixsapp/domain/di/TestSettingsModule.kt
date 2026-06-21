@@ -22,12 +22,6 @@ abstract class TestSettingsModule {
 
     @Binds
     @Singleton
-    abstract fun bindUpdatePrefixSyncUseCase(
-        useCase: UpdatePrefixSyncUseCase
-    ): IUpdatePrefixSyncUseCase
-
-    @Binds
-    @Singleton
     abstract fun bindGetThemeAppUseCase(
         useCase: GetThemeAppUseCase
     ): IGetThemeAppUseCase

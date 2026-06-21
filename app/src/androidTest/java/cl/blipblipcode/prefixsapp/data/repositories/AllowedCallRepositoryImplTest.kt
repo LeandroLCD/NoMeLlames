@@ -39,9 +39,9 @@ class AllowedCallRepositoryImplTest {
     lateinit var allowedCallDao: AllowedCallDao
 
     @Before
-    fun setUp() {
+    fun setUp() = runTest {
         hiltRule.inject()
-        runBlocking { allowedCallDao.deleteAllAllowedCalls() }
+       // allowedCallDao.deleteAllAllowedCalls()
     }
 
     @Test
@@ -54,9 +54,12 @@ class AllowedCallRepositoryImplTest {
 
         //THEN
         assertTrue(result.isSuccess)
-        val calls = repository.getAllAllowedCalls().first()
-        assertEquals(1, calls.size)
-        assertEquals(phoneNumber, calls.first().phoneNumber)
+        repository.getAllAllowedCalls().test {
+            val calls = awaitItem()
+            assertEquals(1, calls.size)
+            assertEquals(phoneNumber, calls.first().phoneNumber)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -68,8 +71,11 @@ class AllowedCallRepositoryImplTest {
         repository.insertAllowedCall(phoneNumber)
 
         //THEN
-        val calls = repository.getAllAllowedCalls().first()
-        assertNotEquals(0L, calls.first().id)
+        repository.getAllAllowedCalls().test {
+            val calls = awaitItem()
+            assertNotEquals(0L, calls.first().id)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -82,13 +88,16 @@ class AllowedCallRepositoryImplTest {
         val after = System.currentTimeMillis()
 
         //THEN
-        val calls = repository.getAllAllowedCalls().first()
-        val timestamp = calls.first().timestamp
-        assertTrue(
-            "timestamp=$timestamp not in [$before, $after]",
-            timestamp in before..after
-        )
-    }
+        repository.getAllAllowedCalls().test {
+
+            val timestamp = awaitItem().first().timestamp
+            assertTrue(
+                "timestamp=$timestamp not in [$before, $after]",
+                timestamp in before..after
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+        }
 
     @Test
     fun should_persist_multiple_calls_when_dao_inserts_each_in_invoke() = runTest {
@@ -99,9 +108,12 @@ class AllowedCallRepositoryImplTest {
         phones.forEach { repository.insertAllowedCall(it) }
 
         //THEN
-        val calls = repository.getAllAllowedCalls().first()
-        assertEquals(3, calls.size)
-        assertEquals(phones.toSet(), calls.map { it.phoneNumber }.toSet())
+        repository.getAllAllowedCalls().test {
+            val calls = awaitItem()
+                assertEquals(3, calls.size)
+            assertEquals(phones.toSet(), calls.map { it.phoneNumber }.toSet())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -139,7 +151,11 @@ class AllowedCallRepositoryImplTest {
         repository.deleteAllAllowedCalls()
 
         //THEN
-        assertEquals(0, repository.getAllowedCallsCount().first())
+        repository.getAllowedCallsCount().test {
+            val calls = awaitItem()
+            assertEquals(0, calls)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -156,9 +172,12 @@ class AllowedCallRepositoryImplTest {
 
         //THEN
         assertTrue(result.isSuccess)
-        val after = repository.getAllAllowedCalls().first()
-        assertEquals(2, after.size)
-        assertTrue(after.none { it.id == targetId })
+         repository.getAllAllowedCalls().test {
+             val after = awaitItem()
+             assertEquals(2, after.size)
+             assertTrue(after.none { it.id == targetId })
+             cancelAndIgnoreRemainingEvents()
+         }
     }
 
     @Test
@@ -169,14 +188,17 @@ class AllowedCallRepositoryImplTest {
         allowedCallDao.insertAllowedCall(AllowedCallEntity(phoneNumber = "+573001234569"))
         val before = repository.getAllAllowedCalls().first()
         val targetId = before.first { it.phoneNumber == "+573001234568" }.id
-        val expectedPhones = before.filter { it.id != targetId }.map { it.phoneNumber }.toSet()
 
         //WHEN
         repository.deleteAllowedCall(targetId)
 
         //THEN
-        val after = repository.getAllAllowedCalls().first()
-        assertEquals(expectedPhones, after.map { it.phoneNumber }.toSet())
+        repository.getAllAllowedCalls().test {
+            val after = awaitItem()
+            assertEquals(2, after.size)
+            assertTrue(after.none { it.id == targetId })
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -192,7 +214,10 @@ class AllowedCallRepositoryImplTest {
         repository.deleteAllowedCall(targetId)
 
         //THEN
-        assertEquals(2, repository.getAllowedCallsCount().first())
+        repository.getAllowedCallsCount().test {
+            assertEquals(2, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -206,7 +231,10 @@ class AllowedCallRepositoryImplTest {
 
         //THEN
         assertTrue(result.isSuccess)
-        assertEquals(2, repository.getAllAllowedCalls().first().size)
+        repository.getAllowedCallsCount().test {
+            assertEquals(2, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
