@@ -2,6 +2,7 @@ package cl.blipblipcode.prefixsapp
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.domain.repositories.AllowedCallRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
@@ -138,7 +139,7 @@ class SpamCallPrefixServiceTest {
         val matchedPrefix = "57"
 
         //WHEN
-        insertBlockedCallUseCase(phoneNumber, matchedPrefix)
+        insertBlockedCallUseCase(phoneNumber, BlockType.Prefix(matchedPrefix))
         advanceUntilIdle()
 
         //THEN
