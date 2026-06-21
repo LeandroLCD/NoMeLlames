@@ -5,13 +5,13 @@ data class HistoryItem(
     val phoneNumber: String,
     val timestamp: Long,
     val type: CallType,
+    val blockType: BlockType,
     val matchedPrefix: String? = null
 ) {
     enum class CallType {
         BLOCKED,
         ALLOWED
     }
-    
+
     val isBlocked: Boolean get() = type == CallType.BLOCKED
 }
-

@@ -2,16 +2,8 @@ package cl.blipblipcode.prefixsapp.domain.model
 
 data class AppSettings(
     val lastPrefixUpdateTimestamp: Long,
-    val totalPrefixCount: Int,
-    val syncStatus: SyncStatus
+    val totalPrefixCount: Int
 ) {
-    enum class SyncStatus {
-        NEVER,
-        IN_PROGRESS,
-        COMPLETED,
-        FAILED
-    }
-    
     /**
      * Calcula el progreso de actualización basado en qué tan reciente fue la última actualización.
      * - 100% si fue actualizado en las últimas 24 horas
@@ -19,10 +11,10 @@ data class AppSettings(
      */
     fun calculateUpdateProgress(): Int {
         if (lastPrefixUpdateTimestamp == 0L) return 0
-        
+
         val now = System.currentTimeMillis()
         val daysSinceUpdate = (now - lastPrefixUpdateTimestamp) / (1000 * 60 * 60 * 24)
-        
+
         return when {
             daysSinceUpdate <= 1 -> 100
             daysSinceUpdate >= 30 -> 0
@@ -44,4 +36,3 @@ data class AppSettings(
         }
     }
 }
-
