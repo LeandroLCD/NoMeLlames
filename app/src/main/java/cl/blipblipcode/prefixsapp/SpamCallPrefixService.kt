@@ -9,6 +9,9 @@ import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
 import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
 import cl.blipblipcode.prefixsapp.domain.useCase.allowedcall.IInsertAllowedCallUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.blockedcall.IInsertBlockedCallUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetAllPrefixRulesUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipCallLogUseCase
+import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipNotificationUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IMatchPrefixRuleUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.INormalizePhoneNumberUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.MatchResult
@@ -31,7 +34,10 @@ class SpamCallPrefixService : CallScreeningService() {
     lateinit var allowedCallRepository: AllowedCallRepository
 
     @Inject
-    lateinit var prefixRepository: PrefixRepository
+    lateinit var skipNotificationUseCase: IGetSkipNotificationUseCase
+
+    @Inject
+    lateinit var skipCallLogUseCase: IGetSkipCallLogUseCase
 
     @Inject
     lateinit var matchPrefixRuleUseCase: IMatchPrefixRuleUseCase
@@ -48,14 +54,22 @@ class SpamCallPrefixService : CallScreeningService() {
     @Inject
     lateinit var ioDispatcher: CoroutineDispatcher
     private val serviceScope by lazy { CoroutineScope(SupervisorJob() + ioDispatcher) }
+    @Inject lateinit var getAllPrefixRulesUseCase: IGetAllPrefixRulesUseCase
 
-
-    private var skipCallLog: Boolean = true
-    private var skipNotification: Boolean = true
+    internal val skipCallLog = skipCallLogUseCase.invoke().stateIn(
+        scope = serviceScope,
+        started = kotlinx.coroutines.flow.SharingStarted.Lazily,
+        initialValue = false
+    )
+    internal val skipNotification = skipNotificationUseCase.invoke().stateIn(
+        scope = serviceScope,
+        started = kotlinx.coroutines.flow.SharingStarted.Lazily,
+        initialValue = false
+    )
     private var countryDialingCode: String? = null
 
     internal val rulesStateFlow = lazy {
-        prefixRepository.getAllPrefixRules().stateIn(
+        getAllPrefixRulesUseCase().stateIn(
             scope = serviceScope,
             started = kotlinx.coroutines.flow.SharingStarted.Lazily,
             initialValue = emptyList()
@@ -65,8 +79,6 @@ class SpamCallPrefixService : CallScreeningService() {
     override fun onCreate() {
         super.onCreate()
         countryDialingCode = detectCountryDialingCode()
-        skipCallLog = prefixRepository.skipCallLog.value
-        skipNotification = prefixRepository.skipNotification.value
 
         Timber.i("Detected country dialing code: ${countryDialingCode ?: "unknown"}")
         Timber.i("Settings - skipCallLog: $skipCallLog, skipNotification: $skipNotification")
@@ -86,8 +98,8 @@ class SpamCallPrefixService : CallScreeningService() {
                         Timber.i("Blocking call from $phoneNumber - matched prefix: ${matchResult.prefix} (${matchResult.prefix.length} chars)")
                         setDisallowCall(true)
                         setRejectCall(true)
-                        setSkipCallLog(skipCallLog)
-                        setSkipNotification(skipNotification)
+                        setSkipCallLog(skipCallLog.value)
+                        setSkipNotification(skipNotification.value)
 
                         serviceScope.launch {
                             saveBlockedCall(phoneNumber, matchResult.prefix)
