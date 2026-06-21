@@ -1,5 +1,6 @@
 package cl.blipblipcode.prefixsapp.core.fakes
 
+import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.BlockedCall
 import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,7 @@ class FakeBlockedCallRepository : BlockedCallRepository {
 
     var lastInsertedPhone: String? = null
         private set
-    var lastInsertedMatchedPrefix: String? = null
+    var lastInsertedBlockType: BlockType? = null
         private set
     var lastDeletedId: Long? = null
         private set
@@ -36,10 +37,10 @@ class FakeBlockedCallRepository : BlockedCallRepository {
 
     override fun getAllBlockedCalls(): Flow<List<BlockedCall>> = _allBlockedCalls.asStateFlow()
 
-    override suspend fun insertBlockedCall(phoneNumber: String, matchedPrefix: String): Result<Unit> {
+    override suspend fun insertBlockedCall(phoneNumber: String, blockType: BlockType): Result<Unit> {
         insertCallCount++
         lastInsertedPhone = phoneNumber
-        lastInsertedMatchedPrefix = matchedPrefix
+        lastInsertedBlockType = blockType
         return insertResult
     }
 
