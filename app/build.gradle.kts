@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -19,10 +20,29 @@ android {
         applicationId = "cl.blipblipcode.prefixsapp"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.1.2"
+        versionCode = 5
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "cl.blipblipcode.prefixsapp.HiltTestRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystoreFilePath = providers.environmentVariable("KEYSTORE_FILE").orNull
+                ?: providers.gradleProperty("prefixsapp.signing.storeFile").orNull
+            if (!keystoreFilePath.isNullOrBlank()) {
+                storeFile = rootProject.file(keystoreFilePath)
+                storePassword = providers.environmentVariable("KEYSTORE_PASSWORD").orNull
+                    ?: providers.gradleProperty("prefixsapp.signing.storePassword").orNull
+                    ?: ""
+                keyAlias = providers.environmentVariable("KEY_ALIAS").orNull
+                    ?: providers.gradleProperty("prefixsapp.signing.keyAlias").orNull
+                    ?: ""
+                keyPassword = providers.environmentVariable("KEY_PASSWORD").orNull
+                    ?: providers.gradleProperty("prefixsapp.signing.keyPassword").orNull
+                    ?: ""
+            }
+        }
     }
 
     buildTypes {
@@ -43,6 +63,11 @@ android {
             )
             configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
                 nativeSymbolUploadEnabled = true
+            }
+            signingConfig = if (providers.environmentVariable("KEYSTORE_FILE").orNull != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
             }
         }
         create("apk"){

@@ -1,0 +1,493 @@
+name: 🚀 App — Test, Build & Release
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - '.github/workflows/app-android-test-integration.yml'
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - '.github/workflows/app-android-test-integration.yml'
+
+concurrency:
+  group: app-android-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # STEP 1 — Unit Tests
+  # Runs on every push & PR. Independent of every other job.
+  # ───────────────────────────────────────────────────────────────────────────
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: 🔧 Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: 🧪 Run unit tests
+        run: ./gradlew --init-script gradle/init-ci.gradle.kts :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: 📊 Publish unit test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: '**/build/test-results/testDebugUnitTest/TEST-*.xml'
+          check_name: 📋 Unit Test Results — App
+          comment_title: 🧪 Unit Test Report — :app module
+          comment_mode: always
+
+      - name: 📄 Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-report
+          path: '**/build/reports/tests/testDebugUnitTest/**'
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # STEP 2 — Check Tag Availability & Version Bump
+  # Runs on every push & PR. Independent.
+  # Exposes version + tag_name for downstream jobs.
+  # ───────────────────────────────────────────────────────────────────────────
+  check-tag:
+    name: 🏷️ Check Tag & Version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      version_code: ${{ steps.extract-version.outputs.version_code }}
+      tag_name: ${{ steps.extract-version.outputs.tag_name }}
+      latest_tag: ${{ steps.validate-version.outputs.latest_tag }}
+      latest_version_code: ${{ steps.validate-versioncode.outputs.latest_version_code }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 📌 Extract versionName & versionCode
+        id: extract-version
+        run: |
+          # Ambos viven en defaultConfig del módulo :app.
+          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts 2>/dev/null | head -1 || true)
+
+          if [ -z "$VERSION" ]; then
+            echo "❌ No se encontró 'versionName = \"...\"' en app/build.gradle.kts"
+            exit 1
+          fi
+
+          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts 2>/dev/null | head -1 || true)
+          if [ -z "$VERSION_CODE" ]; then
+            echo "❌ No se encontró 'versionCode = ...' en app/build.gradle.kts"
+            exit 1
+          fi
+
+          if ! [[ "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
+            echo "❌ versionCode inválido: '${VERSION_CODE}' (debe ser entero)"
+            exit 1
+          fi
+
+          TAG_NAME="v${VERSION}"
+          echo "version=${VERSION}"           >> "$GITHUB_OUTPUT"
+          echo "version_code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${TAG_NAME}"         >> "$GITHUB_OUTPUT"
+          echo "📌 versionName: ${VERSION}"
+          echo "📌 versionCode: ${VERSION_CODE}"
+          echo "📌 Tag a crear: ${TAG_NAME}"
+
+      - name: "🔍 Validate: new tag > latest tag & no duplicate"
+        id: validate-version
+        run: |
+          NEW_VERSION="${{ steps.extract-version.outputs.version }}"
+          NEW_TAG="${{ steps.extract-version.outputs.tag_name }}"
+
+          semver_gt() {
+            local A="${1#v}" B="${2#v}"
+            local IFS=.
+            read -ra VA <<< "$A"
+            read -ra VB <<< "$B"
+            for i in 0 1 2; do
+              local a="${VA[$i]:-0}" b="${VB[$i]:-0}"
+              if   (( 10#$a > 10#$b )); then return 0
+              elif (( 10#$a < 10#$b )); then return 1
+              fi
+            done
+            return 1
+          }
+
+          LATEST_TAG=$(git tag -l 'v*' | sort -V | tail -1)
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "ℹ️  No hay tags previos en el repo. Primer release: ${NEW_TAG}"
+            echo "latest_tag=ninguno" >> "$GITHUB_OUTPUT"
+            echo "✅ Validación de tag superada — primer release."
+            exit 0
+          fi
+
+          echo "latest_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "🏷️  Último tag existente : ${LATEST_TAG}"
+          echo "🆕 Nuevo tag a crear    : ${NEW_TAG}"
+
+          if git ls-remote --tags origin "refs/tags/${NEW_TAG}" | grep -q "${NEW_TAG}"; then
+            echo ""
+            echo "❌ ERROR: El tag ${NEW_TAG} ya existe en el repositorio."
+            echo "   Incrementa la versión en build.gradle.kts antes de mergear."
+            exit 1
+          fi
+
+          if semver_gt "$NEW_VERSION" "$LATEST_TAG"; then
+            echo ""
+            echo "✅ Validación de tag superada: ${NEW_TAG} > ${LATEST_TAG}"
+          else
+            echo ""
+            echo "❌ ERROR: La versión ${NEW_VERSION} NO es mayor que el último tag ${LATEST_TAG}."
+            echo "   Regla: el nuevo tag debe ser estrictamente mayor al último publicado."
+            NEXT_PATCH=$(echo "${LATEST_TAG#v}" | awk -F. '{print $1"."$2"."$3+1}')
+            echo "   Ejemplo válido  : ${LATEST_TAG} → v${NEXT_PATCH}"
+            exit 1
+          fi
+
+      - name: "🔢 Validate: new versionCode > latest tag's versionCode"
+        id: validate-versioncode
+        run: |
+          NEW_CODE="${{ steps.extract-version.outputs.version_code }}"
+          LATEST_TAG="${{ steps.validate-version.outputs.latest_tag }}"
+
+          echo "🔢 versionCode actual: ${NEW_CODE}"
+
+          # Primer release: nada que comparar
+          if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "ninguno" ]; then
+            echo "ℹ️  Primer release — sin validación de versionCode."
+            echo "latest_version_code=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Lee el app/build.gradle.kts EN EL COMMIT del tag previo.
+          # git show <tag>:<path> no toca el working tree.
+          PREV_FILE=$(git show "${LATEST_TAG}:app/build.gradle.kts" 2>/dev/null || true)
+          if [ -z "$PREV_FILE" ]; then
+            echo "⚠️  No se pudo leer app/build.gradle.kts en ${LATEST_TAG}."
+            echo "   Saltando validación de versionCode (asumiendo válido)."
+            echo "latest_version_code=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PREV_CODE=$(printf '%s\n' "$PREV_FILE" | grep -oP 'versionCode\s*=\s*\K[0-9]+' | head -1 || true)
+          if [ -z "$PREV_CODE" ]; then
+            echo "⚠️  ${LATEST_TAG} no contiene 'versionCode' en app/build.gradle.kts."
+            echo "   Saltando validación."
+            echo "latest_version_code=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "🔢 versionCode en ${LATEST_TAG}: ${PREV_CODE}"
+          echo "latest_version_code=${PREV_CODE}" >> "$GITHUB_OUTPUT"
+
+          if (( 10#$NEW_CODE > 10#$PREV_CODE )); then
+            echo ""
+            echo "✅ Validación de versionCode superada: ${NEW_CODE} > ${PREV_CODE}"
+          else
+            echo ""
+            echo "❌ ERROR: versionCode ${NEW_CODE} NO es mayor que el del tag ${LATEST_TAG} (${PREV_CODE})."
+            echo "   Android rechaza downgrades y APKs con el mismo versionCode."
+            echo "   Solución: incrementá 'versionCode' en app/build.gradle.kts."
+            NEXT_CODE=$(( 10#$PREV_CODE + 1 ))
+            echo "   Ejemplo válido: versionCode = ${NEXT_CODE}  (o mayor)"
+            exit 1
+          fi
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # STEP 3 — Instrumented Android Tests (Emulator)
+  # Depends on unit-tests + check-tag to skip expensive emulator runs
+  # when either prerequisite fails. (3 first jobs run in parallel where
+  # possible; android-tests depend on the other two by design.)
+  # ───────────────────────────────────────────────────────────────────────────
+  android-tests:
+    name: 🤖 Android Tests (API ${{ matrix.api-level }})
+    needs: [unit-tests, check-tag]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 30
+            target: google_apis
+          - api-level: 34
+            target: google_apis
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: 🔧 Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🐘 Gradle cache
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: 📱 AVD cache
+        uses: actions/cache@v5
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-prefixapp-${{ matrix.api-level }}-${{ matrix.target }}
+
+      - name: 🏗️ Create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          emulator-boot-timeout: 300
+          script: echo "✅ AVD snapshot generated for caching (API ${{ matrix.api-level }})"
+
+      - name: 🔧 Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: 🧪 Run :app instrumented tests (API ${{ matrix.api-level }})
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          emulator-boot-timeout: 300
+          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon --warning-mode none --console=plain --stacktrace
+
+      - name: 📊 Publish instrumented test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: '**/build/outputs/androidTest-results/**/*.xml'
+          check_name: 📋 Instrumented Results — API ${{ matrix.api-level }}
+          comment_title: 🤖 Instrumented Test Report (API ${{ matrix.api-level }})
+          comment_mode: always
+
+      - name: 📄 Upload HTML report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-test-report-api${{ matrix.api-level }}-${{ github.run_number }}
+          path: '**/build/reports/androidTests/connected/'
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # STEP 4 — Build :app Release APK (signed)
+  # Depends on unit-tests, android-tests, check-tag.
+  # Only when the PR has been merged into main.
+  # Injects keystore + google-services.json from secrets.
+  # ───────────────────────────────────────────────────────────────────────────
+  build-release:
+    name: 🏗️ Build Release APK
+    needs: [unit-tests, android-tests, check-tag]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: 🔧 Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: 🔐 Decode keystore from base64 secret
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "❌ Secret KEYSTORE_BASE64 no configurado."
+            exit 1
+          fi
+          mkdir -p .ci
+          echo "$KEYSTORE_BASE64" | base64 -d > .ci/release-keystore.jks
+          chmod 600 .ci/release-keystore.jks
+          echo "🔐 Keystore decodificado en .ci/release-keystore.jks ($(stat -c%s .ci/release-keystore.jks) bytes)"
+
+      - name: 📝 Write google-services.json from secret
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "❌ Secret GOOGLE_SERVICES_JSON no configurado."
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
+          echo "📝 google-services.json escrito ($(stat -c%s app/google-services.json) bytes)"
+
+      - name: 🏗️ Assemble :app release
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/.ci/release-keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew :app:assembleRelease \
+            --no-daemon \
+            --warning-mode none \
+            --console=plain \
+            --stacktrace
+
+      - name: 🔎 Locate generated APK
+        id: find-apk
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -name "*.apk" | head -1 || true)
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ No se encontró ningún APK en app/build/outputs/apk/release/"
+            ls -la app/build/outputs/apk/ || true
+            exit 1
+          fi
+          APK_NAME=$(basename "$APK_PATH")
+          echo "apk_path=${APK_PATH}"   >> "$GITHUB_OUTPUT"
+          echo "apk_name=${APK_NAME}"   >> "$GITHUB_OUTPUT"
+          echo "✅ APK encontrado: ${APK_PATH} (${APK_NAME})"
+
+      - name: 📦 Upload APK as workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: prefixapp-${{ needs.check-tag.outputs.tag_name }}-apk
+          path: ${{ steps.find-apk.outputs.apk_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # STEP 5 — Create GitHub Release & Git Tag with the signed APK
+  # Depends on build-release + check-tag (for the final tag_name).
+  # Only when the PR has been merged.
+  # ───────────────────────────────────────────────────────────────────────────
+  create-release:
+    name: 🎯 Create Release & Tag
+    needs: [build-release, check-tag]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📥 Download signed APK artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: prefixapp-${{ needs.check-tag.outputs.tag_name }}-apk
+          path: ./release-artifacts
+
+      - name: 🧹 Clean orphan tag from previous failed run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-tag.outputs.tag_name }}
+        run: |
+          # Si el tag existe en origin pero NO tiene release asociado (run previo fallido),
+          # lo borramos para que action-gh-release pueda re-crearlo limpio.
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q "${TAG}"; then
+            echo "⚠️  Tag ${TAG} ya existe en origin. Verificando si tiene release..."
+            RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/${TAG} --jq '.id' 2>/dev/null || echo "")
+            if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
+              echo "🧹 Tag huérfano detectado (sin release). Borrando..."
+              git push origin --delete "${TAG}" || echo "   (push falló, intentando vía API)"
+              gh api -X DELETE repos/${{ github.repository }}/git/refs/tags/${TAG} || true
+              echo "✅ Tag huérfano eliminado."
+            else
+              echo "❌ El tag ${TAG} ya tiene un release (id=${RELEASE_ID}). Abortando para evitar duplicado."
+              echo "   Si querés forzar un nuevo release, eliminá manualmente el tag y el release primero."
+              exit 1
+            fi
+          fi
+
+      - name: 🏷️ Create GitHub Release & Tag
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.check-tag.outputs.tag_name }}
+          name: PrefixApp ${{ needs.check-tag.outputs.tag_name }}
+          body: |
+            ## 📦 PrefixApp ${{ needs.check-tag.outputs.tag_name }}
+
+            Publicado automáticamente desde PR #${{ github.event.pull_request.number }}
+            **${{ github.event.pull_request.title }}**
+
+            ---
+
+            ### 🔐 Instalación
+            El APK está firmado con la keystore de release. Descargá el archivo `*.apk`
+            adjunto a este release y abrilo en tu dispositivo Android (API 24+).
+
+            ---
+
+            📅 Generado el: ${{ github.event.pull_request.merged_at }}
+          files: ./release-artifacts/*.apk
+          make_latest: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
