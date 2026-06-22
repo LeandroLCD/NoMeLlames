@@ -1,6 +1,5 @@
 package cl.blipblipcode.prefixsapp
 
-import android.content.Context
 import android.telecom.Call
 import android.telecom.CallScreeningService
 import android.telephony.TelephonyManager
@@ -8,32 +7,17 @@ import cl.blipblipcode.prefixsapp.data.local.static.CountryDialingCodeProvider
 import cl.blipblipcode.prefixsapp.di.SpamCallPrefixEntryPoint
 import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
-import cl.blipblipcode.prefixsapp.domain.repositories.AllowedCallRepository
-import cl.blipblipcode.prefixsapp.domain.repositories.BlockedCallRepository
-import cl.blipblipcode.prefixsapp.domain.repositories.ContactsRepository
-import cl.blipblipcode.prefixsapp.domain.useCase.allowedcall.IInsertAllowedCallUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.blockedcall.IInsertBlockedCallUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.blocking.IGetBlockNonContactsUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.blocking.IGetBlockPrivateNumbersUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetAllPrefixRulesUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipCallLogUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IGetSkipNotificationUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IMatchPrefixRuleUseCase
-import cl.blipblipcode.prefixsapp.domain.useCase.prefix.INormalizePhoneNumberUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.MatchResult
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import javax.inject.Inject
 

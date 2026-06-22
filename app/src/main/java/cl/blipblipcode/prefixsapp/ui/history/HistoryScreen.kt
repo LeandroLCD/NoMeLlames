@@ -104,12 +104,12 @@ fun HistoryScreen(
     val exportErrorLabel = stringResource(R.string.history_export_error)
     val saveErrorLabel = stringResource(R.string.history_save_contact_error)
 
-    var pendingSaveNumber by rememberSaveable { mutableStateOf<String?>(null) }
+    val pendingSaveNumber = rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(permissionsGranted, pendingSaveNumber) {
-        if (permissionsGranted && pendingSaveNumber != null) {
-            val number = pendingSaveNumber!!
-            pendingSaveNumber = null
+        if (permissionsGranted && pendingSaveNumber.value != null) {
+            val number = pendingSaveNumber.value.orEmpty()
+            pendingSaveNumber.value = null
             launchSaveContactIntent(context, number).onFailure {
                 scope.launch {
                     snackbarHostState.showSnackbar(saveErrorLabel)
@@ -126,7 +126,7 @@ fun HistoryScreen(
                 }
             }
         } else {
-            pendingSaveNumber = phoneNumber
+            pendingSaveNumber.value = phoneNumber
             onRequestPermissions(Screen.Permission)
         }
     }

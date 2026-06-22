@@ -26,7 +26,6 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -85,43 +84,8 @@ class SpamCallPrefixServiceTest {
     }
 
     @After
-    fun tearDown() {
-        runBlocking {
-            createdRawContactIds.forEach { id ->
-                appContext.contentResolver.delete(
-                    ContactsContract.RawContacts.CONTENT_URI,
-                    "${ContactsContract.RawContacts._ID} = ?",
-                    arrayOf(id.toString())
-                )
-            }
-            createdRawContactIds.clear()
-            blockingPreferencesRepositoryImpl.setBlockNonContacts(false).getOrThrow()
-        }
-    }
-
-    private fun insertContact(phoneNumber: String): Long {
-        val rawContactValues = ContentValues().apply {
-            put(ContactsContract.RawContacts.ACCOUNT_TYPE, "com.google")
-            put(ContactsContract.RawContacts.ACCOUNT_NAME, "test_account")
-        }
-        val rawContactUri = appContext.contentResolver.insert(
-            ContactsContract.RawContacts.CONTENT_URI,
-            rawContactValues
-        )
-        val rawContactId = rawContactUri?.lastPathSegment?.toLongOrNull() ?: 0L
-
-        val phoneValues = ContentValues().apply {
-            put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
-            put(
-                ContactsContract.Data.MIMETYPE,
-                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
-            )
-            put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber)
-        }
-        appContext.contentResolver.insert(ContactsContract.Data.CONTENT_URI, phoneValues)
-
-        createdRawContactIds.add(rawContactId)
-        return rawContactId
+    fun tearDown() = runTest{
+        blockingPreferencesRepositoryImpl.setBlockNonContacts(false).getOrThrow()
     }
 
     @Test
@@ -244,7 +208,7 @@ class SpamCallPrefixServiceTest {
     fun should_return_true_when_contact_exists_with_full_phone_number_in_invoke() = runTest {
         //GIVEN
         val phoneNumber = "+56911111111"
-        insertContact(phoneNumber)
+        insertContact()
 
         //WHEN
         val isContact = contactsRepository.isContact(phoneNumber)
@@ -254,6 +218,7 @@ class SpamCallPrefixServiceTest {
             "expected isContact to return true for stored contact $phoneNumber",
             isContact
         )
+        deleteNumber()
     }
 
     @Test
@@ -269,5 +234,49 @@ class SpamCallPrefixServiceTest {
             "expected isContact to return false for non-existing contact $phoneNumber",
             isContact
         )
+    }
+    private fun insertContact(): Long {
+        val rawContactValues = ContentValues().apply {
+            put(ContactsContract.RawContacts.ACCOUNT_NAME, "test_account")
+        }
+        val rawContactUri = appContext.contentResolver.insert(
+            ContactsContract.RawContacts.CONTENT_URI,
+            rawContactValues
+        )
+        val rawContactId = rawContactUri?.lastPathSegment?.toLongOrNull() ?: 0L
+
+        val phoneValues = ContentValues().apply {
+            put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+            put(
+                ContactsContract.Data.MIMETYPE,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+            )
+            put(ContactsContract.CommonDataKinds.Phone.NUMBER, "+56911111111")
+        }
+        appContext.contentResolver.insert(ContactsContract.Data.CONTENT_URI, phoneValues)
+
+        createdRawContactIds.add(rawContactId)
+        return rawContactId
+    }
+
+    private fun deleteNumber() {
+        val cursor = appContext.contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            arrayOf(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID),
+            "${ContactsContract.CommonDataKinds.Phone.NUMBER} = ?",
+            arrayOf("+56911111111"),
+            null
+        )
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val rawContactId = it.getLong(0)
+                appContext.contentResolver.delete(
+                    ContactsContract.RawContacts.CONTENT_URI,
+                    "${ContactsContract.RawContacts._ID} = ?",
+                    arrayOf(rawContactId.toString())
+                )
+                createdRawContactIds.remove(rawContactId)
+            }
+        }
     }
 }

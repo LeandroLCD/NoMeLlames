@@ -46,7 +46,5 @@ interface SpamCallPrefixEntryPoint {
 
     fun contactsRepository(): ContactsRepository
 
-    fun ioDispatcher(): CoroutineDispatcher
-
     fun getAllPrefixRulesUseCase(): IGetAllPrefixRulesUseCase
 }
