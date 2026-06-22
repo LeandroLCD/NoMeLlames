@@ -1,7 +1,14 @@
 package cl.blipblipcode.prefixsapp
 
+import android.Manifest
+import android.app.Instrumentation
+import android.content.ContentValues
+import android.content.Context
+import android.provider.ContactsContract
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import app.cash.turbine.test
+import cl.blipblipcode.prefixsapp.data.repositories.BlockingPreferencesRepositoryImpl
 import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.domain.repositories.AllowedCallRepository
@@ -14,13 +21,17 @@ import cl.blipblipcode.prefixsapp.domain.useCase.prefix.IMatchPrefixRuleUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.INormalizePhoneNumberUseCase
 import cl.blipblipcode.prefixsapp.domain.useCase.prefix.MatchResult
 import cl.blipblipcode.prefixsapp.rules.MainDispatcherRule
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -49,9 +60,68 @@ class SpamCallPrefixServiceTest {
     @Inject lateinit var insertBlockedCallUseCase: IInsertBlockedCallUseCase
     @Inject lateinit var insertAllowedCallUseCase: IInsertAllowedCallUseCase
 
+    @Inject lateinit var contactsRepository: cl.blipblipcode.prefixsapp.domain.repositories.ContactsRepository
+    @Inject lateinit var blockingPreferencesRepositoryImpl: BlockingPreferencesRepositoryImpl
+
+    @Inject @ApplicationContext
+    lateinit var appContext: Context
+
+    private val instrumentation: Instrumentation
+        get() = InstrumentationRegistry.getInstrumentation()
+
+    private val createdRawContactIds = mutableListOf<Long>()
+
     @Before
     fun setUp() {
         hiltRule.inject()
+        instrumentation.uiAutomation.grantRuntimePermission(
+            appContext.packageName,
+            Manifest.permission.READ_CONTACTS
+        )
+        instrumentation.uiAutomation.grantRuntimePermission(
+            appContext.packageName,
+            Manifest.permission.WRITE_CONTACTS
+        )
+    }
+
+    @After
+    fun tearDown() {
+        runBlocking {
+            createdRawContactIds.forEach { id ->
+                appContext.contentResolver.delete(
+                    ContactsContract.RawContacts.CONTENT_URI,
+                    "${ContactsContract.RawContacts._ID} = ?",
+                    arrayOf(id.toString())
+                )
+            }
+            createdRawContactIds.clear()
+            blockingPreferencesRepositoryImpl.setBlockNonContacts(false).getOrThrow()
+        }
+    }
+
+    private fun insertContact(phoneNumber: String): Long {
+        val rawContactValues = ContentValues().apply {
+            put(ContactsContract.RawContacts.ACCOUNT_TYPE, "com.google")
+            put(ContactsContract.RawContacts.ACCOUNT_NAME, "test_account")
+        }
+        val rawContactUri = appContext.contentResolver.insert(
+            ContactsContract.RawContacts.CONTENT_URI,
+            rawContactValues
+        )
+        val rawContactId = rawContactUri?.lastPathSegment?.toLongOrNull() ?: 0L
+
+        val phoneValues = ContentValues().apply {
+            put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+            put(
+                ContactsContract.Data.MIMETYPE,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+            )
+            put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber)
+        }
+        appContext.contentResolver.insert(ContactsContract.Data.CONTENT_URI, phoneValues)
+
+        createdRawContactIds.add(rawContactId)
+        return rawContactId
     }
 
     @Test
@@ -168,5 +238,36 @@ class SpamCallPrefixServiceTest {
             assertEquals(phoneNumber, calls.first().phoneNumber)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun should_return_true_when_contact_exists_with_full_phone_number_in_invoke() = runTest {
+        //GIVEN
+        val phoneNumber = "+56911111111"
+        insertContact(phoneNumber)
+
+        //WHEN
+        val isContact = contactsRepository.isContact(phoneNumber)
+
+        //THEN
+        assertTrue(
+            "expected isContact to return true for stored contact $phoneNumber",
+            isContact
+        )
+    }
+
+    @Test
+    fun should_return_false_when_no_contact_exists_in_invoke() = runTest {
+        //GIVEN
+        val phoneNumber = "+56922222222"
+
+        //WHEN
+        val isContact = contactsRepository.isContact(phoneNumber)
+
+        //THEN
+        assertFalse(
+            "expected isContact to return false for non-existing contact $phoneNumber",
+            isContact
+        )
     }
 }
