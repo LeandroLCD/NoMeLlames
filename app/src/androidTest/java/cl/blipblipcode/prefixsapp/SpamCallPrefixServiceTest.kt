@@ -236,12 +236,9 @@ class SpamCallPrefixServiceTest {
         )
     }
     private fun insertContact(): Long {
-        val rawContactValues = ContentValues().apply {
-            put(ContactsContract.RawContacts.ACCOUNT_NAME, "test_account")
-        }
         val rawContactUri = appContext.contentResolver.insert(
             ContactsContract.RawContacts.CONTENT_URI,
-            rawContactValues
+            ContentValues()
         )
         val rawContactId = rawContactUri?.lastPathSegment?.toLongOrNull() ?: 0L
 
