@@ -307,6 +307,7 @@ class HomeViewModelTest {
                 it is HomeUiState.Content && it.recentThreats.size == 2
             } as HomeUiState.Content
             //THEN
+            assertEquals(2, state.recentThreats.size)
             cancelAndIgnoreRemainingEvents()
         }
     }
