@@ -234,7 +234,10 @@ fun MainScreen(
                             snackbarHostState.showSnackbar(message)
                         }
 
-                        TabIds.HISTORY -> HistoryScreen()
+                        TabIds.HISTORY -> HistoryScreen(
+                            permissionsGranted = permissionsGranted,
+                            onRequestPermissions = onRequestPermissions
+                        )
                         TabIds.SETTINGS -> SettingsScreen {
                             scope.launch {
                                 snackbarHostState.showSnackbar(it)

@@ -80,6 +80,8 @@
     <string name="history_exporting">Exportando…</string>
     <string name="history_no_matched_rule">Sin regla coincidente</string>
     <string name="history_unknown_operator">Operador desconocido</string>
+    <string name="history_save_contact">Guardar en contactos</string>
+    <string name="history_save_contact_error">No se pudo abrir la app de contactos</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">[ AJUSTES ]</string>
@@ -169,6 +171,8 @@
     <string name="permission_read_phone_state_desc">Estado del teléfono para detección en tiempo real.</string>
     <string name="permission_read_call_log_title">READ_CALL_LOG</string>
     <string name="permission_read_call_log_desc">Registro de llamadas para filtrado de SPAM conocido.</string>
+    <string name="permission_read_contacts_title" translatable="false">READ_CONTACTS</string>
+    <string name="permission_read_contacts_desc">Contactos para la regla "bloquear todo excepto contactos".</string>
     <string name="permission_grant_access">[ CONCEDER ACCESO ]</string>
     <string name="permission_skip">OMITIR POR AHORA</string>
 
@@ -192,4 +196,9 @@
     <string name="green">Verde</string>
     <string name="solaris">Solaris</string>
     <string name="theme_description">Elige entre el modo claro, oscuro, rosa, verde, solaris o seguir el sistema</string>
+    <string name="non_contact_block_type">Contacto no registrado</string>
+    <string name="private_number_block_type">Numero privado.</string>
+    <string name="deterministic_block">[%1$s] - DETERMINISTIC_BLOCK</string>
+    <string name="private_number">NUMEROS PRIVADOS</string>
+    <string name="non_contact">NO REGISTRADOS</string>
 </resources>

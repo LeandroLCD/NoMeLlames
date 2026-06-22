@@ -80,6 +80,8 @@
     <string name="history_exporting">Exportando…</string>
     <string name="history_no_matched_rule">Sem regra correspondente</string>
     <string name="history_unknown_operator">Operadora desconhecida</string>
+    <string name="history_save_contact">Salvar nos contatos</string>
+    <string name="history_save_contact_error">Não foi possível abrir o app de contatos</string>
 
     <!-- Tela de Ajustes -->
     <string name="settings_title">[ AJUSTES ]</string>

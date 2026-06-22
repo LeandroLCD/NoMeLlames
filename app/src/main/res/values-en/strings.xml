@@ -80,6 +80,8 @@
     <string name="history_exporting">Exporting…</string>
     <string name="history_no_matched_rule">No matching rule</string>
     <string name="history_unknown_operator">Unknown operator</string>
+    <string name="history_save_contact">Save to contacts</string>
+    <string name="history_save_contact_error">Could not open contacts app</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">[ SETTINGS ]</string>

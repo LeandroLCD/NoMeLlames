@@ -1,7 +1,9 @@
 package cl.blipblipcode.prefixsapp.ui.history
 
 import android.content.ClipData
+import android.content.Context
 import android.content.Intent
+import android.provider.ContactsContract
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -25,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -45,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,15 +66,30 @@ import cl.blipblipcode.prefixsapp.R
 import cl.blipblipcode.prefixsapp.domain.model.BlockType
 import cl.blipblipcode.prefixsapp.domain.model.HistoryItem
 import cl.blipblipcode.prefixsapp.domain.useCase.history.IGetCallHistoryUseCase
+import cl.blipblipcode.prefixsapp.ui.navigation.Screen
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+internal fun launchSaveContactIntent(
+    context: Context,
+    phoneNumber: String
+): Result<Unit> = runCatching {
+    val intent = Intent(Intent.ACTION_INSERT).apply {
+        data = ContactsContract.Contacts.CONTENT_URI
+        putExtra(ContactsContract.Intents.Insert.PHONE, phoneNumber)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(intent)
+}
+
 @Composable
 fun HistoryScreen(
     modifier: Modifier = Modifier,
+    permissionsGranted: Boolean = false,
+    onRequestPermissions: (Screen) -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -83,6 +102,34 @@ fun HistoryScreen(
     val exportSuccessLabel = stringResource(R.string.history_export_success_snackbar)
     val exportOpenLabel = stringResource(R.string.history_export_open)
     val exportErrorLabel = stringResource(R.string.history_export_error)
+    val saveErrorLabel = stringResource(R.string.history_save_contact_error)
+
+    var pendingSaveNumber by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(permissionsGranted, pendingSaveNumber) {
+        if (permissionsGranted && pendingSaveNumber != null) {
+            val number = pendingSaveNumber!!
+            pendingSaveNumber = null
+            launchSaveContactIntent(context, number).onFailure {
+                scope.launch {
+                    snackbarHostState.showSnackbar(saveErrorLabel)
+                }
+            }
+        }
+    }
+
+    val onSaveClick: (String) -> Unit = { phoneNumber ->
+        if (permissionsGranted) {
+            launchSaveContactIntent(context, phoneNumber).onFailure {
+                scope.launch {
+                    snackbarHostState.showSnackbar(saveErrorLabel)
+                }
+            }
+        } else {
+            pendingSaveNumber = phoneNumber
+            onRequestPermissions(Screen.Permission)
+        }
+    }
 
     LaunchedEffect(export) {
 
@@ -130,6 +177,7 @@ fun HistoryScreen(
                     clipboardManager.setClipEntry(ClipEntry(clipData))
                 }
             },
+            onSaveClick = onSaveClick,
             modifier = Modifier.fillMaxSize()
         )
         SnackbarHost(
@@ -155,7 +203,8 @@ private fun HistoryContentContainer(
     modifier: Modifier = Modifier,
     onFilterSelected: (IGetCallHistoryUseCase.HistoryFilter) -> Unit,
     onExportClick: () -> Unit,
-    onPhoneNumberClick: (String) -> Unit
+    onPhoneNumberClick: (String) -> Unit,
+    onSaveClick: (String) -> Unit
 ) {
     val canExport = (uiState as? HistoryUiState.Content)?.canExport == true
     val isExporting = export.isExporting
@@ -179,6 +228,7 @@ private fun HistoryContentContainer(
                     state = uiState,
                     onFilterSelected = onFilterSelected,
                     onPhoneNumberClick = onPhoneNumberClick,
+                    onSaveClick = onSaveClick,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -221,6 +271,7 @@ private fun HistoryContent(
     state: HistoryUiState.Content,
     onFilterSelected: (IGetCallHistoryUseCase.HistoryFilter) -> Unit,
     onPhoneNumberClick: (String) -> Unit,
+    onSaveClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dateFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
@@ -258,7 +309,8 @@ private fun HistoryContent(
                         HistoryItem(
                             item = item,
                             dateFormat = dateFormat,
-                            onPhoneNumberClick = onPhoneNumberClick
+                            onPhoneNumberClick = onPhoneNumberClick,
+                            onSaveClick = onSaveClick
                         )
                         HorizontalDivider(
                             color = MaterialTheme.colorScheme.outlineVariant,
@@ -354,7 +406,8 @@ private fun FilterButton(
 private fun HistoryItem(
     item: HistoryItem,
     dateFormat: SimpleDateFormat,
-    onPhoneNumberClick: (String) -> Unit
+    onPhoneNumberClick: (String) -> Unit,
+    onSaveClick: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     val statusColor =
@@ -398,6 +451,17 @@ private fun HistoryItem(
                     modifier = Modifier
                         .size(8.dp)
                         .background(statusColor)
+                )
+            }
+            IconButton(
+                onClick = { onSaveClick(item.phoneNumber) },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.PersonAdd,
+                    contentDescription = stringResource(R.string.history_save_contact),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

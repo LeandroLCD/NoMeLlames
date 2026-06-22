@@ -80,6 +80,8 @@
     <string name="history_exporting">Esportazione in corso…</string>
     <string name="history_no_matched_rule">Nessuna regola corrispondente</string>
     <string name="history_unknown_operator">Operatore sconosciuto</string>
+    <string name="history_save_contact">Salva nei contatti</string>
+    <string name="history_save_contact_error">Impossibile aprire l\'app dei contatti</string>
 
     <!-- Schermata Impostazioni -->
     <string name="settings_title">[ IMPOSTAZIONI ]</string>
