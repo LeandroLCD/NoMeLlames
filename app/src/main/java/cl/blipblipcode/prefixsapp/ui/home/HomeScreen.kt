@@ -126,10 +126,10 @@ private fun HomeContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun HomePreview() {
-    PrefixsAppTheme(darkTheme = true) {
+    PrefixsAppTheme(darkTheme = false) {
         HomeContent(
             permission = Permission(
                 isEnabled = true,
