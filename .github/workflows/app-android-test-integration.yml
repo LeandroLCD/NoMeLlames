@@ -470,6 +470,15 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      - name: 📤 Upload R8 mapping file
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-release-mapping
+          path: app/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: warn
+          retention-days: 14
+
   # ───────────────────────────────────────────────────────────────────────────
   # STEP 5 — Create GitHub Release & Git Tag with the signed APK
   # Depends on build-release + check-tag (for the final tag_name).
@@ -582,13 +591,20 @@ jobs:
           fi
           echo "✅ AAB ready for deploy ($(stat -c%s "$AAB") bytes)"
 
+      - name: 📥 Download R8 mapping artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: app-release-mapping
+          path: app/build/outputs/mapping/release/
+          if-no-files-found: warn
+
       - name: 🚀 Upload to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
           packageName: cl.blipblipcode.prefixsapp
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: ${{ github.event_name == 'workflow_dispatch' && inputs.track || 'internal' }}
+          tracks: ${{ github.event_name == 'workflow_dispatch' && inputs.track || 'internal' }}
           status: completed
           mappingFile: app/build/outputs/mapping/release/mapping.txt
           whatsNewDirectory: app/src/main/play/release-notes/
