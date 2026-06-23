@@ -7,7 +7,6 @@ import cl.blipblipcode.prefixsapp.data.local.entities.PrefixRuleEntity
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
 import cl.blipblipcode.prefixsapp.rules.MainDispatcherRule
-import cl.blipblipcode.prefixsapp.utils.awaitMatches
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -284,12 +283,10 @@ class PrefixRepositoryImplTest {
         repository.setSkipCallLog(false)
 
         //WHEN
-         repository.skipCallLog.test {
+        val value = repository.skipCallLog.first { !it }
 
-             //THEN
-             assertEquals(false, awaitMatches { !it })
-             cancelAndIgnoreRemainingEvents()
-         }
+        //THEN
+        assertEquals(false, value)
     }
 
     @Test
