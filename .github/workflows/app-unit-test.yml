@@ -2,7 +2,7 @@ name: 🧪 App Unit Tests 🧪
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [develop ]
     paths:
       - 'app/src/main/java/**/domain/**'
       - 'app/src/test/**'
