@@ -19,6 +19,8 @@ on:
       - 'gradle/**'
       - '.github/workflows/app-android-test-integration.yml'
 
+  workflow_dispatch:
+
 concurrency:
   group: app-android-integration-${{ github.ref }}
   cancel-in-progress: true
