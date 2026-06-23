@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 
 plugins {
@@ -11,6 +12,14 @@ plugins {
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.kotlin.serialization)
 }
+
+val localSigningProperties: Properties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+fun signingProp(name: String): String? =
+    localSigningProperties.getProperty(name)?.takeIf { it.isNotBlank() }
 
 android {
     namespace = "cl.blipblipcode.prefixsapp"
@@ -29,30 +38,32 @@ android {
     signingConfigs {
         create("release") {
             val keystoreFilePath = providers.environmentVariable("KEYSTORE_FILE").orNull
-                ?: providers.gradleProperty("prefixsapp.signing.storeFile").orNull
+                ?: signingProp("prefixsapp.signing.storeFile")
+
             if (!keystoreFilePath.isNullOrBlank()) {
                 storeFile = rootProject.file(keystoreFilePath)
                 storePassword = providers.environmentVariable("KEYSTORE_PASSWORD").orNull
-                    ?: providers.gradleProperty("prefixsapp.signing.storePassword").orNull
+                    ?: signingProp("prefixsapp.signing.storePassword")
                     ?: ""
                 keyAlias = providers.environmentVariable("KEY_ALIAS").orNull
-                    ?: providers.gradleProperty("prefixsapp.signing.keyAlias").orNull
+                    ?: signingProp("prefixsapp.signing.keyAlias")
                     ?: ""
                 keyPassword = providers.environmentVariable("KEY_PASSWORD").orNull
-                    ?: providers.gradleProperty("prefixsapp.signing.keyPassword").orNull
+                    ?: signingProp("prefixsapp.signing.keyPassword")
                     ?: ""
             }
         }
     }
 
     buildTypes {
+        val isSigningConfigured = providers.environmentVariable("KEYSTORE_FILE").isPresent ||
+                                 signingProp("prefixsapp.signing.storeFile") != null
+
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
-                // alternativa:
-                // debugSymbolLevel = "FULL"
             }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -64,7 +75,8 @@ android {
             configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
                 nativeSymbolUploadEnabled = true
             }
-            signingConfig = if (providers.environmentVariable("KEYSTORE_FILE").orNull != null) {
+
+            signingConfig = if (isSigningConfigured) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")
@@ -75,6 +87,11 @@ android {
             manifestPlaceholders += mapOf(
                 "buildserver" to "apk",
             )
+            signingConfig = if (isSigningConfigured) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -169,5 +186,3 @@ tasks.register("androidTestApp") {
     description = "Runs all instrumented androidTest for the :app module (src/androidTest/) on every available connected variant."
     dependsOn("connectedAndroidTest")
 }
-
-
