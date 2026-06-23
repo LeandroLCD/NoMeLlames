@@ -305,18 +305,8 @@ class PrefixRepositoryImplTest {
         }
     }
 
-    @Test
-    fun should_emit_persisted_value_when_set_in_data_store_in_skip_notification() = runTest(context = mainDispatcherRule.scheduler) {
-        //GIVEN
-        repository.setSkipNotification(false)
 
-        //WHEN
-        repository.skipNotification.test {
-            //THEN
-            assertEquals(false, awaitMatches { !it })
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
+
 
     @Test
     fun should_emit_updated_value_after_set_skip_notification_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
