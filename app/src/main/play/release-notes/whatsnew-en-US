@@ -1,0 +1,5 @@
+What's new in this release:
+- Block calls from unregistered contacts
+- Block calls from private/hidden numbers
+- Performance and stability improvements
+- Bug fixes
