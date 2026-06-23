@@ -24,7 +24,11 @@ signing.properties
 *.apk
 *.aab
 /app/apk/
-/app/src/main/play/
+# Play Store assets: only release-notes/ is tracked (used by upload-google-play).
+# Other generated files under play/ (if any) stay out of the repo.
+play/**/*
+!play/**/release-notes/
+!play/**/release-notes/**
 
 # JVM heap dumps
 *.hprof
