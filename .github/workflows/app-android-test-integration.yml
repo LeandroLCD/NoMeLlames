@@ -159,6 +159,22 @@ jobs:
       - name: 🔧 Run generate service-play-json
         run: ./gradlew --init-script gradle/init-ci.gradle.kts
 
+      - name: 🛡️ Pre-compile :app androidTest (with cache self-healing)
+        run: |
+          echo "🔄 Pre-compile attempt 1 (may use cache)..."
+          if ./gradlew :app:compileDebugAndroidTestKotlin --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace; then
+            echo "✅ Pre-compile OK (cached or fresh)"
+          else
+            echo "⚠️ Pre-compile failed. Clearing Gradle build cache and retrying..."
+            rm -rf ~/.gradle/caches/build-cache-*
+            rm -rf ~/.gradle/caches/transforms-*
+            rm -rf ~/.gradle/caches/jars-*
+            rm -rf app/.gradle
+            rm -rf app/build
+            echo "🔄 Pre-compile attempt 2 (after cache clear)..."
+            ./gradlew :app:compileDebugAndroidTestKotlin --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace
+          fi
+
       - name: 🧪 Run :app instrumented tests (API ${{ matrix.api-level }})
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -169,7 +185,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           emulator-boot-timeout: 300
-          script: ./gradlew :app:connectedDebugAndroidTest --rerun-tasks --no-daemon --warning-mode none --console=plain --stacktrace
+          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon --warning-mode none --console=plain --stacktrace
 
       - name: 📊 Publish instrumented test results
         if: always()
