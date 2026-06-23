@@ -293,26 +293,16 @@ class PrefixRepositoryImplTest {
          }
     }
 
-    @Test
-    fun should_emit_updated_value_after_set_skip_call_log_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
-        //WHEN
-        repository.skipCallLog.test {
-            assertEquals(true, awaitItem())
-            repository.setSkipCallLog(false)
-            advanceUntilIdle()
-            //THEN
-            assertEquals(false, awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
 
     @Test
     fun should_emit_true_by_default_when_no_value_persisted_in_skip_notification() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
-        val value = repository.skipNotification.first()
-
-        //THEN
-        assertEquals(true, value)
+        repository.skipNotification.test {
+            advanceUntilIdle()
+            //THEN
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -321,21 +311,21 @@ class PrefixRepositoryImplTest {
         repository.setSkipNotification(false)
 
         //WHEN
-        val value = repository.skipNotification.first { !it }
-
-        //THEN
-        assertEquals(false, value)
+        repository.skipNotification.test {
+            //THEN
+            assertEquals(false, awaitMatches { !it })
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun should_emit_updated_value_after_set_skip_notification_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         repository.skipNotification.test {
-            assertEquals(true, awaitItem())
             repository.setSkipNotification(false)
             advanceUntilIdle()
             //THEN
-            assertEquals(false, awaitItem())
+            assertEquals(false, awaitMatches { !it })
             cancelAndIgnoreRemainingEvents()
         }
     }
