@@ -367,8 +367,9 @@ jobs:
     needs: [build-release]
     timeout-minutes: 20
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
+      github.event.pull_request.merged == true ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push'
 
     permissions:
       contents: read
@@ -419,7 +420,7 @@ jobs:
     needs: [deploy-play-store, check-tag]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    if: success()
 
     permissions:
       contents: write
