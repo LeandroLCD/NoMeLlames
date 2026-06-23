@@ -165,14 +165,18 @@ jobs:
           if ./gradlew :app:compileDebugAndroidTestKotlin --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace; then
             echo "✅ Pre-compile OK (cached or fresh)"
           else
-            echo "⚠️ Pre-compile failed. Clearing Gradle build cache and retrying..."
+            echo "⚠️ Pre-compile failed. Clearing ALL Gradle caches and retrying..."
             rm -rf ~/.gradle/caches/build-cache-*
             rm -rf ~/.gradle/caches/transforms-*
             rm -rf ~/.gradle/caches/jars-*
+            rm -rf ~/.gradle/caches/modules-2
+            rm -rf ~/.gradle/caches/8.*
+            rm -rf ~/.gradle/caches/9.*
+            rm -rf ~/.gradle/caches/10.*
             rm -rf app/.gradle
             rm -rf app/build
-            echo "🔄 Pre-compile attempt 2 (after cache clear)..."
-            ./gradlew :app:compileDebugAndroidTestKotlin --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace
+            echo "🔄 Pre-compile attempt 2 (after full cache clear + --rerun-tasks)..."
+            ./gradlew :app:compileDebugAndroidTestKotlin --rerun-tasks --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace
           fi
 
       - name: 🧪 Run :app instrumented tests (API ${{ matrix.api-level }})

@@ -8,7 +8,7 @@ on:
       - 'app/src/test/**'
       - '.github/workflows/app-unit-test.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ develop ]
     paths:
       - 'app/src/main/java/**/domain/**'
       - 'app/src/test/**'
