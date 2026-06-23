@@ -11,7 +11,7 @@ on:
       - '.github/workflows/app-android-test-integration.yml'
   pull_request:
     branches: [ main ]
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     paths:
       - 'app/**'
       - 'build.gradle.kts'
