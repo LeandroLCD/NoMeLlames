@@ -41,7 +41,7 @@ class PrefixRepositoryImplTest {
     lateinit var prefixRuleDao: PrefixRuleDao
 
     @Before
-    fun setUp() {
+    fun setUp() = runTest {
         hiltRule.inject()
     }
 
@@ -280,14 +280,18 @@ class PrefixRepositoryImplTest {
 
     @Test
     fun should_emit_persisted_value_when_set_in_data_store_in_skip_call_log() = runTest(context = mainDispatcherRule.scheduler) {
-        //GIVEN
-        repository.setSkipCallLog(false)
+
 
         //WHEN
-        val value = repository.skipCallLog.first { !it }
+        repository.skipCallLog.test {
+            skipItems(1)
+            repository.setSkipCallLog(false)
 
-        //THEN
-        assertEquals(false, value)
+            //THEN
+            val value = awaitItem()
+            assertEquals(false, value)
+        }
+
     }
 
 
@@ -319,15 +323,20 @@ class PrefixRepositoryImplTest {
     @Test
     fun should_keep_skip_flags_independent_when_one_is_set_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
-        repository.setSkipCallLog(false)
 
+        repository.setSkipNotification(true)
         //WHEN
-        val callLog = repository.skipCallLog.first { !it }
-        val notification = repository.skipNotification.value
+        repository.skipCallLog.test {
+            skipItems(1)
+            repository.setSkipCallLog(false)
+            val notification = repository.skipNotification.value
+            advanceUntilIdle()
+            //THEN
+            assertEquals(false, awaitItem())
+            assertEquals(true, notification)
+            cancelAndIgnoreRemainingEvents()
+        }
 
-        //THEN
-        assertEquals(false, callLog)
-        assertEquals(true, notification)
     }
 
     @Test

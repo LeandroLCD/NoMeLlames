@@ -60,11 +60,11 @@ class HistoryViewModelTest {
     )
 
     @Before
-    fun setUp() = runTest(context = mainDispatcherRule.scheduler) {
+    fun setUp() = runTest{
         hiltRule.inject()
+        viewModel = historyViewModel()
         blockedCallDao.deleteAllBlockedCalls()
         allowedCallDao.deleteAllAllowedCalls()
-        viewModel = historyViewModel()
     }
 
     @Test
