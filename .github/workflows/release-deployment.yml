@@ -1,6 +1,14 @@
 name: 🚀 App — Build & Release
 
 on:
+  push:
+    branches: [ develop ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - '.github/workflows/release-deployment.yml'
   pull_request:
     branches: [ main ]
     types: [closed]
