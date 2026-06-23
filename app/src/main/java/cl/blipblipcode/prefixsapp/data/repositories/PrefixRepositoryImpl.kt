@@ -15,16 +15,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PrefixRepositoryImpl @Inject constructor(
     private val prefixRuleDao: PrefixRuleDao,
-    private val scope: CoroutineScope,
-    dispatcher: CoroutineDispatcher,
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    scope: CoroutineScope,
+    dispatcher: CoroutineDispatcher
 ) : BaseRepository(dispatcher), PrefixRepository {
 
     private companion object {
@@ -34,7 +33,7 @@ class PrefixRepositoryImpl @Inject constructor(
 
     override val prefixes: StateFlow<Set<String>> = prefixRuleDao.getBlockedPrefixes().map { rules ->
         rules.map { it.prefix }.toSet()
-    }.stateIn(scope, SharingStarted.WhileSubscribed(5_000L), emptySet())
+    }.stateIn(scope, SharingStarted.WhileSubscribed(10_000L), emptySet())
 
     override val skipCallLog: StateFlow<Boolean> = dataStore.data
         .map { preferences -> preferences[KEY_SKIP_CALL_LOG] ?: true }
@@ -44,36 +43,34 @@ class PrefixRepositoryImpl @Inject constructor(
         .map { preferences -> preferences[KEY_SKIP_NOTIFICATION] ?: true }
         .stateIn(scope, SharingStarted.Eagerly, true)
 
-    override fun setSkipCallLog(value: Boolean) {
-        scope.launch {
+    override suspend fun setSkipCallLog(value: Boolean):Result<Unit> {
+        return makeSuspendCall{
             dataStore.edit { preferences ->
                 preferences[KEY_SKIP_CALL_LOG] = value
             }
         }
     }
 
-    override fun setSkipNotification(value: Boolean) {
-        scope.launch {
+    override suspend fun setSkipNotification(value: Boolean):Result<Unit> {
+        return makeSuspendCall{
             dataStore.edit { preferences ->
                 preferences[KEY_SKIP_NOTIFICATION] = value
             }
         }
     }
 
-    // Legacy methods - now use Room
-    override fun addPrefix(prefix: String) {
-        scope.launch {
+    override suspend fun addPrefix(prefix: String):Result<Unit> {
+        return makeSuspendCall{
             addPrefixRule(prefix, PrefixRule.RuleType.BLOCK)
         }
     }
 
-    override fun removePrefix(prefix: String) {
-        scope.launch {
+    override suspend fun removePrefix(prefix: String):Result<Unit> {
+        return makeSuspendCall{
             removePrefixByValue(prefix)
         }
     }
 
-    // Room-based methods
     override fun getAllPrefixRules(): Flow<List<PrefixRule>> {
         return prefixRuleDao.getAllPrefixRules().map { entities ->
             entities.map { it.mapToDomain() }

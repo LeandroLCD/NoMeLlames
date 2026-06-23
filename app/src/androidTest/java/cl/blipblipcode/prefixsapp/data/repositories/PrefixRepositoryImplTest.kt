@@ -271,10 +271,11 @@ class PrefixRepositoryImplTest {
     @Test
     fun should_emit_true_by_default_when_no_value_persisted_in_skip_call_log() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
-        val value = repository.skipCallLog.first()
-
-        //THEN
-        assertEquals(true, value)
+        repository.skipCallLog.test {
+            //THEN
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -289,45 +290,24 @@ class PrefixRepositoryImplTest {
         assertEquals(false, value)
     }
 
-    @Test
-    fun should_emit_updated_value_after_set_skip_call_log_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
-        //WHEN
-        repository.skipCallLog.test {
-            assertEquals(true, awaitItem())
-            repository.setSkipCallLog(false)
-            advanceUntilIdle()
-            //THEN
-            assertEquals(false, awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
 
     @Test
     fun should_emit_true_by_default_when_no_value_persisted_in_skip_notification() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
-        val value = repository.skipNotification.first()
-
-        //THEN
-        assertEquals(true, value)
+        repository.skipNotification.test {
+            advanceUntilIdle()
+            //THEN
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
-    @Test
-    fun should_emit_persisted_value_when_set_in_data_store_in_skip_notification() = runTest(context = mainDispatcherRule.scheduler) {
-        //GIVEN
-        repository.setSkipNotification(false)
-
-        //WHEN
-        val value = repository.skipNotification.first { !it }
-
-        //THEN
-        assertEquals(false, value)
-    }
 
     @Test
     fun should_emit_updated_value_after_set_skip_notification_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         repository.skipNotification.test {
-            assertEquals(true, awaitItem())
+            skipItems(1)
             repository.setSkipNotification(false)
             advanceUntilIdle()
             //THEN

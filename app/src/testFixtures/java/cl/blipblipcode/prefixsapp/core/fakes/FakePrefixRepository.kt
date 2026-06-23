@@ -4,8 +4,8 @@ import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class FakePrefixRepository : PrefixRepository {
 
@@ -17,6 +17,10 @@ class FakePrefixRepository : PrefixRepository {
     private val _allowedPrefixes = MutableStateFlow<List<PrefixRule>>(emptyList())
     private val storedByValue = mutableMapOf<String, PrefixRule>()
 
+    private var setSkipCallLogResult: Result<Unit> = Result.success(Unit)
+    private var setSkipNotificationResult: Result<Unit> = Result.success(Unit)
+    private var addPrefixResult: Result<Unit> = Result.success(Unit)
+    private var removePrefixResult: Result<Unit> = Result.success(Unit)
     private var addPrefixRuleResult: Result<Unit> = Result.success(Unit)
     private var removePrefixRuleResult: Result<Unit> = Result.success(Unit)
     private var deleteAllPrefixRulesResult: Result<Unit> = Result.success(Unit)
@@ -46,22 +50,32 @@ class FakePrefixRepository : PrefixRepository {
     override val skipCallLog: StateFlow<Boolean> = _skipCallLog.asStateFlow()
     override val skipNotification: StateFlow<Boolean> = _skipNotification.asStateFlow()
 
-    override fun setSkipCallLog(value: Boolean) {
+    override suspend fun setSkipCallLog(value: Boolean): Result<Unit> {
         lastSetSkipCallLog = value
-        _skipCallLog.value = value
+        return setSkipCallLogResult.also { result ->
+            result.getOrNull()?.let { _skipCallLog.value = value }
+        }
     }
 
-    override fun setSkipNotification(value: Boolean) {
+    override suspend fun setSkipNotification(value: Boolean): Result<Unit> {
         lastSetSkipNotification = value
-        _skipNotification.value = value
+        return setSkipNotificationResult.also { result ->
+            result.getOrNull()?.let { _skipNotification.value = value }
+        }
     }
 
-    override fun addPrefix(prefix: String) {
+    override suspend fun addPrefix(prefix: String): Result<Unit> {
         lastAddedPrefix = prefix
+        return addPrefixResult.also { result ->
+            result.getOrNull()?.let { _prefixes.value = _prefixes.value + prefix }
+        }
     }
 
-    override fun removePrefix(prefix: String) {
+    override suspend fun removePrefix(prefix: String): Result<Unit> {
         lastRemovedPrefix = prefix
+        return removePrefixResult.also { result ->
+            result.getOrNull()?.let { _prefixes.value = _prefixes.value - prefix }
+        }
     }
 
     override fun getAllPrefixRules(): Flow<List<PrefixRule>> {
@@ -79,9 +93,12 @@ class FakePrefixRepository : PrefixRepository {
     override suspend fun addPrefixRule(prefix: String, ruleType: PrefixRule.RuleType): Result<Unit> {
         lastAddedPrefixRule = prefix
         lastAddedRuleType = ruleType
-        val id = (storedByValue.size + 1).toLong()
-        storedByValue[prefix] = PrefixRule(id = id, prefix = prefix, ruleType = ruleType)
-        return addPrefixRuleResult
+        val result = addPrefixRuleResult
+        result.getOrNull()?.let {
+            val id = (storedByValue.size + 1).toLong()
+            storedByValue[prefix] = PrefixRule(id = id, prefix = prefix, ruleType = ruleType)
+        }
+        return result
     }
 
     override suspend fun removePrefixRule(id: Long): Result<Unit> {
@@ -118,6 +135,22 @@ class FakePrefixRepository : PrefixRepository {
 
     fun setAllowedPrefixes(rules: List<PrefixRule>) {
         _allowedPrefixes.value = rules
+    }
+
+    fun setSetSkipCallLogResult(result: Result<Unit>) {
+        setSkipCallLogResult = result
+    }
+
+    fun setSetSkipNotificationResult(result: Result<Unit>) {
+        setSkipNotificationResult = result
+    }
+
+    fun setAddPrefixResult(result: Result<Unit>) {
+        addPrefixResult = result
+    }
+
+    fun setRemovePrefixResult(result: Result<Unit>) {
+        removePrefixResult = result
     }
 
     fun setAddPrefixRuleResult(result: Result<Unit>) {

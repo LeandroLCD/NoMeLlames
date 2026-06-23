@@ -1,4 +1,4 @@
-name: 🚀 App — Test, Build & Release
+name: 🚀 App — UnitTest and androidTest.
 
 on:
   push:
@@ -18,18 +18,8 @@ on:
       - 'settings.gradle.kts'
       - 'gradle/**'
       - '.github/workflows/app-android-test-integration.yml'
+
   workflow_dispatch:
-    inputs:
-      track:
-        description: 'Google Play track to deploy to'
-        required: true
-        type: choice
-        default: 'production'
-        options:
-          - production
-          - internal
-          - beta
-          - alpha
 
 concurrency:
   group: app-android-integration-${{ github.ref }}
@@ -95,170 +85,14 @@ jobs:
           if-no-files-found: ignore
 
   # ───────────────────────────────────────────────────────────────────────────
-  # STEP 2 — Check Tag Availability & Version Bump
-  # Runs on every push & PR. Independent.
-  # Exposes version + tag_name for downstream jobs.
-  # ───────────────────────────────────────────────────────────────────────────
-  check-tag:
-    name: 🏷️ Check Tag & Version
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    outputs:
-      version: ${{ steps.extract-version.outputs.version }}
-      version_code: ${{ steps.extract-version.outputs.version_code }}
-      tag_name: ${{ steps.extract-version.outputs.tag_name }}
-      latest_tag: ${{ steps.validate-version.outputs.latest_tag }}
-      latest_version_code: ${{ steps.validate-versioncode.outputs.latest_version_code }}
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: 📌 Extract versionName & versionCode
-        id: extract-version
-        run: |
-          # Both live in defaultConfig of the :app module.
-          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts 2>/dev/null | head -1 || true)
-
-          if [ -z "$VERSION" ]; then
-            echo "❌ 'versionName = \"...\"' not found in app/build.gradle.kts"
-            exit 1
-          fi
-
-          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts 2>/dev/null | head -1 || true)
-          if [ -z "$VERSION_CODE" ]; then
-            echo "❌ 'versionCode = ...' not found in app/build.gradle.kts"
-            exit 1
-          fi
-
-          if ! [[ "$VERSION_CODE" =~ ^[0-9]+$ ]]; then
-            echo "❌ Invalid versionCode: '${VERSION_CODE}' (must be an integer)"
-            exit 1
-          fi
-
-          TAG_NAME="v${VERSION}"
-          echo "version=${VERSION}"           >> "$GITHUB_OUTPUT"
-          echo "version_code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
-          echo "tag_name=${TAG_NAME}"         >> "$GITHUB_OUTPUT"
-          echo "📌 versionName: ${VERSION}"
-          echo "📌 versionCode: ${VERSION_CODE}"
-          echo "📌 Tag to create: ${TAG_NAME}"
-
-      - name: "🔍 Validate: new tag > latest tag & no duplicate"
-        id: validate-version
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          NEW_VERSION="${{ steps.extract-version.outputs.version }}"
-          NEW_TAG="${{ steps.extract-version.outputs.tag_name }}"
-
-          semver_gt() {
-            local A="${1#v}" B="${2#v}"
-            local IFS=.
-            read -ra VA <<< "$A"
-            read -ra VB <<< "$B"
-            for i in 0 1 2; do
-              local a="${VA[$i]:-0}" b="${VB[$i]:-0}"
-              if   (( 10#$a > 10#$b )); then return 0
-              elif (( 10#$a < 10#$b )); then return 1
-              fi
-            done
-            return 1
-          }
-
-          LATEST_TAG=$(git tag -l 'v*' | sort -V | tail -1)
-
-          if [ -z "$LATEST_TAG" ]; then
-            echo "ℹ️  No previous tags in repo. First release: ${NEW_TAG}"
-            echo "latest_tag=none" >> "$GITHUB_OUTPUT"
-            echo "✅ Tag validation passed — first release."
-            exit 0
-          fi
-
-          echo "latest_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
-          echo "🏷️  Latest existing tag   : ${LATEST_TAG}"
-          echo "🆕 New tag to create      : ${NEW_TAG}"
-
-          if git ls-remote --tags origin "refs/tags/${NEW_TAG}" | grep -q "${NEW_TAG}"; then
-            echo ""
-            echo "❌ ERROR: Tag ${NEW_TAG} already exists in the repository."
-            echo "   Increment the version in build.gradle.kts before merging."
-            exit 1
-          fi
-
-          if semver_gt "$NEW_VERSION" "$LATEST_TAG"; then
-            echo ""
-            echo "✅ Tag validation passed: ${NEW_TAG} > ${LATEST_TAG}"
-          else
-            echo ""
-            echo "❌ ERROR: Version ${NEW_VERSION} is NOT greater than the latest tag ${LATEST_TAG}."
-            echo "   Rule: the new tag must be strictly greater than the last published one."
-            NEXT_PATCH=$(echo "${LATEST_TAG#v}" | awk -F. '{print $1"."$2"."$3+1}')
-            echo "   Valid example      : ${LATEST_TAG} → v${NEXT_PATCH}"
-            exit 1
-          fi
-
-      - name: "🔢 Validate: new versionCode > latest tag's versionCode"
-        id: validate-versioncode
-        if: github.event_name != 'workflow_dispatch'
-        run: |
-          NEW_CODE="${{ steps.extract-version.outputs.version_code }}"
-          LATEST_TAG="${{ steps.validate-version.outputs.latest_tag }}"
-
-          echo "🔢 versionCode actual: ${NEW_CODE}"
-
-          # First release: nothing to compare
-          if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "none" ]; then
-            echo "ℹ️  First release — no versionCode validation."
-            echo "latest_version_code=0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # Reads app/build.gradle.kts AT THE COMMIT of the previous tag.
-          # git show <tag>:<path> does not touch the working tree.
-          PREV_FILE=$(git show "${LATEST_TAG}:app/build.gradle.kts" 2>/dev/null || true)
-          if [ -z "$PREV_FILE" ]; then
-            echo "⚠️  Could not read app/build.gradle.kts in ${LATEST_TAG}."
-            echo "   Skipping versionCode validation (assuming valid)."
-            echo "latest_version_code=unknown" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          PREV_CODE=$(printf '%s\n' "$PREV_FILE" | grep -oP 'versionCode\s*=\s*\K[0-9]+' | head -1 || true)
-          if [ -z "$PREV_CODE" ]; then
-            echo "⚠️  ${LATEST_TAG} does not contain 'versionCode' in app/build.gradle.kts."
-            echo "   Skipping validation."
-            echo "latest_version_code=unknown" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "🔢 versionCode in ${LATEST_TAG}: ${PREV_CODE}"
-          echo "latest_version_code=${PREV_CODE}" >> "$GITHUB_OUTPUT"
-
-          if (( 10#$NEW_CODE > 10#$PREV_CODE )); then
-            echo ""
-            echo "✅ versionCode validation passed: ${NEW_CODE} > ${PREV_CODE}"
-          else
-            echo ""
-            echo "❌ ERROR: versionCode ${NEW_CODE} is NOT greater than the one in tag ${LATEST_TAG} (${PREV_CODE})."
-            echo "   Android rejects downgrades and APKs with the same versionCode."
-            echo "   Solution: increment 'versionCode' in app/build.gradle.kts."
-            NEXT_CODE=$(( 10#$PREV_CODE + 1 ))
-            echo "   Valid example: versionCode = ${NEXT_CODE}  (or greater)"
-            exit 1
-          fi
-
-  # ───────────────────────────────────────────────────────────────────────────
-  # STEP 3 — Instrumented Android Tests (Emulator)
+  # STEP 2 — Instrumented Android Tests (Emulator)
   # Depends on unit-tests + check-tag to skip expensive emulator runs
   # when either prerequisite fails. (3 first jobs run in parallel where
   # possible; android-tests depend on the other two by design.)
   # ───────────────────────────────────────────────────────────────────────────
   android-tests:
     name: 🤖 Android Tests (API ${{ matrix.api-level }})
-    needs: [unit-tests, check-tag]
+    needs: [unit-tests]    
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -325,6 +159,26 @@ jobs:
       - name: 🔧 Run generate service-play-json
         run: ./gradlew --init-script gradle/init-ci.gradle.kts
 
+      - name: 🛡️ Pre-compile :app androidTest (with cache self-healing)
+        run: |
+          echo "🔄 Pre-compile attempt 1 (may use cache)..."
+          if ./gradlew :app:compileDebugAndroidTestKotlin --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace; then
+            echo "✅ Pre-compile OK (cached or fresh)"
+          else
+            echo "⚠️ Pre-compile failed. Clearing ALL Gradle caches and retrying..."
+            rm -rf ~/.gradle/caches/build-cache-*
+            rm -rf ~/.gradle/caches/transforms-*
+            rm -rf ~/.gradle/caches/jars-*
+            rm -rf ~/.gradle/caches/modules-2
+            rm -rf ~/.gradle/caches/8.*
+            rm -rf ~/.gradle/caches/9.*
+            rm -rf ~/.gradle/caches/10.*
+            rm -rf app/.gradle
+            rm -rf app/build
+            echo "🔄 Pre-compile attempt 2 (after full cache clear + --rerun-tasks)..."
+            ./gradlew :app:compileDebugAndroidTestKotlin --rerun-tasks --init-script gradle/init-ci.gradle.kts --no-daemon --console=plain --stacktrace
+          fi
+
       - name: 🧪 Run :app instrumented tests (API ${{ matrix.api-level }})
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -355,258 +209,3 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  # ───────────────────────────────────────────────────────────────────────────
-  # STEP 4 — Build :app Release APK (signed)
-  # Depends on unit-tests, android-tests, check-tag.
-  # Only when the PR has been merged into main.
-  # Injects keystore + google-services.json from secrets.
-  # ───────────────────────────────────────────────────────────────────────────
-  build-release:
-    name: 🏗️ Build Release APK
-    needs: [unit-tests, android-tests, check-tag]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: ☕ Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: gradle
-
-      - name: 🔧 Grant execute permission to gradlew
-        run: chmod +x ./gradlew
-
-      - name: 🔐 Decode keystore from base64 secret
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "❌ Secret KEYSTORE_BASE64 not configured."
-            exit 1
-          fi
-          mkdir -p .ci
-          echo "$KEYSTORE_BASE64" | base64 -d > .ci/release-keystore.jks
-          chmod 600 .ci/release-keystore.jks
-          echo "🔐 Keystore decoded to .ci/release-keystore.jks ($(stat -c%s .ci/release-keystore.jks) bytes)"
-
-      - name: 📝 Write google-services.json from secret
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: |
-          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-            echo "❌ Secret GOOGLE_SERVICES_JSON not configured."
-            exit 1
-          fi
-          printf '%s' "$GOOGLE_SERVICES_JSON" > app/google-services.json
-          echo "📝 google-services.json written ($(stat -c%s app/google-services.json) bytes)"
-
-      - name: 🏗️ Assemble :app release (APK + AAB)
-        env:
-          KEYSTORE_FILE: ${{ github.workspace }}/.ci/release-keystore.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          ./gradlew :app:assembleRelease :app:bundleRelease \
-            --no-daemon \
-            --warning-mode none \
-            --console=plain \
-            --stacktrace
-
-      - name: 🔎 Locate generated APK
-        id: find-apk
-        run: |
-          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -name "*.apk" | head -1 || true)
-          if [ -z "$APK_PATH" ]; then
-            echo "❌ No APK found in app/build/outputs/apk/release/"
-            ls -la app/build/outputs/apk/ || true
-            exit 1
-          fi
-          APK_NAME=$(basename "$APK_PATH")
-          echo "apk_path=${APK_PATH}"   >> "$GITHUB_OUTPUT"
-          echo "apk_name=${APK_NAME}"   >> "$GITHUB_OUTPUT"
-          echo "✅ APK found: ${APK_PATH} (${APK_NAME})"
-
-      - name: 📦 Upload APK as workflow artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: prefixapp-${{ needs.check-tag.outputs.tag_name }}-apk
-          path: ${{ steps.find-apk.outputs.apk_path }}
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: 🔎 Locate generated AAB
-        id: find-aab
-        run: |
-          AAB_PATH=$(find app/build/outputs/bundle/release -maxdepth 1 -name "*.aab" | head -1 || true)
-          if [ -z "$AAB_PATH" ]; then
-            echo "❌ No AAB found in app/build/outputs/bundle/release/"
-            ls -la app/build/outputs/bundle/ 2>/dev/null || true
-            exit 1
-          fi
-          AAB_NAME=$(basename "$AAB_PATH")
-          echo "aab_path=${AAB_PATH}"   >> "$GITHUB_OUTPUT"
-          echo "aab_name=${AAB_NAME}"   >> "$GITHUB_OUTPUT"
-          echo "✅ AAB found: ${AAB_PATH} (${AAB_NAME})"
-
-      - name: 📤 Upload Release AAB
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-release-aab
-          path: ${{ steps.find-aab.outputs.aab_path }}
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: 📤 Upload R8 mapping file
-        if: success() || failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-release-mapping
-          path: app/build/outputs/mapping/release/mapping.txt
-          if-no-files-found: warn
-          retention-days: 14
-
-  # ───────────────────────────────────────────────────────────────────────────
-  # STEP 5 — Create GitHub Release & Git Tag with the signed APK
-  # Depends on build-release + check-tag (for the final tag_name).
-  # Only when the PR has been merged.
-  # ───────────────────────────────────────────────────────────────────────────
-  create-release:
-    name: 🎯 Create Release & Tag
-    needs: [build-release, check-tag]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📥 Download signed APK artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: prefixapp-${{ needs.check-tag.outputs.tag_name }}-apk
-          path: ./release-artifacts
-
-      - name: 🧹 Clean orphan tag from previous failed run
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.check-tag.outputs.tag_name }}
-        run: |
-          # If the tag exists in origin but has NO associated release (previous failed run),
-          # we delete it so action-gh-release can re-create it cleanly.
-          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q "${TAG}"; then
-            echo "⚠️  Tag ${TAG} already exists in origin. Checking if it has a release..."
-            RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/${TAG} --jq '.id' 2>/dev/null || echo "")
-            if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
-              echo "🧹 Orphan tag detected (no release). Deleting..."
-              git push origin --delete "${TAG}" || echo "   (push failed, trying via API)"
-              gh api -X DELETE repos/${{ github.repository }}/git/refs/tags/${TAG} || true
-              echo "✅ Orphan tag deleted."
-            else
-              echo "❌ Tag ${TAG} already has a release (id=${RELEASE_ID}). Aborting to avoid duplicate."
-              echo "   If you want to force a new release, manually delete the tag and release first."
-              exit 1
-            fi
-          fi
-
-      - name: 🏷️ Create GitHub Release & Tag
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ needs.check-tag.outputs.tag_name }}
-          name: PrefixApp ${{ needs.check-tag.outputs.tag_name }}
-          body: |
-            ## 📦 PrefixApp ${{ needs.check-tag.outputs.tag_name }}
-
-            Automatically published from PR #${{ github.event.pull_request.number }}
-            **${{ github.event.pull_request.title }}**
-
-            ---
-
-            ### 🔐 Installation
-            The APK is signed with the release keystore. Download the `*.apk` file
-            attached to this release and open it on your Android device (API 24+).
-
-            ---
-
-            📅 Generated on: ${{ github.event.pull_request.merged_at }}
-          files: ./release-artifacts/*.apk
-          make_latest: true
-          fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # ───────────────────────────────────────────────────────────────────────────
-  # STEP 6 — Deploy signed AAB to Google Play
-  # Depends on build-release.
-  # On PR merge to main → uploads to the `internal` track (no review needed).
-  # On workflow_dispatch → uploads to the track chosen in the manual trigger
-  #                        (defaults to `production`, requires Play review).
-  # ───────────────────────────────────────────────────────────────────────────
-  deploy-play-store:
-    name: 🚀 Deploy to Play Store
-    runs-on: ubuntu-latest
-    needs: [build-release]
-    timeout-minutes: 20
-    if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: 📥 Download signed AAB artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: app-release-aab
-          path: app/build/outputs/bundle/release/
-
-      - name: 🔍 Verify AAB present
-        run: |
-          AAB="app/build/outputs/bundle/release/app-release.aab"
-          if [ ! -f "$AAB" ]; then
-            echo "❌ $AAB not found"
-            ls -la app/build/outputs/bundle/release/ || true
-            exit 1
-          fi
-          echo "✅ AAB ready for deploy ($(stat -c%s "$AAB") bytes)"
-
-      - name: 📥 Download R8 mapping artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: app-release-mapping
-          path: app/build/outputs/mapping/release/
-          if-no-files-found: warn
-
-      - name: 🚀 Upload to Google Play
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
-          packageName: cl.blipblipcode.prefixsapp
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          tracks: ${{ github.event_name == 'workflow_dispatch' && inputs.track || 'internal' }}
-          status: completed
-          mappingFile: app/build/outputs/mapping/release/mapping.txt
-          whatsNewDirectory: app/src/main/play/release-notes/
-        env:
-          SUPPRESS_ANALYTICS: true

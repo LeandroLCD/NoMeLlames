@@ -6,9 +6,8 @@ import javax.inject.Inject
 class SetSkipNotificationUseCase @Inject constructor(
     private val repository: PrefixRepository
 ) : ISetSkipNotificationUseCase {
-    
-    override operator fun invoke(value: Boolean) {
-        repository.setSkipNotification(value)
+
+    override suspend operator fun invoke(value: Boolean): Result<Unit> {
+        return repository.setSkipNotification(value)
     }
 }
-

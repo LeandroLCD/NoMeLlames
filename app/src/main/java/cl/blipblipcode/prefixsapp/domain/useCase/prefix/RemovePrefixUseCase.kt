@@ -6,9 +6,8 @@ import javax.inject.Inject
 class RemovePrefixUseCase @Inject constructor(
     private val repository: PrefixRepository
 ) : IRemovePrefixUseCase {
-    
-    override operator fun invoke(prefix: String) {
-        repository.removePrefix(prefix)
+
+    override suspend operator fun invoke(prefix: String): Result<Unit> {
+        return repository.removePrefix(prefix)
     }
 }
-

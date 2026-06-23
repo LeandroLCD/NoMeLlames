@@ -9,12 +9,11 @@ interface PrefixRepository {
     val skipCallLog: StateFlow<Boolean>
     val skipNotification: StateFlow<Boolean>
 
-    fun setSkipCallLog(value: Boolean)
-    fun setSkipNotification(value: Boolean)
-    
-    // Legacy methods for backward compatibility
-    fun addPrefix(prefix: String)
-    fun removePrefix(prefix: String)
+    suspend fun setSkipCallLog(value: Boolean):Result<Unit>
+    suspend fun setSkipNotification(value: Boolean):Result<Unit>
+
+    suspend fun addPrefix(prefix: String):Result<Unit>
+    suspend fun removePrefix(prefix: String):Result<Unit>
     
     // New methods for PrefixRule
     fun getAllPrefixRules(): Flow<List<PrefixRule>>

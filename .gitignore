@@ -23,6 +23,11 @@ signing.properties
 # APK/AAB
 *.apk
 *.aab
+/app/apk/
+/app/src/main/play/
+
+# JVM heap dumps
+*.hprof
 
 # OS generated
 Thumbs.db
