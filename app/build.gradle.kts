@@ -94,6 +94,7 @@ android {
             }
         }
         debug {
+            applicationIdSuffix = ".debug"
             manifestPlaceholders += mapOf(
                 "buildserver" to "debug",
             )

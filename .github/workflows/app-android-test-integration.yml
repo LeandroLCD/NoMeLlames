@@ -70,8 +70,11 @@ jobs:
       - name: 🔧 Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
+      - name: 🔧 Run generate service-play-json
+        run: ./gradlew --init-script gradle/init-ci.gradle.kts
+
       - name: 🧪 Run unit tests
-        run: ./gradlew --init-script gradle/init-ci.gradle.kts :app:testDebugUnitTest --no-daemon --stacktrace
+        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
 
       - name: 📊 Publish unit test results
         if: always()
@@ -318,6 +321,9 @@ jobs:
 
       - name: 🔧 Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: 🔧 Run generate service-play-json
+        run: ./gradlew --init-script gradle/init-ci.gradle.kts
 
       - name: 🧪 Run :app instrumented tests (API ${{ matrix.api-level }})
         uses: reactivecircus/android-emulator-runner@v2
