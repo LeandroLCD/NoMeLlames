@@ -272,10 +272,11 @@ class PrefixRepositoryImplTest {
     @Test
     fun should_emit_true_by_default_when_no_value_persisted_in_skip_call_log() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
-        val value = repository.skipCallLog.first()
-
-        //THEN
-        assertEquals(true, value)
+        repository.skipCallLog.test {
+            //THEN
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test

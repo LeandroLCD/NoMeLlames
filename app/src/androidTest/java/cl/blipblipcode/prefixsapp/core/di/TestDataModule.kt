@@ -69,12 +69,12 @@ object TestDataModule {
     @Singleton
     fun provideAppPreferencesDataStore(): DataStore<Preferences> {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val name = "test_settings_${UUID.randomUUID()}.preferences_pb"
+        val name = "test_dataStore_${UUID.randomUUID()}.preferences_pb"
 
         return PreferenceDataStoreFactory.create(
             produceFile = {
                 File(context.cacheDir, name)
-            },
+            }
         )
     }
 
