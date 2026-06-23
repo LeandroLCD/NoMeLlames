@@ -375,6 +375,11 @@ jobs:
       contents: read
 
     steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
       - name: 📥 Download signed AAB artifact
         uses: actions/download-artifact@v8
         with:
@@ -399,10 +404,11 @@ jobs:
           if-no-files-found: warn
 
       - name: 🚀 Upload to Google Play
-        uses: r0adkll/upload-google-play@v1
+        uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
           packageName: cl.blipblipcode.prefixsapp
+          releaseName: ${{ needs.check-tag.outputs.tag_name }}
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           tracks: ${{ github.event_name == 'workflow_dispatch' && inputs.track || 'internal' }}
           status: completed
