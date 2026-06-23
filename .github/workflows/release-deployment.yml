@@ -249,19 +249,36 @@ jobs:
           fi
 
           mkdir -p app
-          echo "$GOOGLE_SERVICES_BASE64" | base64 -d > app/google-services.json
 
-          # Validate the file actually has the structure the plugin requires.
-          if ! grep -q '"project_info"' app/google-services.json; then
-            echo "❌ google-services.json is missing 'project_info' object"
-            echo "   Size: $(stat -c%s app/google-services.json) bytes"
-            echo "   First 200 bytes:"
-            head -c 200 app/google-services.json || true
+          # 1) Decode must succeed. Anything in stderr = bad base64.
+          if ! echo "$GOOGLE_SERVICES_BASE64" | base64 -d > app/google-services.json 2> b64.err; then
+            echo "❌ GOOGLE_SERVICES_BASE64 is not valid base64"
+            cat b64.err
+            echo "   Make sure the secret is ONE single line of base64 with no extra characters."
+            exit 1
+          fi
+          rm -f b64.err
+
+          # 2) JSON must be parseable. grep alone misses malformed/duplicated content.
+          if ! jq empty app/google-services.json 2> jq.err; then
+            echo "❌ google-services.json is not valid JSON"
+            cat jq.err
+            rm -f jq.err
+            echo "   File size: $(stat -c%s app/google-services.json) bytes"
+            echo "   Last 200 bytes (where truncation usually shows up):"
+            tail -c 200 app/google-services.json || true
             echo ""
             exit 1
           fi
+          rm -f jq.err
 
-          echo "✅ google-services.json written ($(stat -c%s app/google-services.json) bytes)"
+          # 3) Structural check: the Google Services plugin requires project_info.
+          if ! jq -e '.project_info' app/google-services.json > /dev/null; then
+            echo "❌ google-services.json is missing the 'project_info' object"
+            exit 1
+          fi
+
+          echo "✅ google-services.json written and validated ($(stat -c%s app/google-services.json) bytes)"
 
       - name: 🏗️ Assemble :app release (APK + AAB)
         env:
