@@ -2,7 +2,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -174,13 +173,17 @@ dependencies {
 }
 
 tasks.register("testUnitApp") {
+
     group = "verification"
     description = "Runs all unit tests for the :app module (JVM, src/test/) across every available variant."
     dependsOn("test")
+
 }
 
 tasks.register("androidTestApp") {
+
     group = "verification"
     description = "Runs all instrumented androidTest for the :app module (src/androidTest/) on every available connected variant."
     dependsOn("connectedAndroidTest")
+
 }
