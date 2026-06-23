@@ -310,10 +310,11 @@ class PrefixRepositoryImplTest {
     fun should_emit_updated_value_after_set_skip_notification_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         repository.skipNotification.test {
+            skipItems(1)
             repository.setSkipNotification(false)
             advanceUntilIdle()
             //THEN
-            assertEquals(false, awaitMatches { !it })
+            assertEquals(false, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
