@@ -7,6 +7,7 @@ import cl.blipblipcode.prefixsapp.data.local.entities.PrefixRuleEntity
 import cl.blipblipcode.prefixsapp.domain.model.PrefixRule
 import cl.blipblipcode.prefixsapp.domain.repositories.PrefixRepository
 import cl.blipblipcode.prefixsapp.rules.MainDispatcherRule
+import cl.blipblipcode.prefixsapp.utils.awaitMatches
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,7 +47,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_empty_set_when_no_prefixes_in_db_in_prefixes() = runTest {
+    fun should_emit_empty_set_when_no_prefixes_in_db_in_prefixes() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         val prefixes = repository.prefixes.first { true }
 
@@ -55,7 +56,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_set_with_blocked_prefixes_when_db_has_rules_in_prefixes() = runTest {
+    fun should_emit_set_with_blocked_prefixes_when_db_has_rules_in_prefixes() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -69,7 +70,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_updated_set_when_block_prefix_added_after_subscription_in_prefixes() = runTest {
+    fun should_emit_updated_set_when_block_prefix_added_after_subscription_in_prefixes() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "BLOCK"))
 
@@ -85,7 +86,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_empty_list_when_no_prefix_rules_in_db_in_get_all_invoke() = runTest {
+    fun should_emit_empty_list_when_no_prefix_rules_in_db_in_get_all_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         val rules = repository.getAllPrefixRules().first()
 
@@ -94,7 +95,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_all_rules_ordered_by_created_at_desc_in_get_all_invoke() = runTest {
+    fun should_emit_all_rules_ordered_by_created_at_desc_in_get_all_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "a", ruleType = "BLOCK", createdAt = 100L))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "b", ruleType = "BLOCK", createdAt = 300L))
@@ -108,7 +109,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_only_block_rules_in_get_blocked_invoke() = runTest {
+    fun should_emit_only_block_rules_in_get_blocked_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -123,7 +124,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_only_allow_rules_in_get_allowed_invoke() = runTest {
+    fun should_emit_only_allow_rules_in_get_allowed_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -138,7 +139,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_matching_rule_when_prefix_exists_in_get_prefix_by_value_invoke() = runTest {
+    fun should_return_matching_rule_when_prefix_exists_in_get_prefix_by_value_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -153,7 +154,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_null_when_prefix_does_not_exist_in_get_prefix_by_value_invoke() = runTest {
+    fun should_return_null_when_prefix_does_not_exist_in_get_prefix_by_value_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
 
@@ -165,7 +166,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_success_and_persist_rule_when_added_in_invoke() = runTest {
+    fun should_return_success_and_persist_rule_when_added_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         val prefix = "57"
         val ruleType = PrefixRule.RuleType.BLOCK
@@ -182,7 +183,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_persist_both_rule_types_when_added_in_invoke() = runTest {
+    fun should_persist_both_rule_types_when_added_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         val blockPrefix = "57"
         val allowPrefix = "1"
@@ -199,7 +200,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_success_and_remove_rule_by_id_in_invoke() = runTest {
+    fun should_return_success_and_remove_rule_by_id_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -216,7 +217,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_success_and_remove_all_rules_in_invoke() = runTest {
+    fun should_return_success_and_remove_all_rules_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -230,7 +231,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_success_when_delete_all_called_on_empty_db_in_invoke() = runTest {
+    fun should_return_success_when_delete_all_called_on_empty_db_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         val result = repository.deleteAllPrefixRules()
 
@@ -240,7 +241,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_success_and_remove_rule_by_value_in_invoke() = runTest {
+    fun should_return_success_and_remove_rule_by_value_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "1", ruleType = "ALLOW"))
@@ -256,7 +257,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_return_success_when_remove_by_value_called_on_missing_value_in_invoke() = runTest {
+    fun should_return_success_when_remove_by_value_called_on_missing_value_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         prefixRuleDao.insertPrefixRule(PrefixRuleEntity(prefix = "57", ruleType = "BLOCK"))
 
@@ -269,7 +270,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_true_by_default_when_no_value_persisted_in_skip_call_log() = runTest {
+    fun should_emit_true_by_default_when_no_value_persisted_in_skip_call_log() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         val value = repository.skipCallLog.first()
 
@@ -278,19 +279,21 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_persisted_value_when_set_in_data_store_in_skip_call_log() = runTest {
+    fun should_emit_persisted_value_when_set_in_data_store_in_skip_call_log() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         repository.setSkipCallLog(false)
 
         //WHEN
-        val value = repository.skipCallLog.first { !it }
+         repository.skipCallLog.test {
 
-        //THEN
-        assertEquals(false, value)
+             //THEN
+             assertEquals(false, awaitMatches { !it })
+             cancelAndIgnoreRemainingEvents()
+         }
     }
 
     @Test
-    fun should_emit_updated_value_after_set_skip_call_log_in_invoke() = runTest {
+    fun should_emit_updated_value_after_set_skip_call_log_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         repository.skipCallLog.test {
             assertEquals(true, awaitItem())
@@ -303,7 +306,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_true_by_default_when_no_value_persisted_in_skip_notification() = runTest {
+    fun should_emit_true_by_default_when_no_value_persisted_in_skip_notification() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         val value = repository.skipNotification.first()
 
@@ -312,7 +315,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_persisted_value_when_set_in_data_store_in_skip_notification() = runTest {
+    fun should_emit_persisted_value_when_set_in_data_store_in_skip_notification() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         repository.setSkipNotification(false)
 
@@ -324,7 +327,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_emit_updated_value_after_set_skip_notification_in_invoke() = runTest {
+    fun should_emit_updated_value_after_set_skip_notification_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         repository.skipNotification.test {
             assertEquals(true, awaitItem())
@@ -337,7 +340,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_keep_skip_flags_independent_when_one_is_set_in_invoke() = runTest {
+    fun should_keep_skip_flags_independent_when_one_is_set_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         repository.setSkipCallLog(false)
 
@@ -351,7 +354,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_persist_block_rule_when_legacy_add_prefix_in_invoke() = runTest {
+    fun should_persist_block_rule_when_legacy_add_prefix_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         val prefix = "57"
 
@@ -367,7 +370,7 @@ class PrefixRepositoryImplTest {
     }
 
     @Test
-    fun should_remove_rule_when_legacy_remove_prefix_in_invoke() = runTest {
+    fun should_remove_rule_when_legacy_remove_prefix_in_invoke() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         repository.addPrefix("57")
 

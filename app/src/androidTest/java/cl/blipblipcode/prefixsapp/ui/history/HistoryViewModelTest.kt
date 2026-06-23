@@ -60,7 +60,7 @@ class HistoryViewModelTest {
     )
 
     @Before
-    fun setUp() = runTest {
+    fun setUp() = runTest(context = mainDispatcherRule.scheduler) {
         hiltRule.inject()
         blockedCallDao.deleteAllBlockedCalls()
         allowedCallDao.deleteAllAllowedCalls()
@@ -68,7 +68,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_emit_loading_in_uiState_in_init() = runTest {
+    fun should_emit_loading_in_uiState_in_init() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         viewModel.uiState.test {
             //THEN
@@ -78,7 +78,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_emit_default_export_in_export_in_init() = runTest {
+    fun should_emit_default_export_in_export_in_init() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         viewModel.export.test {
             //THEN
@@ -88,7 +88,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_emit_content_with_empty_history_when_db_empty_in_uiState() = runTest {
+    fun should_emit_content_with_empty_history_when_db_empty_in_uiState() = runTest(context = mainDispatcherRule.scheduler) {
         //WHEN
         viewModel.uiState.test {
             val state = awaitMatches { it is HistoryUiState.Content } as HistoryUiState.Content
@@ -102,7 +102,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_emit_content_with_history_items_when_db_has_data_in_uiState() = runTest {
+    fun should_emit_content_with_history_items_when_db_has_data_in_uiState() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         blockedCallDao.insertBlockedCall(
             BlockedCallEntity(
@@ -131,7 +131,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_emit_content_with_only_blocked_when_filter_is_BLOCKED_in_setFilter() = runTest {
+    fun should_emit_content_with_only_blocked_when_filter_is_BLOCKED_in_setFilter() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         blockedCallDao.insertBlockedCall(
             BlockedCallEntity(
@@ -163,7 +163,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_emit_content_with_only_allowed_when_filter_is_ALLOWED_in_setFilter() = runTest {
+    fun should_emit_content_with_only_allowed_when_filter_is_ALLOWED_in_setFilter() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         blockedCallDao.insertBlockedCall(
             BlockedCallEntity(
@@ -195,87 +195,100 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun should_not_set_isExporting_when_exportHistory_called_with_empty_history_in_exportHistory() = runTest {
-        //WHEN
-        viewModel.exportHistory()
-
-        viewModel.export.test {
-            //THEN - isExporting stays false because history is empty
-            val state = awaitMatches { !it.isExporting }
-            assertFalse(state.isExporting)
-            assertNull(state.exportedFilePath)
-            assertNull(state.exportErrorMessage)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-@Test
-    fun should_set_isExporting_true_then_false_when_exportHistory_called_with_items_in_exportHistory() = runTest {
-        //GIVEN
-        blockedCallDao.insertBlockedCall(
-            BlockedCallEntity(
-                phoneNumber = "+57123456789",
-                matchedPrefix = "57",
-                blockType = BlockedCallEntity.BLOCK_TYPE_PREFIX,
-                timestamp = 1_000L
-            )
-        )
-
-        // Subscribe to uiState first so it transitions out of Loading
-        // (exportHistory checks uiState.value which is Loading otherwise)
+    fun should_not_set_isExporting_when_exportHistory_called_with_empty_history_in_exportHistory() = runTest(context = mainDispatcherRule.scheduler) {
         viewModel.uiState.test {
-            awaitMatches { it is HistoryUiState.Content && !it.isEmpty }
-            cancelAndIgnoreRemainingEvents()
-        }
+            // Ensure we are in Content state (which is empty by default)
+            awaitMatches { it is HistoryUiState.Content }
 
-        //WHEN
-        viewModel.exportHistory()
+            viewModel.export.test {
+                awaitItem() // Consume initial state
 
-        viewModel.export.test {
-            //THEN - first transition: isExporting becomes true
-            val exportingState = awaitMatches { it.isExporting }
-            assertTrue(exportingState.isExporting)
+                //WHEN
+                viewModel.exportHistory()
 
-            //THEN - second transition: isExporting becomes false (success or failure)
-            val finalState = awaitMatches { !it.isExporting }
-            assertTrue(
-                "Expected either exportedFilePath or exportErrorMessage to be set",
-                finalState.exportedFilePath != null || finalState.exportErrorMessage != null
-            )
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun should_set_exportErrorMessage_when_export_fails_in_exportHistory() = runTest {
-        //GIVEN
-        blockedCallDao.insertBlockedCall(
-            BlockedCallEntity(
-                phoneNumber = "+57123456789",
-                matchedPrefix = "57",
-                blockType = BlockedCallEntity.BLOCK_TYPE_PREFIX,
-                timestamp = 1_000L
-            )
-        )
-
-        //WHEN
-        viewModel.exportHistory()
-
-        viewModel.export.test {
-            //THEN - wait for the export to settle (either success or failure)
-            val finalState = awaitMatches { !it.isExporting }
-            // On modern Android (scoped storage), the export will likely fail
-            // We assert that if it fails, the error message is set
-            if (finalState.exportErrorMessage != null) {
-                assertNotNull(finalState.exportErrorMessage)
-                assertNull(finalState.exportedFilePath)
+                //THEN - No new events should be produced because exportHistory returns early
+                expectNoEvents()
+                cancelAndIgnoreRemainingEvents()
             }
             cancelAndIgnoreRemainingEvents()
         }
     }
 
-@Test
-    fun should_clear_exportedFilePath_and_exportErrorMessage_when_clearExportMessage_called_in_clearExportMessage() = runTest {
+    @Test
+    fun should_set_isExporting_true_then_false_when_exportHistory_called_with_items_in_exportHistory() = runTest(context = mainDispatcherRule.scheduler) {
+        //GIVEN
+        blockedCallDao.insertBlockedCall(
+            BlockedCallEntity(
+                phoneNumber = "+57123456789",
+                matchedPrefix = "57",
+                blockType = BlockedCallEntity.BLOCK_TYPE_PREFIX,
+                timestamp = 1_000L
+            )
+        )
+
+        viewModel.uiState.test {
+            // Wait for Content state with data
+            awaitMatches { it is HistoryUiState.Content && !it.isEmpty }
+
+            viewModel.export.test {
+                awaitItem() // Consume initial state
+
+                //WHEN
+                viewModel.exportHistory()
+
+                //THEN - first transition: isExporting becomes true
+                val exportingState = awaitMatches { it.isExporting }
+                assertTrue(exportingState.isExporting)
+
+                //THEN - second transition: isExporting becomes false (success or failure)
+                val finalState = awaitMatches { !it.isExporting }
+                assertTrue(
+                    "Expected either exportedFilePath or exportErrorMessage to be set",
+                    finalState.exportedFilePath != null || finalState.exportErrorMessage != null
+                )
+                cancelAndIgnoreRemainingEvents()
+            }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun should_set_exportErrorMessage_when_export_fails_in_exportHistory() = runTest(context = mainDispatcherRule.scheduler) {
+        //GIVEN
+        blockedCallDao.insertBlockedCall(
+            BlockedCallEntity(
+                phoneNumber = "+57123456789",
+                matchedPrefix = "57",
+                blockType = BlockedCallEntity.BLOCK_TYPE_PREFIX,
+                timestamp = 1_000L
+            )
+        )
+
+        viewModel.uiState.test {
+            awaitMatches { it is HistoryUiState.Content && !it.isEmpty }
+
+            viewModel.export.test {
+                awaitItem() // Consume initial state
+
+                //WHEN
+                viewModel.exportHistory()
+
+                //THEN - wait for the export to settle (either success or failure)
+                val finalState = awaitMatches { !it.isExporting }
+                
+                // We assert that if it fails, the error message is set
+                if (finalState.exportErrorMessage != null) {
+                    assertNotNull(finalState.exportErrorMessage)
+                    assertNull(finalState.exportedFilePath)
+                }
+                cancelAndIgnoreRemainingEvents()
+            }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun should_clear_exportedFilePath_and_exportErrorMessage_when_clearExportMessage_called_in_clearExportMessage() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN - first trigger an export so there's something to clear
         blockedCallDao.insertBlockedCall(
             BlockedCallEntity(
@@ -286,32 +299,33 @@ class HistoryViewModelTest {
             )
         )
 
-        // Subscribe to uiState first so it transitions out of Loading
         viewModel.uiState.test {
             awaitMatches { it is HistoryUiState.Content && !it.isEmpty }
-            cancelAndIgnoreRemainingEvents()
-        }
 
-        viewModel.exportHistory()
+            viewModel.export.test {
+                awaitItem() // Consume initial state
 
-        //WHEN
-        viewModel.export.test {
-            // Wait for the export to complete (isExporting=false)
-            awaitMatches { !it.isExporting }
+                viewModel.exportHistory()
 
-            viewModel.clearExportMessage()
+                // Wait for the export to complete (isExporting=false)
+                awaitMatches { !it.isExporting }
 
-            //THEN
-            val clearedState = awaitMatches {
-                it.exportedFilePath == null && it.exportErrorMessage == null && !it.isExporting
+                //WHEN
+                viewModel.clearExportMessage()
+
+                //THEN
+                val clearedState = awaitMatches {
+                    it.exportedFilePath == null && it.exportErrorMessage == null && !it.isExporting
+                }
+                assertEquals(Export(), clearedState)
+                cancelAndIgnoreRemainingEvents()
             }
-            assertEquals(Export(), clearedState)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun should_emit_content_with_empty_history_when_clearHistory_called_in_clearHistory() = runTest {
+    fun should_emit_content_with_empty_history_when_clearHistory_called_in_clearHistory() = runTest(context = mainDispatcherRule.scheduler) {
         //GIVEN
         blockedCallDao.insertBlockedCall(
             BlockedCallEntity(

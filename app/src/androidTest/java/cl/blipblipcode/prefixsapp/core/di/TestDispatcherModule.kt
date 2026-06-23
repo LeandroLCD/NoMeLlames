@@ -7,8 +7,10 @@ import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import javax.inject.Singleton
 
 @Module
@@ -17,9 +19,13 @@ import javax.inject.Singleton
     replaces = [DispatcherModule::class]
 )
 class TestDispatcherModule {
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Provides
     @Singleton
-    fun providesDispatcher(): CoroutineDispatcher =  Dispatchers.Main
+    fun providesDispatcher(): CoroutineDispatcher {
+        val scheduler = TestCoroutineScheduler()
+        return UnconfinedTestDispatcher(scheduler)
+    }
 
     @Provides
     @Singleton
