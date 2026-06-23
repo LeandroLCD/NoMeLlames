@@ -6,9 +6,8 @@ import javax.inject.Inject
 class SetSkipCallLogUseCase @Inject constructor(
     private val repository: PrefixRepository
 ) : ISetSkipCallLogUseCase {
-    
-    override operator fun invoke(value: Boolean) {
-        repository.setSkipCallLog(value)
+
+    override suspend operator fun invoke(value: Boolean): Result<Unit> {
+        return repository.setSkipCallLog(value)
     }
 }
-

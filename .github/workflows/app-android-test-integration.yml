@@ -1,4 +1,4 @@
-name: 🚀 App — Test, Build & Release
+name: 🚀 App — UnitTest and androidTest.
 
 on:
   push:

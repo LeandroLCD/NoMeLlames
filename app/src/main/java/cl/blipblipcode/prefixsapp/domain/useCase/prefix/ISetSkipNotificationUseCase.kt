@@ -1,6 +1,5 @@
 package cl.blipblipcode.prefixsapp.domain.useCase.prefix
 
 interface ISetSkipNotificationUseCase {
-    operator fun invoke(value: Boolean)
+    suspend operator fun invoke(value: Boolean): Result<Unit>
 }
-

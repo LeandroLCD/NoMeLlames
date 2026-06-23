@@ -6,9 +6,8 @@ import javax.inject.Inject
 class AddPrefixUseCase @Inject constructor(
     private val repository: PrefixRepository
 ) : IAddPrefixUseCase {
-    
-    override operator fun invoke(prefix: String) {
-        repository.addPrefix(prefix)
+
+    override suspend operator fun invoke(prefix: String): Result<Unit> {
+        return repository.addPrefix(prefix)
     }
 }
-

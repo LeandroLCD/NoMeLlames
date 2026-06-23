@@ -90,11 +90,15 @@ class SettingsViewModel @Inject constructor(
 
     // Settings actions
     fun setSkipCallLog(value: Boolean) {
-        setSkipCallLogUseCase.invoke(value)
+        viewModelScope.launch {
+            setSkipCallLogUseCase.invoke(value)
+        }
     }
 
     fun setSkipNotification(value: Boolean) {
-        setSkipNotificationUseCase.invoke(value)
+        viewModelScope.launch {
+            setSkipNotificationUseCase.invoke(value)
+        }
     }
 
     // Biometric actions
